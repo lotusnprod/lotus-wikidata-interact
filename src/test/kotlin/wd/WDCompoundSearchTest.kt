@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class WDCompoundTest {
+class WDCompoundSearchTest {
     lateinit var wdSparql: WDSparql
 
     @BeforeEach
@@ -14,7 +14,7 @@ class WDCompoundTest {
 
     @Test
     fun findCompoundsByInChIKey() {
-        val wdCompound = WDCompound(wdSparql)
+        val wdCompound = WDCompoundSearch(wdSparql)
         val inChIs = mapOf(
             "VFLDPWHFBUODDF-FCXRPNKRSA-N" to listOf("Q312266"),
             "REFJWTPEDVJJIY-UHFFFAOYSA-N" to listOf("Q409478")
@@ -28,7 +28,7 @@ class WDCompoundTest {
 
     @Test
     fun findCompoundsByInChIKeyChunked() {
-        val wdCompound = WDCompound(wdSparql)
+        val wdCompound = WDCompoundSearch(wdSparql)
         val inChIs = mapOf(
             "VFLDPWHFBUODDF-FCXRPNKRSA-N" to listOf("Q312266"),
             "REFJWTPEDVJJIY-UHFFFAOYSA-N" to listOf("Q409478"),

@@ -4,9 +4,8 @@ import helpers.GZIPRead
 import helpers.parseTSVFile
 import org.apache.logging.log4j.LogManager
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 
-class WDCompoundPerformanceTest {
+class WDCompoundSearchPerformanceTest {
     lateinit var wdSparql: WDSparql
     val logger = LogManager.getLogger(this::class.java)
 
@@ -18,7 +17,7 @@ class WDCompoundPerformanceTest {
     // We don't want that to run everytime we run the basic tests
     //@Test
     fun findCompoundsByInChIKeyChunked() {
-        val wdCompound = WDCompound(wdSparql)
+        val wdCompound = WDCompoundSearch(wdSparql)
 
         val file = GZIPRead("/home/bjo/Store/01_Research/opennaturalproductsdb/data/external/dbSource/napralert/napralert_matched_final_unified.tsv.gz")
         val inchies = parseTSVFile(file)?.map {
