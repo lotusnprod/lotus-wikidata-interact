@@ -15,7 +15,8 @@ class WDCompoundPerformanceTest {
         wdSparql = WDSparql()
     }
 
-    @Test
+    // We don't want that to run everytime we run the basic tests
+    //@Test
     fun findCompoundsByInChIKeyChunked() {
         val wdCompound = WDCompound(wdSparql)
 

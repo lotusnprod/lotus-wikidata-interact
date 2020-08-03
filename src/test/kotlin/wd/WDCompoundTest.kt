@@ -17,8 +17,10 @@ class WDCompoundTest {
     fun findCompoundByInChIKey() {
         val wdCompound = WDCompound(wdSparql)
         val inChIKey = "VFLDPWHFBUODDF-FCXRPNKRSA-N"
-        val expected = "Q312266"
-        assertArrayEquals(arrayOf(expected), wdCompound.findCompoundByInChIKey(inChIKey)[inChIKey]?.toTypedArray())
+        val expected = listOf("Q312266")
+        val result = wdCompound.findCompoundByInChIKey(inChIKey)
+        assertEquals(1, result.size)
+        assertEquals(expected, result[inChIKey])
     }
 
     @Test
@@ -29,6 +31,7 @@ class WDCompoundTest {
             "REFJWTPEDVJJIY-UHFFFAOYSA-N" to listOf("Q409478")
         )
         val result = wdCompound.findCompoundsByInChIKey(inChIs.keys.toList())
+        assertEquals(2, result.size)
         result.forEach {
             assertEquals(inChIs[it.key], it.value)
         }
@@ -45,6 +48,7 @@ class WDCompoundTest {
 
         )
         val result = wdCompound.findCompoundsByInChIKey(inChIs.keys.toList(), chunkSize = 2)
+        assertEquals(4, result.size)
         result.forEach {
             assertEquals(inChIs[it.key], it.value)
         }
