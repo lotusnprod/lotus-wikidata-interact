@@ -13,16 +13,6 @@ class WDCompoundTest {
     }
 
     @Test
-    fun findCompoundByInChIKey() {
-        val wdCompound = WDCompound(wdSparql)
-        val inChIKey = "VFLDPWHFBUODDF-FCXRPNKRSA-N"
-        val expected = listOf("Q312266")
-        val result = wdCompound.findCompoundByInChIKey(inChIKey)
-        assertEquals(1, result.size)
-        assertEquals(expected, result[inChIKey])
-    }
-
-    @Test
     fun findCompoundsByInChIKey() {
         val wdCompound = WDCompound(wdSparql)
         val inChIs = mapOf(

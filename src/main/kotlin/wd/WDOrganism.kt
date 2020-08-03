@@ -15,7 +15,5 @@ class WDOrganism(override val wdSparql: WDSparql) : WDThing {
         chunkSize: Int = 100,
         chunkFeedBack: () -> Unit = {}
     ): Map<Taxon, List<WDEntity>> =
-        findByPropertyValue(keys, chunkSize, chunkFeedBack)
-
-    override val property = "P225"
+        findByPropertyValue("P225", keys, chunkSize, chunkFeedBack)
 }

@@ -7,11 +7,6 @@ typealias DOI = String
  */
 class WDReference(override val wdSparql: WDSparql) : WDThing {
     /**
-     * Find reference by DOI
-     */
-    fun findReferenceByDOI(key: String): Map<DOI, List<WDEntity>> = findByPropertyValue(listOf(key))
-
-    /**
      * Search large quantities of DOIs, by default they are chunked by groups of 100
      * this can be changed with the `chunkSize` if you have any performance issue
      */
@@ -20,7 +15,5 @@ class WDReference(override val wdSparql: WDSparql) : WDThing {
         chunkSize: Int = 100,
         chunkFeedBack: () -> Unit = {}
     ): Map<DOI, List<WDEntity>> =
-        findByPropertyValue(keys, chunkSize, chunkFeedBack)
-
-    override val property = "P356"
+        findByPropertyValue("P356", keys, chunkSize, chunkFeedBack)
 }

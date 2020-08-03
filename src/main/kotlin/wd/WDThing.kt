@@ -9,11 +9,14 @@ interface WDThing {
     val wdSparql: WDSparql
 
     /**
-     * The property that will be used for the search
+     * @param property The property in WikiData (e.g. P123)
+     * @param keys The values of the properties that should be matched
+     * @param chunkSize The number of elements that should be processed by block (1000 to 10000 seems optimal)
+     * @param chunkFeedBack A function that will be called after each chunk (useful for progress bars)
+     *
+     * @return a map of the input strings to a list of matching entities
      */
-    val property: String
-
-    fun findByPropertyValue(keys: List<String>, chunkSize: Int = 100, chunkFeedBack: ()->Unit = {}): Map<String, List<WDEntity>> {
+    fun findByPropertyValue(property: String, keys: List<String>, chunkSize: Int = 1000, chunkFeedBack: ()->Unit = {}): Map<String, List<WDEntity>> {
         return keys.chunked(chunkSize).flatMap { chunk ->
             val valuesQuoted = chunk.joinToString(" ") { Rdf.literalOf(it).queryString }
 

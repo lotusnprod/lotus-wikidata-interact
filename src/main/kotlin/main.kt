@@ -23,9 +23,6 @@ fun main(args: Array<String>) {
     logger.info("Initializing the Sparql stuff")
     val wdSparql = WDSparql()
     val wdCompound = WDCompound(wdSparql)
-    println(wdCompound.findCompoundByInChIKey("VFLDPWHFBUODDF-FCXRPNKRSA-N"))
 
-    println(wdCompound.findCompoundsByInChIKey(listOf("VFLDPWHFBUODDF-FCXRPNKRSA-N",
-    "REFJWTPEDVJJIY-UHFFFAOYSA-N")))
 }
 
