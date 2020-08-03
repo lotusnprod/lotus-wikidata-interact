@@ -4,9 +4,11 @@ import org.apache.logging.log4j.LogManager
 import org.wikidata.wdtk.datamodel.helpers.Datamodel
 import org.wikidata.wdtk.datamodel.helpers.Datamodel.makePropertyIdValue
 import org.wikidata.wdtk.datamodel.helpers.ItemDocumentBuilder
+import org.wikidata.wdtk.datamodel.helpers.ReferenceBuilder
 import org.wikidata.wdtk.datamodel.helpers.StatementBuilder
 import org.wikidata.wdtk.datamodel.interfaces.ItemDocument
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
+import org.wikidata.wdtk.datamodel.interfaces.Reference
 import org.wikidata.wdtk.datamodel.interfaces.Statement
 import org.wikidata.wdtk.util.WebResourceFetcherImpl
 import org.wikidata.wdtk.wikibaseapi.ApiConnection
@@ -55,17 +57,28 @@ class WDPublisher {
 
         val property1 = makePropertyIdValue("P95458", siteIri)
         val property2 = makePropertyIdValue("P95459", siteIri)
+        val hasUrl = makePropertyIdValue("P95460", siteIri)
 
         val statement1: Statement = StatementBuilder
             .forSubjectAndProperty(noid, property1)
             .withValue(Datamodel.makeStringValue("String value 1")).build()
+
+
+        val reference1: Reference = ReferenceBuilder
+            .newInstance()
+            .withPropertyValue(
+                hasUrl,
+                Datamodel.makeStringValue("https://www.kotlinlang.org")
+            ) // can add more property values
+            .build()
         val statement2: Statement = StatementBuilder
             .forSubjectAndProperty(noid, property1)
             .withValue(
                 Datamodel
                     .makeStringValue("Item created with Kotlin using the Wikidata Toolkit")
             )
-            .build()
+            .withReference(reference1).build()
+
         val statement3: Statement = StatementBuilder
             .forSubjectAndProperty(noid, property2)
             .withValue(Datamodel.makeStringValue("Preparing a bot for the Natural products project")).build()
