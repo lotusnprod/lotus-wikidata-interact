@@ -7,6 +7,10 @@ import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
  */
 interface WDThing {
     val wdSparql: WDSparql
+
+    /**
+     * The property that will be used for the search
+     */
     val property: String
 
     fun findByPropertyValue(keys: List<String>, chunkSize: Int = 100, chunkFeedBack: ()->Unit = {}): Map<String, List<WDEntity>> {
@@ -15,7 +19,7 @@ interface WDThing {
 
             val query = """
             PREFIX wdt: <http://www.wikidata.org/prop/direct/>
-            SELECT ?id ?value {
+            SELECT DISTINCT ?id ?value {
               ?id wdt:$property ?value.
               VALUES ?value { $valuesQuoted }
             }
