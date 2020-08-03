@@ -3,16 +3,16 @@ package wd
 typealias DOI = String
 
 /**
- * Access compound information on Wikidata
+ * Access reference information on Wikidata
  */
 class WDReference(override val wdSparql: WDSparql) : WDThing {
     /**
-     * Find compounds by InChiKey
+     * Find reference by DOI
      */
     fun findReferenceByDOI(key: String): Map<DOI, List<WDEntity>> = findByPropertyValue(listOf(key))
 
     /**
-     * Search large quantities of InChIKeys, by default they are chunked by groups of 100
+     * Search large quantities of DOIs, by default they are chunked by groups of 100
      * this can be changed with the `chunkSize` if you have any performance issue
      */
     fun findReferencesByDOI(
