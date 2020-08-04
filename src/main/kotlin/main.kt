@@ -2,9 +2,7 @@ import org.apache.logging.log4j.LogManager
 import org.wikidata.wdtk.datamodel.helpers.Datamodel
 import org.wikidata.wdtk.wikibaseapi.BasicApiConnection
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher
-import wd.WDCompoundSearch
-import wd.WDPublisher
-import wd.WDSparql
+import wd.*
 
 
 fun main(args: Array<String>) {
@@ -27,7 +25,8 @@ fun main(args: Array<String>) {
 
     val publisher = WDPublisher()
     publisher.connect()
-    publisher.publish()
+    val compound = WDCompound("fauxine", "INCHIFAKEY", "INCHIFAKE", "CCCOOOCCC", "123", "C6O3")
+    publisher.publish(compound.document(TestInstanceItems), "Creating a new fake compound")
     publisher.disconnect()
 }
 

@@ -2,15 +2,6 @@ package wd
 
 typealias InChIKey = String
 
-data class WDCompound(
-    val inChIKey: String,
-    val inChI: String,
-    val isomericSMILES: String,
-    val pubChemID: String?,
-    val HillFormula: String
-) {
-
-}
 
 // ?id wdt:P31   wd:Q11173;
 //     wdt:P235  "InChIKey";

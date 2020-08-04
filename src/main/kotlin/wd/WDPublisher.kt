@@ -2,23 +2,57 @@ package wd
 
 import org.apache.logging.log4j.LogManager
 import org.wikidata.wdtk.datamodel.helpers.Datamodel
+import org.wikidata.wdtk.datamodel.helpers.Datamodel.makeItemIdValue
 import org.wikidata.wdtk.datamodel.helpers.Datamodel.makePropertyIdValue
 import org.wikidata.wdtk.datamodel.helpers.ItemDocumentBuilder
 import org.wikidata.wdtk.datamodel.helpers.ReferenceBuilder
 import org.wikidata.wdtk.datamodel.helpers.StatementBuilder
-import org.wikidata.wdtk.datamodel.interfaces.ItemDocument
-import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
-import org.wikidata.wdtk.datamodel.interfaces.Reference
-import org.wikidata.wdtk.datamodel.interfaces.Statement
+import org.wikidata.wdtk.datamodel.interfaces.*
 import org.wikidata.wdtk.util.WebResourceFetcherImpl
 import org.wikidata.wdtk.wikibaseapi.ApiConnection
 import org.wikidata.wdtk.wikibaseapi.BasicApiConnection
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataEditor
 import java.net.ConnectException
 
+const val IRI_TestInstance = "http://www.test.wikidata.org/entity/"
 
 class EnvironmentVariableError(message: String) : Exception(message)
 class InternalError(message: String) : Exception(message)
+
+interface InstanceItems {
+    enum class Properties(val id: PropertyIdValue)
+    enum class Items(val id: ItemIdValue)
+    val siteIri: String
+    val inChIKey: PropertyIdValue
+    val inChI: PropertyIdValue
+    val isomericSMILES: PropertyIdValue
+    val canonicalSMILES: PropertyIdValue
+    val pcId: PropertyIdValue
+    val chemicalFormula: PropertyIdValue
+    val instanceOf: PropertyIdValue
+    val chemicalCompound: ItemIdValue
+}
+
+object TestInstanceItems : InstanceItems {
+    override val siteIri = "http://www.test.wikidata.org/entity/"
+    override val inChIKey = makePropertyIdValue("P95461", siteIri)
+    override val inChI = makePropertyIdValue("P95462", siteIri)
+    override val isomericSMILES = makePropertyIdValue("P95463", siteIri)
+    override val canonicalSMILES = makePropertyIdValue("P95466", siteIri)
+    override val pcId = makePropertyIdValue("P95464", siteIri)
+    override val chemicalFormula = makePropertyIdValue("P95465", siteIri)
+    override val instanceOf = makePropertyIdValue("P82", siteIri)
+    override val chemicalCompound = makeItemIdValue("Q212525", IRI_TestInstance)
+}
+
+// TODO: Real instance
+// ?id wdt:P31   wd:Q11173;
+//     wdt:P235  "InChIKey";
+//     wdt:P234  "InChI";
+//     wdt:P2017 "SMILES_isomeric";
+//     wdt:P664  "PCID";
+//     wdt:P274  "Hill Chemical Formula".
+
 
 class WDPublisher {
     val userAgent = "Wikidata Toolkit EditOnlineDataExample"
@@ -39,62 +73,77 @@ class WDPublisher {
 
     fun connect() {
         connection = BasicApiConnection.getTestWikidataApiConnection()
-        connection?.login(user, password) ?:
-                throw ConnectException("Impossible to connect to the WikiData instance.")
+        connection?.login(user, password) ?: throw ConnectException("Impossible to connect to the WikiData instance.")
         editor = WikibaseDataEditor(connection, siteIri)
-        require(connection?.isLoggedIn ?: false) { "Impossible to login in the instance"}
+        require(connection?.isLoggedIn ?: false) { "Impossible to login in the instance" }
     }
 
     fun disconnect() = connection?.logout()
 
-    fun publish() {
+    fun publish(itemDocument: ItemDocument, summary: String) {
         require(connection != null) { "You need to connect first" }
         require(editor != null) { "The editor should exist, you connection likely failed and we didn't catch that" }
         WebResourceFetcherImpl
             .setUserAgent(userAgent)
 
-        val noid = ItemIdValue.NULL // used when creating new items
-
-        val property1 = makePropertyIdValue("P95458", siteIri)
-        val property2 = makePropertyIdValue("P95459", siteIri)
-        val hasUrl = makePropertyIdValue("P95460", siteIri)
-
-        val statement1: Statement = StatementBuilder
-            .forSubjectAndProperty(noid, property1)
-            .withValue(Datamodel.makeStringValue("String value 1")).build()
-
-
-        val reference1: Reference = ReferenceBuilder
-            .newInstance()
-            .withPropertyValue(
-                hasUrl,
-                Datamodel.makeStringValue("https://www.kotlinlang.org")
-            ) // can add more property values
-            .build()
-        val statement2: Statement = StatementBuilder
-            .forSubjectAndProperty(noid, property1)
-            .withValue(
-                Datamodel
-                    .makeStringValue("Item created with Kotlin using the Wikidata Toolkit")
-            )
-            .withReference(reference1).build()
-
-        val statement3: Statement = StatementBuilder
-            .forSubjectAndProperty(noid, property2)
-            .withValue(Datamodel.makeStringValue("Preparing a bot for the Natural products project")).build()
-
-        val itemDocument = ItemDocumentBuilder.forItemId(noid)
-            .withLabel("Wikidata Toolkit test", "en")
-            .withStatement(statement1).withStatement(statement2)
-            .withStatement(statement3).build()
-
         val newItemDocument: ItemDocument = editor?.createItemDocument(
             itemDocument,
-            "Test document", null
+            summary, null
         ) ?: throw InternalError("There is no editor anymore")
 
         val newItemId = newItemDocument.entityId
         logger.info("Successfully created the item: ${newItemId.id}")
         logger.info("you can access it at $sitePageURL${newItemId.id}")
     }
+}
+
+/**
+ * Type safe builder or DSL
+ */
+
+fun newReference(f: (ReferenceBuilder) -> Unit): Reference {
+    val reference = ReferenceBuilder.newInstance()
+    reference.apply(f)
+    return reference.build()
+}
+
+fun ReferenceBuilder.propertyValue(property: PropertyIdValue, value: String) =
+    this.propertyValue(property, Datamodel.makeStringValue(value))
+
+fun ReferenceBuilder.propertyValue(property: PropertyIdValue, value: Value) {
+    this.withPropertyValue(
+        property,
+        value
+    )
+}
+
+fun StatementBuilder.reference(reference: Reference) {
+    this.reference(reference)
+}
+
+fun newDocument(name: String, f: ItemDocumentBuilder.()->Unit): ItemDocument {
+    val builder = ItemDocumentBuilder.forItemId(ItemIdValue.NULL)
+        .withLabel(name, "en")
+
+    builder.apply(f)
+
+    return builder.build()
+}
+
+fun ItemDocumentBuilder.statement(statement: Statement) {
+    this.withStatement(statement)
+}
+
+
+fun ItemDocumentBuilder.statement(property: PropertyIdValue, value: String, f: (StatementBuilder) -> Unit = {}) =
+    this.withStatement(newStatement(property, Datamodel.makeStringValue(value), f))
+
+fun ItemDocumentBuilder.statement(property: PropertyIdValue, value: Value, f: (StatementBuilder) -> Unit = {}) =
+    this.withStatement(newStatement(property, value, f))
+
+fun newStatement(property: PropertyIdValue, value: Value, f: (StatementBuilder) -> Unit = {}): Statement {
+    val statement = StatementBuilder.forSubjectAndProperty(ItemIdValue.NULL, property)
+    statement.withValue(value)
+    statement.apply(f)
+    return statement.build()
 }
