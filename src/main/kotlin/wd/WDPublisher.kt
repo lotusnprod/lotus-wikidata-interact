@@ -11,6 +11,8 @@ import org.wikidata.wdtk.wikibaseapi.ApiConnection
 import org.wikidata.wdtk.wikibaseapi.BasicApiConnection
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataEditor
 import wd.models.Publishable
+import wd.models.ReferenceableRemoteItemStatement
+import wd.models.ReferenceableValueStatement
 import java.net.ConnectException
 
 const val IRI_TestInstance = "http://www.test.wikidata.org/entity/"
@@ -27,7 +29,7 @@ class InternalError(message: String) : Exception(message)
 //     wdt:P274  "Hill Chemical Formula".
 
 
-class WDPublisher(val instanceItems: InstanceItems) {
+class WDPublisher(override val instanceItems: InstanceItems) : Resolver {
     val userAgent = "Wikidata Toolkit EditOnlineDataExample"
     val siteIri = "http://www.test.wikidata.org/entity/"
     val sitePageURL = "https://test.wikidata.org/w/index.php?title="
@@ -96,7 +98,7 @@ fun StatementBuilder.reference(reference: Reference) {
     this.reference(reference)
 }
 
-fun newDocument(name: String, f: ItemDocumentBuilder.()->Unit): ItemDocument {
+fun newDocument(name: String, f: ItemDocumentBuilder.() -> Unit): ItemDocument {
     val builder = ItemDocumentBuilder.forItemId(ItemIdValue.NULL)
         .withLabel(name, "en")
 
@@ -115,6 +117,31 @@ fun ItemDocumentBuilder.statement(property: PropertyIdValue, value: String, f: (
 
 fun ItemDocumentBuilder.statement(property: PropertyIdValue, value: Value, f: (StatementBuilder) -> Unit = {}) =
     this.withStatement(newStatement(property, value, f))
+
+fun ItemDocumentBuilder.statement(referenceableStatement: ReferenceableValueStatement, instanceItems: InstanceItems) {
+    val statement = newStatement(
+        referenceableStatement.property.get(instanceItems),
+        referenceableStatement.value
+    ) { statementBuilder ->
+        referenceableStatement.preReferences.forEach {
+            statementBuilder.withReference(it.build(instanceItems))
+        }
+    }
+    this.withStatement(statement)
+}
+
+fun ItemDocumentBuilder.statement(
+    referenceableStatement: ReferenceableRemoteItemStatement,
+    instanceItems: InstanceItems
+) =
+    this.statement(
+        ReferenceableValueStatement(
+            referenceableStatement.property,
+            referenceableStatement.value.get(instanceItems),
+            referenceableStatement.preReferences
+        ),
+        instanceItems
+    )
 
 fun newStatement(property: PropertyIdValue, value: Value, f: (StatementBuilder) -> Unit = {}): Statement {
     val statement = StatementBuilder.forSubjectAndProperty(ItemIdValue.NULL, property)

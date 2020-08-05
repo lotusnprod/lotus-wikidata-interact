@@ -3,28 +3,23 @@ package wd.sparql
 import org.eclipse.rdf4j.query.TupleQueryResult
 import org.eclipse.rdf4j.repository.Repository
 import org.eclipse.rdf4j.repository.sparql.SPARQLRepository
-import org.eclipse.rdf4j.sparqlbuilder.core.Prefix
-import org.eclipse.rdf4j.sparqlbuilder.core.SparqlBuilder.prefix
 import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
-import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf.iri
-
-const val WDT_URI = "http://www.wikidata.org/prop/direct/"
-const val WD_URI = "http://www.wikidata.org/entity/"
-
-val wdt: Prefix = prefix("wdt", iri(WDT_URI))
-val wd: Prefix = prefix("wd", iri(WD_URI))
+import wd.InstanceItems
+import wd.Resolver
 
 typealias WDEntity = String
 
-class WDSparql {
-    private val endpoint: Repository
+class WDSparql(override val instanceItems: InstanceItems) : Resolver {
+    private val repository: Repository
 
     init {
-        endpoint = SPARQLRepository("https://query.wikidata.org/bigdata/namespace/wdq/sparql")
+        repository = SPARQLRepository(
+            instanceItems.sparqlEndpoint
+        )
     }
 
     fun <T> query(query: String, function: (TupleQueryResult) -> T): T {
-        return endpoint.connection.use {
+        return repository.connection.use {
             it.prepareTupleQuery(query).evaluate().use { result ->
                 function(result)
             }
@@ -41,16 +36,16 @@ class WDSparql {
      * @return a map of the input strings to a list of matching entities
      */
     fun findByPropertyValue(
-    property: String,
-    keys: List<String>,
-    chunkSize: Int = 1000,
-    chunkFeedBack: () -> Unit = {}
+        property: String,
+        keys: List<String>,
+        chunkSize: Int = 1000,
+        chunkFeedBack: () -> Unit = {}
     ): Map<String, List<WDEntity>> {
         return keys.chunked(chunkSize).flatMap { chunk ->
             val valuesQuoted = chunk.joinToString(" ") { Rdf.literalOf(it).queryString }
 
             val query = """
-            PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+            PREFIX wdt: <${InstanceItems::wdtURI.get(instanceItems)}>
             SELECT DISTINCT ?id ?value {
               ?id wdt:$property ?value.
               VALUES ?value { $valuesQuoted }
@@ -60,7 +55,7 @@ class WDSparql {
             this.query(query) { result ->
                 result.map { bindingSet ->
                     (bindingSet.getValue("value").stringValue()) to
-                            bindingSet.getValue("id").stringValue().replace(WD_URI, "")
+                            bindingSet.getValue("id").stringValue().replace(instanceItems.wdURI, "")
                 }
             }.also { chunkFeedBack() }
         }.groupBy(keySelector = { it.first },
