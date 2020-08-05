@@ -1,18 +1,19 @@
 package wd
 
+import net.nprod.onpdb.wdimport.wd.MainInstanceItems
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
-import wd.sparql.WDSparql
-import wd.sparql.findTaxonByName
+import net.nprod.onpdb.wdimport.wd.sparql.WDSparql
+import net.nprod.onpdb.wdimport.wd.sparql.findTaxonByName
 
 internal class WDTaxonTest {
     lateinit var wdSparql: WDSparql
 
     @BeforeEach
     fun setUp() {
-        wdSparql = WDSparql()
+        wdSparql = WDSparql(MainInstanceItems)
     }
 
     @Test

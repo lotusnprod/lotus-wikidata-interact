@@ -1,8 +1,8 @@
-package wd.models
+package net.nprod.onpdb.wdimport.wd.models
 
 import org.wikidata.wdtk.datamodel.helpers.Datamodel
 import org.wikidata.wdtk.datamodel.interfaces.Value
-import wd.InstanceItems
+import net.nprod.onpdb.wdimport.wd.InstanceItems
 
 sealed class ReferenceableStatement
 

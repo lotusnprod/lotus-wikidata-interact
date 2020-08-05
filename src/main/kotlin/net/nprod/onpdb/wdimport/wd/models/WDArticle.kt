@@ -1,8 +1,7 @@
-package wd.models
+package net.nprod.onpdb.wdimport.wd.models
 
-import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher
-import wd.InstanceItems
-import wd.sparql.WDSparql
+import net.nprod.onpdb.wdimport.wd.InstanceItems
+import net.nprod.onpdb.wdimport.wd.sparql.WDSparql
 
 // TODO: Identifiers
 

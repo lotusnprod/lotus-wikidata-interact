@@ -1,19 +1,16 @@
+package net.nprod.onpdb.wdimport
+
 import org.apache.logging.log4j.LogManager
-import org.wikidata.wdtk.datamodel.helpers.Datamodel
-import org.wikidata.wdtk.wikibaseapi.BasicApiConnection
-import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher
-import wd.InstanceItems
-import wd.MainInstanceItems
-import wd.TestInstanceItems
-import wd.WDPublisher
-import wd.models.WDArticle
-import wd.models.WDCompound
-import wd.models.WDTaxon
-import wd.sparql.WDSparql
+import net.nprod.onpdb.wdimport.wd.InstanceItems
+import net.nprod.onpdb.wdimport.wd.MainInstanceItems
+import net.nprod.onpdb.wdimport.wd.TestInstanceItems
+import net.nprod.onpdb.wdimport.wd.WDPublisher
+import net.nprod.onpdb.wdimport.wd.models.WDTaxon
+import net.nprod.onpdb.wdimport.wd.sparql.WDSparql
 
 
 fun main(args: Array<String>) {
-    val logger = LogManager.getLogger("main")
+    val logger = LogManager.getLogger("net.nprod.onpdb.wdimport.main")
     logger.info("Playing with Wikidata Toolkit")
 
     val instanceItems = TestInstanceItems
@@ -72,8 +69,6 @@ fun main(args: Array<String>) {
     }
 
     publisher.publish(compound, "Creating a new compound")
-
+*/
     publisher.disconnect()
-
- */
 }

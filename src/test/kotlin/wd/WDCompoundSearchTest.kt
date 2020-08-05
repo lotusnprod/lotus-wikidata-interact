@@ -1,17 +1,18 @@
 package wd
 
+import net.nprod.onpdb.wdimport.wd.MainInstanceItems
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import wd.sparql.WDSparql
-import wd.sparql.findCompoundsByInChIKey
+import net.nprod.onpdb.wdimport.wd.sparql.WDSparql
+import net.nprod.onpdb.wdimport.wd.sparql.findCompoundsByInChIKey
 
 class WDCompoundSearchTest {
     lateinit var wdSparql: WDSparql
 
     @BeforeEach
     fun setUp() {
-        wdSparql = WDSparql()
+        wdSparql = WDSparql(MainInstanceItems)
     }
 
     @Test

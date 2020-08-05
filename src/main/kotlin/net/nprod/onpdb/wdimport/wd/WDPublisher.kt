@@ -1,6 +1,7 @@
-package wd
+package net.nprod.onpdb.wdimport.wd
 
 import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 import org.wikidata.wdtk.datamodel.helpers.Datamodel
 import org.wikidata.wdtk.datamodel.helpers.ItemDocumentBuilder
 import org.wikidata.wdtk.datamodel.helpers.ReferenceBuilder
@@ -10,30 +11,18 @@ import org.wikidata.wdtk.util.WebResourceFetcherImpl
 import org.wikidata.wdtk.wikibaseapi.ApiConnection
 import org.wikidata.wdtk.wikibaseapi.BasicApiConnection
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataEditor
-import wd.models.Publishable
-import wd.models.ReferenceableRemoteItemStatement
-import wd.models.ReferenceableValueStatement
+import net.nprod.onpdb.wdimport.wd.models.Publishable
+import net.nprod.onpdb.wdimport.wd.models.ReferenceableRemoteItemStatement
+import net.nprod.onpdb.wdimport.wd.models.ReferenceableValueStatement
 import java.net.ConnectException
-
-const val IRI_TestInstance = "http://www.test.wikidata.org/entity/"
 
 class EnvironmentVariableError(message: String) : Exception(message)
 class InternalError(message: String) : Exception(message)
 
-// TODO: Real instance
-// ?id wdt:P31   wd:Q11173;
-//     wdt:P235  "InChIKey";
-//     wdt:P234  "InChI";
-//     wdt:P2017 "SMILES_isomeric";
-//     wdt:P664  "PCID";
-//     wdt:P274  "Hill Chemical Formula".
-
 
 class WDPublisher(override val instanceItems: InstanceItems) : Resolver {
-    val userAgent = "Wikidata Toolkit EditOnlineDataExample"
-    val siteIri = "http://www.test.wikidata.org/entity/"
-    val sitePageURL = "https://test.wikidata.org/w/index.php?title="
-    val logger = LogManager.getLogger(this::class.java)
+    private val userAgent = "Wikidata Toolkit EditOnlineDataExample"
+    val logger: Logger = LogManager.getLogger(this::class.java)
     private var user: String? = null
     private var password: String? = null
     private var connection: ApiConnection? = null
@@ -49,7 +38,7 @@ class WDPublisher(override val instanceItems: InstanceItems) : Resolver {
     fun connect() {
         connection = BasicApiConnection.getTestWikidataApiConnection()
         connection?.login(user, password) ?: throw ConnectException("Impossible to connect to the WikiData instance.")
-        editor = WikibaseDataEditor(connection, siteIri)
+        editor = WikibaseDataEditor(connection, instanceItems.siteIri)
         require(connection?.isLoggedIn ?: false) { "Impossible to login in the instance" }
     }
 
@@ -68,7 +57,7 @@ class WDPublisher(override val instanceItems: InstanceItems) : Resolver {
 
         val newItemId = newItemDocument.entityId
         logger.info("Successfully created the item: ${newItemId.id}")
-        logger.info("you can access it at $sitePageURL${newItemId.id}")
+        logger.info("you can access it at ${instanceItems.sitePageIri}${newItemId.id}")
         publishable.published(newItemId)
         return newItemId
     }
@@ -145,7 +134,7 @@ fun ItemDocumentBuilder.statement(
 
 fun newStatement(property: PropertyIdValue, value: Value, f: (StatementBuilder) -> Unit = {}): Statement {
     val statement = StatementBuilder.forSubjectAndProperty(ItemIdValue.NULL, property)
-    statement.withValue(value)
-    statement.apply(f)
+        .withValue(value)
+        .apply(f)
     return statement.build()
 }

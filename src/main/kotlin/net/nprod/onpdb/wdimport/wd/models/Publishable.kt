@@ -1,14 +1,12 @@
-package wd.models
+package net.nprod.onpdb.wdimport.wd.models
 
 import org.wikidata.wdtk.datamodel.interfaces.ItemDocument
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
 import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue
-import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher
-import wd.InstanceItems
-import wd.WDPublisher
-import wd.newDocument
-import wd.sparql.WDSparql
-import wd.statement
+import net.nprod.onpdb.wdimport.wd.InstanceItems
+import net.nprod.onpdb.wdimport.wd.newDocument
+import net.nprod.onpdb.wdimport.wd.sparql.WDSparql
+import net.nprod.onpdb.wdimport.wd.statement
 import kotlin.reflect.KProperty1
 
 class ElementNotPublishedError(msg: String): Exception(msg)

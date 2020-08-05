@@ -1,11 +1,12 @@
 package wd
 
-import helpers.GZIPRead
-import helpers.parseTSVFile
+import net.nprod.onpdb.helpers.GZIPRead
+import net.nprod.onpdb.helpers.parseTSVFile
+import net.nprod.onpdb.wdimport.wd.MainInstanceItems
 import org.apache.logging.log4j.LogManager
 import org.junit.jupiter.api.BeforeEach
-import wd.sparql.WDSparql
-import wd.sparql.findCompoundsByInChIKey
+import net.nprod.onpdb.wdimport.wd.sparql.WDSparql
+import net.nprod.onpdb.wdimport.wd.sparql.findCompoundsByInChIKey
 
 class WDCompoundSearchPerformanceTest {
     lateinit var wdSparql: WDSparql
@@ -13,7 +14,7 @@ class WDCompoundSearchPerformanceTest {
 
     @BeforeEach
     fun setUp() {
-        wdSparql = WDSparql()
+        wdSparql = WDSparql(MainInstanceItems)
     }
 
     // We don't want that to run everytime we run the basic tests

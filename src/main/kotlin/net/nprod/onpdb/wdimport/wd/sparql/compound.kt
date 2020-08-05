@@ -1,4 +1,4 @@
-package wd.sparql
+package net.nprod.onpdb.wdimport.wd.sparql
 
 typealias InChIKey = String
 

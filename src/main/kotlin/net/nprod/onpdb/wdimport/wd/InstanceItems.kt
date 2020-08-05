@@ -1,4 +1,4 @@
-package wd
+package net.nprod.onpdb.wdimport.wd
 
 import org.eclipse.rdf4j.sparqlbuilder.core.Prefix
 import org.eclipse.rdf4j.sparqlbuilder.core.SparqlBuilder
@@ -9,6 +9,7 @@ import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue
 
 interface InstanceItems {
     val siteIri: String
+    val sitePageIri: String
 
     // Basics
 
@@ -57,6 +58,7 @@ interface InstanceItems {
 
 object TestInstanceItems : InstanceItems {
     override val siteIri = "http://www.test.wikidata.org/entity/"
+    override val sitePageIri = "https://test.wikidata.org/w/index.php?title="
 
     // Properties
     override val inChIKey = property("P95461")
@@ -92,11 +94,12 @@ object TestInstanceItems : InstanceItems {
     //override val ENDPOINT = "https://query.wikidata.org/bigdata/namespace/wdq/sparql"
     override val sparqlEndpoint: String? = null
     override val wdt: Prefix = SparqlBuilder.prefix("wdt", Rdf.iri(wdtURI))
-    override val wd: Prefix = SparqlBuilder.prefix("wd", Rdf.iri(wdURI))
+    override val wd: Prefix = SparqlBuilder.prefix("net/nprod/onpdb/wdimport/wd", Rdf.iri(wdURI))
 }
 
 object MainInstanceItems : InstanceItems {
     override val siteIri = "http://www.wikidata.org/entity/"
+    override val sitePageIri = "https://www.wikidata.org/w/index.php?title="
 
     // Properties
     override val inChIKey = property("P235")
@@ -131,5 +134,5 @@ object MainInstanceItems : InstanceItems {
     override val wdURI = "http://www.wikidata.org/entity/"
     override val sparqlEndpoint = "https://query.wikidata.org/bigdata/namespace/wdq/sparql"
     override val wdt: Prefix = SparqlBuilder.prefix("wdt", Rdf.iri(wdtURI))
-    override val wd: Prefix = SparqlBuilder.prefix("wd", Rdf.iri(wdURI))
+    override val wd: Prefix = SparqlBuilder.prefix("net/nprod/onpdb/wdimport/wd", Rdf.iri(wdURI))
 }

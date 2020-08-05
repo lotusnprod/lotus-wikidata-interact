@@ -1,9 +1,9 @@
-package wd.models
+package net.nprod.onpdb.wdimport.wd.models
 
 import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
-import wd.InstanceItems
-import wd.sparql.WDSparql
+import net.nprod.onpdb.wdimport.wd.InstanceItems
+import net.nprod.onpdb.wdimport.wd.sparql.WDSparql
 
 // TODO: Identifiers
 
@@ -19,7 +19,8 @@ data class WDTaxon(
         listOfNotNull(
             parentTaxon?.let { ReferenceableValueStatement(InstanceItems::parentTaxon, it) },
             taxonName?.let { ReferenceableValueStatement(InstanceItems::taxonName, it) },
-            ReferenceableRemoteItemStatement(InstanceItems::taxonRank, taxonRank))
+            ReferenceableRemoteItemStatement(InstanceItems::taxonRank, taxonRank)
+        )
 
     override fun tryToFind(wdSparql: WDSparql, instanceItems: InstanceItems): Publishable {
         // In the case of the test instance, we do not have the ability to do SPARQL queries

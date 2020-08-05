@@ -15,6 +15,7 @@ version = "0.1-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    jcenter()
     maven {
         url = uri("https://dl.bintray.com/kotlin/kotlin-eap")
     }
@@ -29,10 +30,23 @@ dependencies {
     implementation("org.wikidata.wdtk:wdtk-datamodel:$wdtkVersion")
     implementation("org.wikidata.wdtk:wdtk-rdf:$wdtkVersion")
 
-    implementation("org.eclipse.rdf4j:rdf4j-client:$rdf4jVersion")
-    implementation("org.eclipse.rdf4j:rdf4j-core:$rdf4jVersion")
+    implementation("org.eclipse.rdf4j", "rdf4j-client", rdf4jVersion)
+    implementation("org.eclipse.rdf4j", "rdf4j-core", rdf4jVersion)
 
-    implementation("com.univocity", "univocity-parsers", univocityParserVersion)
+    implementation("org.jetbrains.exposed", "exposed-core", "0.26.2") {
+        exclude("org.jetbrains.kotlin","kotlin-stdlib-jdk7")
+        exclude("org.jetbrains.kotlin","kotlin-stdlib-jdk8")
+        exclude("org.jetbrains.kotlin","kotlin-reflect")
+        exclude("org.jetbrains.kotlin","kotlin-stdlib")
+        exclude("org.jetbrains.kotlin","kotlin-stdlib-common")
+    }
+    implementation("org.jetbrains.exposed", "exposed-dao", "0.26.2")
+    implementation("org.jetbrains.exposed", "exposed-jdbc", "0.26.2")
+    implementation("org.xerial", "sqlite-jdbc", "3.32.3.2")
+
+    implementation(
+        "com.univocity", "univocity-parsers", univocityParserVersion
+    )
     testImplementation(kotlin("test-junit5"))
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitApiVersion")
     testImplementation("org.junit.jupiter:junit-jupiter:$junitApiVersion")
