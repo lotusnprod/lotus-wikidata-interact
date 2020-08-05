@@ -2,8 +2,6 @@ package wd
 
 import org.apache.logging.log4j.LogManager
 import org.wikidata.wdtk.datamodel.helpers.Datamodel
-import org.wikidata.wdtk.datamodel.helpers.Datamodel.makeItemIdValue
-import org.wikidata.wdtk.datamodel.helpers.Datamodel.makePropertyIdValue
 import org.wikidata.wdtk.datamodel.helpers.ItemDocumentBuilder
 import org.wikidata.wdtk.datamodel.helpers.ReferenceBuilder
 import org.wikidata.wdtk.datamodel.helpers.StatementBuilder
@@ -18,32 +16,6 @@ const val IRI_TestInstance = "http://www.test.wikidata.org/entity/"
 
 class EnvironmentVariableError(message: String) : Exception(message)
 class InternalError(message: String) : Exception(message)
-
-interface InstanceItems {
-    enum class Properties(val id: PropertyIdValue)
-    enum class Items(val id: ItemIdValue)
-    val siteIri: String
-    val inChIKey: PropertyIdValue
-    val inChI: PropertyIdValue
-    val isomericSMILES: PropertyIdValue
-    val canonicalSMILES: PropertyIdValue
-    val pcId: PropertyIdValue
-    val chemicalFormula: PropertyIdValue
-    val instanceOf: PropertyIdValue
-    val chemicalCompound: ItemIdValue
-}
-
-object TestInstanceItems : InstanceItems {
-    override val siteIri = "http://www.test.wikidata.org/entity/"
-    override val inChIKey = makePropertyIdValue("P95461", siteIri)
-    override val inChI = makePropertyIdValue("P95462", siteIri)
-    override val isomericSMILES = makePropertyIdValue("P95463", siteIri)
-    override val canonicalSMILES = makePropertyIdValue("P95466", siteIri)
-    override val pcId = makePropertyIdValue("P95464", siteIri)
-    override val chemicalFormula = makePropertyIdValue("P95465", siteIri)
-    override val instanceOf = makePropertyIdValue("P82", siteIri)
-    override val chemicalCompound = makeItemIdValue("Q212525", IRI_TestInstance)
-}
 
 // TODO: Real instance
 // ?id wdt:P31   wd:Q11173;

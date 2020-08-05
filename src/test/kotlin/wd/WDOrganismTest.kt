@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
+import wd.sparql.WDSparql
+import wd.sparql.findOrganismByTaxon
 
 internal class WDOrganismTest {
     lateinit var wdSparql: WDSparql
@@ -15,13 +17,12 @@ internal class WDOrganismTest {
 
     @Test
     fun findOrganismByTaxon() {
-        val wdOrganism = WDOrganism(wdSparql)
         val expected = mapOf(
             "Phalaris arundinacea" to listOf("Q157419"),
             "Lactuca virosa" to listOf("Q578927")
         )
 
-        val result = wdOrganism.findOrganismByTaxon(expected.keys.toList())
+        val result = wdSparql.findOrganismByTaxon(expected.keys.toList())
         assertEquals(2, result.size)
         result.forEach {
             assertEquals(expected[it.key], it.value)

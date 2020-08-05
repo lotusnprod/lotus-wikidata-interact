@@ -4,6 +4,8 @@ import helpers.GZIPRead
 import helpers.parseTSVFile
 import org.apache.logging.log4j.LogManager
 import org.junit.jupiter.api.BeforeEach
+import wd.sparql.WDSparql
+import wd.sparql.findCompoundsByInChIKey
 
 class WDCompoundSearchPerformanceTest {
     lateinit var wdSparql: WDSparql
@@ -17,8 +19,6 @@ class WDCompoundSearchPerformanceTest {
     // We don't want that to run everytime we run the basic tests
     //@Test
     fun findCompoundsByInChIKeyChunked() {
-        val wdCompound = WDCompoundSearch(wdSparql)
-
         val file = GZIPRead("/home/bjo/Store/01_Research/opennaturalproductsdb/data/external/dbSource/napralert/napralert_matched_final_unified.tsv.gz")
         val inchies = parseTSVFile(file)?.map {
             it.getString("InChIKey")
@@ -26,7 +26,7 @@ class WDCompoundSearchPerformanceTest {
 
         logger.info("Found ${inchies.size} Inchies")
         val chunks = 10000
-        val result = wdCompound.findCompoundsByInChIKey(inchies, chunkSize = chunks) {
+        val result = wdSparql.findCompoundsByInChIKey(inchies, chunkSize = chunks) {
             logger.info("Processed $chunks")
         }
         logger.info("Found ${result.size} Inchies already in wikidata, that's ${100*result.size/inchies.size}% of known inchies.")

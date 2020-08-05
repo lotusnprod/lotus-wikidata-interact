@@ -1,9 +1,12 @@
-package wd
+package wd.models
 
 import org.wikidata.wdtk.datamodel.interfaces.*
+import wd.InstanceItems
+import wd.newDocument
+import wd.statement
 
 
-data class WDCompound(
+data class WDOrganism(
     val name: String,
     val inChIKey: String,
     val inChI: String,

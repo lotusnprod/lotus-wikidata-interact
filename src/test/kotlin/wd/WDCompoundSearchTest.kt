@@ -3,6 +3,8 @@ package wd
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import wd.sparql.WDSparql
+import wd.sparql.findCompoundsByInChIKey
 
 class WDCompoundSearchTest {
     lateinit var wdSparql: WDSparql
@@ -14,12 +16,11 @@ class WDCompoundSearchTest {
 
     @Test
     fun findCompoundsByInChIKey() {
-        val wdCompound = WDCompoundSearch(wdSparql)
         val inChIs = mapOf(
             "VFLDPWHFBUODDF-FCXRPNKRSA-N" to listOf("Q312266"),
             "REFJWTPEDVJJIY-UHFFFAOYSA-N" to listOf("Q409478")
         )
-        val result = wdCompound.findCompoundsByInChIKey(inChIs.keys.toList())
+        val result = wdSparql.findCompoundsByInChIKey(inChIs.keys.toList())
         assertEquals(2, result.size)
         result.forEach {
             assertEquals(inChIs[it.key], it.value)
@@ -28,7 +29,6 @@ class WDCompoundSearchTest {
 
     @Test
     fun findCompoundsByInChIKeyChunked() {
-        val wdCompound = WDCompoundSearch(wdSparql)
         val inChIs = mapOf(
             "VFLDPWHFBUODDF-FCXRPNKRSA-N" to listOf("Q312266"),
             "REFJWTPEDVJJIY-UHFFFAOYSA-N" to listOf("Q409478"),
@@ -36,7 +36,7 @@ class WDCompoundSearchTest {
             "RYYVLZVUVIJVGH-UHFFFAOYSA-N" to listOf("Q60235")
 
         )
-        val result = wdCompound.findCompoundsByInChIKey(inChIs.keys.toList(), chunkSize = 2)
+        val result = wdSparql.findCompoundsByInChIKey(inChIs.keys.toList(), chunkSize = 2)
         assertEquals(4, result.size)
         result.forEach {
             assertEquals(inChIs[it.key], it.value)

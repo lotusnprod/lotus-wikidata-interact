@@ -1,8 +1,6 @@
 import org.apache.logging.log4j.LogManager
-import org.wikidata.wdtk.datamodel.helpers.Datamodel
-import org.wikidata.wdtk.wikibaseapi.BasicApiConnection
-import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher
 import wd.*
+import wd.models.WDCompound
 
 
 fun main(args: Array<String>) {
