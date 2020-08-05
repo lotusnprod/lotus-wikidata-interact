@@ -13,8 +13,15 @@ interface InstanceItems {
     val pcId: PropertyIdValue
     val chemicalFormula: PropertyIdValue
     val instanceOf: PropertyIdValue
+    val taxonName: PropertyIdValue
+    val taxonRank: PropertyIdValue
+    val parentTaxon: PropertyIdValue
+    val naturalProductOfTaxon: PropertyIdValue
+
     val chemicalCompound: ItemIdValue
     val taxon: ItemIdValue
+    val species: ItemIdValue
+    val genus: ItemIdValue
 
     fun property(id: String): PropertyIdValue = Datamodel.makePropertyIdValue(id, siteIri)
     fun item(id: String): ItemIdValue = Datamodel.makeItemIdValue(id, siteIri)
@@ -33,7 +40,14 @@ object TestInstanceItems : InstanceItems {
     override val chemicalFormula = property("P95465")
     override val instanceOf = property("P82")
 
+    override val taxonName = property("P49")
+    override val taxonRank = property("P522")
+    override val parentTaxon = property("P2105")
+    override val naturalProductOfTaxon = property("P95470")
+
     // Things
     override val chemicalCompound = item("Q212525")
     override val taxon = item("Q212541")
+    override val species = item("Q212542")
+    override val genus = item("Q212543")
 }

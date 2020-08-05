@@ -10,6 +10,7 @@ import org.wikidata.wdtk.util.WebResourceFetcherImpl
 import org.wikidata.wdtk.wikibaseapi.ApiConnection
 import org.wikidata.wdtk.wikibaseapi.BasicApiConnection
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataEditor
+import wd.models.Publishable
 import java.net.ConnectException
 
 const val IRI_TestInstance = "http://www.test.wikidata.org/entity/"
@@ -26,7 +27,7 @@ class InternalError(message: String) : Exception(message)
 //     wdt:P274  "Hill Chemical Formula".
 
 
-class WDPublisher {
+class WDPublisher(val instanceItems: InstanceItems) {
     val userAgent = "Wikidata Toolkit EditOnlineDataExample"
     val siteIri = "http://www.test.wikidata.org/entity/"
     val sitePageURL = "https://test.wikidata.org/w/index.php?title="
@@ -52,20 +53,22 @@ class WDPublisher {
 
     fun disconnect() = connection?.logout()
 
-    fun publish(itemDocument: ItemDocument, summary: String) {
+    fun publish(publishable: Publishable, summary: String): ItemIdValue {
         require(connection != null) { "You need to connect first" }
         require(editor != null) { "The editor should exist, you connection likely failed and we didn't catch that" }
         WebResourceFetcherImpl
             .setUserAgent(userAgent)
 
         val newItemDocument: ItemDocument = editor?.createItemDocument(
-            itemDocument,
+            publishable.document(instanceItems),
             summary, null
         ) ?: throw InternalError("There is no editor anymore")
 
         val newItemId = newItemDocument.entityId
         logger.info("Successfully created the item: ${newItemId.id}")
         logger.info("you can access it at $sitePageURL${newItemId.id}")
+        publishable.published(newItemId)
+        return newItemId
     }
 }
 
