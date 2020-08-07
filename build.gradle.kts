@@ -42,7 +42,8 @@ dependencies {
     }
     implementation("org.jetbrains.exposed", "exposed-dao", "0.26.2")
     implementation("org.jetbrains.exposed", "exposed-jdbc", "0.26.2")
-    implementation("org.xerial", "sqlite-jdbc", "3.32.3.2")
+    //implementation("org.xerial", "sqlite-jdbc", "3.32.3.2")
+    implementation("com.h2database", "h2", "1.4.197")
 
     implementation(
         "com.univocity", "univocity-parsers", univocityParserVersion

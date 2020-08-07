@@ -1,5 +1,6 @@
 package net.nprod.onpdb.goldcleaner
 
+import net.nprod.onpdb.helpers.GZIPRead
 import net.nprod.onpdb.helpers.parseTSVFile
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
@@ -7,12 +8,12 @@ import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.deleteAll
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.io.File
 
 
 object SourceDatabases : IntIdTable() {
-    val name = varchar("name", 8)
+    var name = varchar("name", 8)
 }
 
 class SourceDatabase(id: EntityID<Int>) : IntEntity(id) {
@@ -22,7 +23,7 @@ class SourceDatabase(id: EntityID<Int>) : IntEntity(id) {
 }
 
 object TaxoDbs : IntIdTable() {
-    val name = varchar("name", 64)
+    var name = varchar("name", 64)
 }
 
 class TaxoDb(id: EntityID<Int>) : IntEntity(id) {
@@ -32,8 +33,8 @@ class TaxoDb(id: EntityID<Int>) : IntEntity(id) {
 }
 
 object TaxRefs : IntIdTable() {
-    val database = reference("taxodb", TaxoDbs)
-    val dbId = varchar("dbid", 64)
+    var database = reference("taxodb", TaxoDbs)
+    var dbId = varchar("dbid", 64)
 }
 
 class TaxRef(id: EntityID<Int>) : IntEntity(id) {
@@ -41,18 +42,19 @@ class TaxRef(id: EntityID<Int>) : IntEntity(id) {
 
     var database by TaxoDb referencedOn TaxRefs.database
     var dbId by TaxRefs.dbId
+    var organism by Organism referencedOn OrganismTaxRefs.organism
 }
 
 
 object Organisms : IntIdTable() {
-    val name = varchar("name", 64)
+    var name = varchar("name", 64)
 }
 
 class Organism(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<Organism>(Organisms)
 
     var name by Organisms.name
-    val taxRefs by OrganismTaxRef referrersOn OrganismTaxRefs.organism
+    val taxRefs by OrganismTaxRef referrersOn OrganismTaxRefs.taxref
 }
 
 
@@ -84,30 +86,39 @@ class Compound(id: EntityID<Int>) : IntEntity(id) {
 }
 
 object References : IntIdTable() {
-    val doi = varchar("doi", 128)
-    val pmcid = varchar("pmcid", 16)
-    val cleanedPmcId = varchar("cleanedpmcid", 16)
+    var doi = varchar("doi", 128)
+    var pmcid = varchar("pmcid", 16)
+    var pmid = varchar("pmid", 16)
 }
 
 class Reference(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<Reference>(References)
 
-    val doi by References.doi
-    val pmcid by References.pmcid
-    val cleanedPmcId by References.cleanedPmcId
+    var doi by References.doi
+    var pmcid by References.pmcid
+    var pmid by References.pmid
 }
 
 object Entries : IntIdTable() {
-    val database = reference("database", SourceDatabases)
-    val organism = reference("organism", Organisms)
-    val compound = reference("compound", Compounds)
-    val reference = reference("reference", References)
+    var database = reference("database", SourceDatabases)
+    var organism = reference("organism", Organisms)
+    var compound = reference("compound", Compounds)
+    var reference = reference("reference", References)
 }
 
-const val GOLD_PATH = "/home/bjo/Store/01_Research/opennaturalproductsdb/data/interim/tables/4_analysed/gold.tsv"
+class Entry(id: EntityID<Int>) : IntEntity(id) {
+    companion object : IntEntityClass<Entry>(Entries)
+
+    var database by Entries.database
+    var organism by Entries.organism
+    var compound by Entries.compound
+    var reference by Entries.reference
+}
+
+const val GOLD_PATH = "/home/bjo/Store/01_Research/opennaturalproductsdb/data/interim/tables/4_analysed/gold.tsv.gz"
 
 fun main() {
-    Database.connect("jdbc:sqlite:data/test.sqlite", driver = "org.sqlite.JDBC")
+    Database.connect("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", driver = "org.h2.Driver")
     transaction {
         SchemaUtils.create(SourceDatabases)
         SchemaUtils.create(TaxoDbs)
@@ -144,43 +155,118 @@ fun main() {
     }
     println(" ${compoundCache.size} entries")
 
-    // TODO
-    val ReferenceCache: MutableMap<String, Reference> = mutableMapOf()
-    val TaxRefCache: MutableMap<Pair<String, String>, TaxRef> = mutableMapOf()
-    val OrganismCache: MutableMap<String, Organism> = mutableMapOf()
+    print(" - references")
+    val referenceCache: MutableMap<String, Reference> = transaction {
+        Reference.all().map {
+            it.doi to it
+        }.toMap().toMutableMap()
+    }
+    println(" ${referenceCache.size} entries")
 
-    println("Processing file")
+    print(" - taxref cache")
+    val taxRefCache: MutableMap<Pair<String, String>, TaxRef> = transaction {
+        TaxRef.all().map {
+            Pair(it.database.name, it.dbId) to it
+        }.toMap().toMutableMap()
+    }
+    println(" ${taxRefCache.size} entries")
+
+    print(" - organisms")
+    val organismCache: MutableMap<String, Organism> = transaction {
+        Organism.all().map {
+            it.name to it
+        }.toMap().toMutableMap()
+    }
+    println(" ${organismCache.size} entries")
+    println("Deleting the linking tables")
     transaction {
-        parseTSVFile(File(GOLD_PATH).bufferedReader())?.map {
-            val db = it.getString("database")
-            val dbObj = databasesCache[db] ?: {
+        Entries.deleteAll()
+        OrganismTaxRefs.deleteAll()
+    }
+    println("Processing file")
+
+    var count = 0
+
+    val currentOrganism: Organism? = null
+    parseTSVFile(GZIPRead(GOLD_PATH))?.map {
+        println("Count: $count")
+        count+=1
+        transaction {
+            val dbName = it.getString("database")
+            val dbObj = databasesCache[dbName] ?: {
                 val dbObj = SourceDatabase.new {
-                    name = db
+                    name = dbName
                 }
-                databasesCache[db] = dbObj
+                databasesCache[dbName] = dbObj
+                dbObj
             }()
 
-            val taxoDb = it.getString("organismCleaned_dbTaxo")
-            val taxoDbObj = taxoDbCache[taxoDb] ?: {
-                val taxoDbObj  = TaxoDb.new {
-                    name = taxoDb
+            val taxoDbName = it.getString("organismCleaned_dbTaxo")
+            val taxoDbObj = taxoDbCache[taxoDbName] ?: {
+                val taxoDbObj = TaxoDb.new {
+                    name = taxoDbName
                 }
-                taxoDbCache[taxoDb] = taxoDbObj
+                taxoDbCache[taxoDbName] = taxoDbObj
+                taxoDbObj
             }()
 
-            val compound = it.getString("structureCleanedSmiles")
-            val compoundObj = compoundCache[compound] ?: {
+            var compoundSmiles = it.getString("structureCleanedSmiles")
+            val compoundObj = compoundCache[compoundSmiles] ?: {
                 val compoundObj = Compound.new {
-                    smiles = it.getString("structureCleanedSmiles")
+                    smiles = compoundSmiles
                     inchi = it.getString("structureCleanedInchi")
                     inchikey = it.getString("structureCleanedInchikey3D")
                 }
-                compoundCache[compound] = compoundObj
+                compoundCache[compoundSmiles] = compoundObj
+                compoundObj
             }()
+
+            val organismCleanedName = it.getString("organismCleaned")
+            val organismObj = organismCache[organismCleanedName] ?: {
+                val organismObj = Organism.new {
+                    name = organismCleanedName
+                }
+                organismCache[organismCleanedName] = organismObj
+                organismObj
+            }()
+
+
+            val orgDbID = it.getString("organismCleaned_dbTaxoTaxonId")
+            val pairOrg = Pair(taxoDbName, orgDbID)
+            val taxrefObj = taxRefCache[pairOrg] ?: {
+                val taxRefObj = TaxRef.new {
+                    this.database = taxoDbObj
+                    this.dbId = orgDbID
+                }
+                taxRefCache[pairOrg] = taxRefObj
+                taxRefObj
+            }()
+
+            var reference = it.getString("referenceCleanedDoi")
+            val referenceObj = referenceCache[reference] ?: {
+                val referenceObj = Reference.new {
+                    this.doi = reference
+                    this.pmcid = it.getString("referenceCleanedPmcid")
+                    this.pmid = it.getString("referenceCleanedPmid")
+                }
+                referenceCache[reference] = referenceObj
+                referenceObj
+            }()
+
+            OrganismTaxRef.new {
+                this.organism = organismObj.id
+                this.taxref = taxrefObj.id
+            }
+
+            Entry.new {
+                this.database = dbObj.id
+                this.organism = organismObj.id
+                this.compound = compoundObj.id
+                this.reference = referenceObj.id
+            }
         }
     }
     println("Done")
-
 }
 
 /*fun findMaxSizes() {
