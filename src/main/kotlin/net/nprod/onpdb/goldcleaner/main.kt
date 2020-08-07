@@ -91,20 +91,24 @@ data class Quad(
     val reference: Reference
 )
 
-fun main() {
+data class DataTotal(
+    val quads: MutableList<Quad> = mutableListOf(),
+    val databaseCache: IndexableCache<String, Database> = IndexableCache(),
+    val taxonomyDatabaseCache: IndexableCache<String, TaxonomyDatabase> = IndexableCache(),
+    val organismCache: IndexableCache<String, Organism> = IndexableCache(),
+    val compoundCache: IndexableCache<String, Compound> = IndexableCache(),
+    val referenceCache: IndexableCache<String, Reference> = IndexableCache()
+)
+
+fun loadGoldData(limit: Int? = null): DataTotal {
     val logger = LogManager.getLogger("net.nprod.onpdb.goldcleaner.main")
-    var count = 0
-    val quads = mutableListOf<Quad>()
-    val databaseCache = IndexableCache<String, Database>()
-    val taxonomyDatabaseCache = IndexableCache<String, TaxonomyDatabase>()
-    val organismCache = IndexableCache<String, Organism>()
-    val compoundCache = IndexableCache<String, Compound>()
-    val referenceCache = IndexableCache<String, Reference>()
+    val dataTotal = DataTotal()
 
     logger.info("Started")
-    parseTSVFile(GZIPRead(GOLD_PATH))?.map {
+    var file = parseTSVFile(GZIPRead(GOLD_PATH))
+    if (limit != null) file = file?.take(limit)
 
-        count+=1
+    file?.map {
         val database = it.getString("database")
         val organismCleaned = it.getString("organismCleaned")
         val organismDb = it.getString("organismCleaned_dbTaxo")
@@ -112,28 +116,28 @@ fun main() {
         val smiles = it.getString("structureCleanedSmiles")
         val doi = it.getString("referenceCleanedDoi")
 
-        val databaseObj = databaseCache.getOrNew(database) {
+        val databaseObj = dataTotal.databaseCache.getOrNew(database) {
             Database(name = database)
         }
 
-        val organismObj = organismCache.getOrNew(organismCleaned) {
+        val organismObj = dataTotal.organismCache.getOrNew(organismCleaned) {
             Organism(name = organismCleaned)
         }
 
         organismObj.textIds[organismDb] = organismID
 
-        val compoundObj = compoundCache.getOrNew(smiles) {
+        val compoundObj = dataTotal.compoundCache.getOrNew(smiles) {
             Compound(smiles = smiles, inchi = it.getString("structureCleanedInchi"),
                 inchikey = it.getString("structureCleanedInchikey3D"))
         }
 
-        val referenceObj = referenceCache.getOrNew(doi) {
+        val referenceObj = dataTotal.referenceCache.getOrNew(doi) {
             Reference(doi = doi,
                 pmcid = it.getString("referenceCleanedPmcid").ifEqualReplace("NA", ""),
                 pmid = it.getString("referenceCleanedPmid").ifEqualReplace("NA", ""))
         }
 
-        quads.add(
+        dataTotal.quads.add(
             Quad(
                 databaseObj,
                 organismObj,
@@ -144,10 +148,11 @@ fun main() {
     }
     logger.info("Done importing")
     logger.info("Resolving the taxo DB")
-    organismCache.store.values.forEach {
-        it.resolve(taxonomyDatabaseCache)
+    dataTotal.organismCache.store.values.forEach {
+        it.resolve(dataTotal.taxonomyDatabaseCache)
     }
 
-    println(taxonomyDatabaseCache.store.values)
+    println(dataTotal.taxonomyDatabaseCache.store.values)
     println("Done")
+    return dataTotal
 }

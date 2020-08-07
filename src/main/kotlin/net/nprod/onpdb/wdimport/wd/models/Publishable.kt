@@ -7,6 +7,8 @@ import net.nprod.onpdb.wdimport.wd.InstanceItems
 import net.nprod.onpdb.wdimport.wd.newDocument
 import net.nprod.onpdb.wdimport.wd.sparql.WDSparql
 import net.nprod.onpdb.wdimport.wd.statement
+import org.wikidata.wdtk.datamodel.helpers.Datamodel
+import org.wikidata.wdtk.datamodel.interfaces.Value
 import kotlin.reflect.KProperty1
 
 class ElementNotPublishedError(msg: String): Exception(msg)
@@ -53,4 +55,14 @@ abstract class Publishable {
     }
 
     abstract fun tryToFind(wdSparql: WDSparql, instanceItems: InstanceItems): Publishable
+
+    fun addProperty(remoteProperty: RemoteProperty, value: Value, f: ReferenceableValueStatement.() -> Unit ={}) {
+        val refStatement = ReferenceableValueStatement(remoteProperty, value).apply(f)
+        preStatements.add(refStatement)
+    }
+
+    fun addProperty(remoteProperty: RemoteProperty, value: String, f: ReferenceableValueStatement.() -> Unit = {}) {
+        val refStatement = ReferenceableValueStatement(remoteProperty, Datamodel.makeStringValue(value)).apply(f)
+        preStatements.add(refStatement)
+    }
 }

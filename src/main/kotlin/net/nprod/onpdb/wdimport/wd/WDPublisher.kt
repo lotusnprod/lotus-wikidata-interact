@@ -87,7 +87,7 @@ class WDPublisher(override val instanceItems: InstanceItems) : Resolver {
         ) ?: throw InternalError("There is no editor anymore")
 
         val newItemId = newItemDocument.entityId
-        logger.info("Successfully created the item: ${newItemId.id}")
+        logger.info("$summary: ${newItemId.id}")
         logger.info("you can access it at ${instanceItems.sitePageIri}${newItemId.id}")
         publishable.published(newItemId)
         return newItemId
