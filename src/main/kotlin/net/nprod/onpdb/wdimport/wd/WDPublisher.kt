@@ -1,11 +1,8 @@
 package net.nprod.onpdb.wdimport.wd
 
+import com.fasterxml.jackson.databind.exc.ValueInstantiationException
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import org.wikidata.wdtk.datamodel.helpers.Datamodel
-import org.wikidata.wdtk.datamodel.helpers.ItemDocumentBuilder
-import org.wikidata.wdtk.datamodel.helpers.ReferenceBuilder
-import org.wikidata.wdtk.datamodel.helpers.StatementBuilder
 import org.wikidata.wdtk.datamodel.interfaces.*
 import org.wikidata.wdtk.util.WebResourceFetcherImpl
 import org.wikidata.wdtk.wikibaseapi.ApiConnection
@@ -14,6 +11,9 @@ import org.wikidata.wdtk.wikibaseapi.WikibaseDataEditor
 import net.nprod.onpdb.wdimport.wd.models.Publishable
 import net.nprod.onpdb.wdimport.wd.models.ReferenceableRemoteItemStatement
 import net.nprod.onpdb.wdimport.wd.models.ReferenceableValueStatement
+import org.wikidata.wdtk.datamodel.helpers.*
+import org.wikidata.wdtk.datamodel.interfaces.DatatypeIdValue.DT_STRING
+import org.wikidata.wdtk.wikibaseapi.apierrors.MediaWikiApiErrorException
 import java.net.ConnectException
 
 class EnvironmentVariableError(message: String) : Exception(message)
@@ -43,6 +43,37 @@ class WDPublisher(override val instanceItems: InstanceItems) : Resolver {
     }
 
     fun disconnect() = connection?.logout()
+
+    fun newProperty(name: String, description: String): PropertyIdValue {
+        logger.info("Building a property with $name $description")
+        val doc = PropertyDocumentBuilder.forPropertyIdAndDatatype(PropertyIdValue.NULL, DT_STRING)
+            .withLabel(Datamodel.makeMonolingualTextValue(name, "en"))
+            .withDescription(Datamodel.makeMonolingualTextValue(description, "en")).build()
+        try {
+            try {
+                val o = editor?.createPropertyDocument(
+                    doc,
+                    "Added a new property for ONPDB", listOf()
+                ) ?: throw Exception("Sorry you can't create a property without connecting first.")
+                return o.entityId
+            } catch (e: ValueInstantiationException) {
+                println("There is a weird bug here, it still creates it, but isn't happy anyway")
+                println("Restarting it…")
+                return newProperty(name, description)
+            }
+
+        } catch(e: MediaWikiApiErrorException) {
+
+            if ("already has label" in e.errorMessage) {
+                println("It already exists: ${e.errorMessage}")
+                return Datamodel.makePropertyIdValue(
+                    e.errorMessage.subSequence(e.errorMessage.indexOf(':')+1,
+                        e.errorMessage.indexOf('|')
+                    ).toString()
+                , "")
+            } else { throw e }
+        }
+    }
 
     fun publish(publishable: Publishable, summary: String): ItemIdValue {
         require(connection != null) { "You need to connect first" }

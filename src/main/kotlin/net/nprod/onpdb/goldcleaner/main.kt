@@ -148,6 +148,6 @@ fun main() {
         it.resolve(taxonomyDatabaseCache)
     }
 
-    // TODO: Resolve organisms
+    println(taxonomyDatabaseCache.store.values)
     println("Done")
 }
