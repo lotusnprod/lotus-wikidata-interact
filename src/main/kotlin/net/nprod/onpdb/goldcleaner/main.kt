@@ -1,158 +1,72 @@
 package net.nprod.onpdb.goldcleaner
 
-import net.nprod.onpdb.helpers.GZIPRead
-import net.nprod.onpdb.helpers.parseTSVFile
+import com.univocity.parsers.tsv.TsvWriter
+import com.univocity.parsers.tsv.TsvWriterSettings
 import org.apache.logging.log4j.LogManager
-import java.util.concurrent.atomic.AtomicLong
+import java.io.File
 
-const val GOLD_PATH = "/home/bjo/Store/01_Research/opennaturalproductsdb/data/interim/tables/4_analysed/gold.tsv.gz"
-
-interface Cache<T, U> {
-    val store: MutableMap<T,U>
-    fun getOrNew(key: T, value: U): U
-}
-
-class IndexableCache<T, U: Indexable>: Cache<T, U> {
-    override val store = mutableMapOf<T, U>()
-    private var counter = AtomicLong(0)
-    override fun getOrNew(key: T, value: U): U {
-        return store[key] ?: {
-            val count = counter.incrementAndGet()
-            value.id = count
-            store[key] = value
-            value
-        }()
-    }
-
-    fun getOrNew(key: T, generator: ()->U): U {
-        return store[key] ?: {
-            val count = counter.incrementAndGet()
-            val value = generator()
-            value.id = count
-            store[key] = value
-            value
-        }()
-    }
-}
-
-interface Indexable {
-    var id: Long?
-}
-
-data class Database(
-    override var id: Long? = null,
-    val name: String
-): Indexable
-
-data class Organism(
-    override var id: Long? = null,
-    val name: String,
-    val textIds: MutableMap<String, String> = mutableMapOf(),
-    val ids: MutableMap<TaxonomyDatabase, String> = mutableMapOf()
-): Indexable {
-    fun resolve(cache: IndexableCache<String, TaxonomyDatabase>) {
-        textIds.forEach {
-            val taxDb = cache.getOrNew(it.key) {
-                TaxonomyDatabase(name = it.key)
-            }
-            ids[taxDb] = it.value
-        }
-    }
-}
-
-data class TaxonomyDatabase(
-    override var id: Long?=null,
-    val name: String
-): Indexable
-
-data class Compound(
-    override var id: Long?=null,
-    val smiles: String,
-    val inchi: String,
-    val inchikey: String
-): Indexable
-
-data class Reference(
-    override var id: Long?=null,
-    val doi: String,
-    val pmcid: String,
-    val pmid: String
-): Indexable
-
-fun String.ifEqualReplace(search: String, replaceBy: String): String {
-    if (this == search) return replaceBy
-    return this
-}
-
-data class Quad(
-    val database: Database,
-    val organism: Organism,
-    val compound: Compound,
-    val reference: Reference
-)
-
-data class DataTotal(
-    val quads: MutableList<Quad> = mutableListOf(),
-    val databaseCache: IndexableCache<String, Database> = IndexableCache(),
-    val taxonomyDatabaseCache: IndexableCache<String, TaxonomyDatabase> = IndexableCache(),
-    val organismCache: IndexableCache<String, Organism> = IndexableCache(),
-    val compoundCache: IndexableCache<String, Compound> = IndexableCache(),
-    val referenceCache: IndexableCache<String, Reference> = IndexableCache()
-)
-
-fun loadGoldData(limit: Int? = null): DataTotal {
+fun main() {
     val logger = LogManager.getLogger("net.nprod.onpdb.goldcleaner.main")
-    val dataTotal = DataTotal()
-
-    logger.info("Started")
-    var file = parseTSVFile(GZIPRead(GOLD_PATH))
-    if (limit != null) file = file?.take(limit)
-
-    file?.map {
-        val database = it.getString("database")
-        val organismCleaned = it.getString("organismCleaned")
-        val organismDb = it.getString("organismCleaned_dbTaxo")
-        val organismID = it.getString("organismCleaned_dbTaxoTaxonId")
-        val smiles = it.getString("structureCleanedSmiles")
-        val doi = it.getString("referenceCleanedDoi")
-
-        val databaseObj = dataTotal.databaseCache.getOrNew(database) {
-            Database(name = database)
-        }
-
-        val organismObj = dataTotal.organismCache.getOrNew(organismCleaned) {
-            Organism(name = organismCleaned)
-        }
-
-        organismObj.textIds[organismDb] = organismID
-
-        val compoundObj = dataTotal.compoundCache.getOrNew(smiles) {
-            Compound(smiles = smiles, inchi = it.getString("structureCleanedInchi"),
-                inchikey = it.getString("structureCleanedInchikey3D"))
-        }
-
-        val referenceObj = dataTotal.referenceCache.getOrNew(doi) {
-            Reference(doi = doi,
-                pmcid = it.getString("referenceCleanedPmcid").ifEqualReplace("NA", ""),
-                pmid = it.getString("referenceCleanedPmid").ifEqualReplace("NA", ""))
-        }
-
-        dataTotal.quads.add(
-            Quad(
-                databaseObj,
-                organismObj,
-                compoundObj,
-                referenceObj
-            )
-        )
-    }
-    logger.info("Done importing")
-    logger.info("Resolving the taxo DB")
-    dataTotal.organismCache.store.values.forEach {
-        it.resolve(dataTotal.taxonomyDatabaseCache)
+    logger.info("Loading the data")
+    val data = loadData(INHOUSE_PATH)
+    logger.info("Creating the organism table")
+    TsvWriter(File("data/03_for-db-import/organism.tsv"), TsvWriterSettings()).let {
+        it.writeHeaders("id", "name")
+        it.writeRowsAndClose(data.organismCache.store.map {
+            listOf(it.value.id, it.value.name)
+        })
     }
 
-    println(dataTotal.taxonomyDatabaseCache.store.values)
-    println("Done")
-    return dataTotal
+    logger.info("Creating the taxdb table")
+    TsvWriter(File("data/03_for-db-import/taxdb.tsv"), TsvWriterSettings()).let {
+        it.writeHeaders("id", "name")
+        it.writeRowsAndClose(data.taxonomyDatabaseCache.store.map {
+            listOf(it.value.id, it.value.name)
+        })
+    }
+    logger.info("Creating the taxref table")
+    TsvWriter(File("data/03_for-db-import/taxref.tsv"), TsvWriterSettings()).let {
+        it.writeHeaders("id", "organism_id", "taxdb_id", "tax_id")
+        var count = 0
+        it.writeRowsAndClose(data.organismCache.store.flatMap {
+            it.value.ids.map { taxid ->
+                listOf(count, it.value.id, taxid.key.id, taxid.value).also {
+                    count += 1
+                }
+            }
+        })
+    }
+    logger.info("Creating the reference table")
+    TsvWriter(File("data/03_for-db-import/reference.tsv"), TsvWriterSettings()).let {
+        it.writeHeaders("id", "doi", "pmic", "pmcid")
+        it.writeRowsAndClose(data.referenceCache.store.map {
+            listOf(it.value.id, it.value.doi, it.value.pmid, it.value.pmcid)
+        })
+    }
+    logger.info("Creating the compound table")
+    TsvWriter(File("data/03_for-db-import/compound.tsv"), TsvWriterSettings()).let {
+        it.writeHeaders("id", "inchi", "inchikey", "smiles")
+        it.writeRowsAndClose(data.compoundCache.store.map {
+            listOf(it.value.id, it.value.inchi, it.value.inchikey, it.value.smiles)
+        })
+    }
+    logger.info("Creating the database table")
+    TsvWriter(File("data/03_for-db-import/database.tsv"), TsvWriterSettings()).let {
+        it.writeHeaders("id", "name")
+        it.writeRowsAndClose(data.databaseCache.store.map {
+            listOf(it.value.id, it.value.name)
+        })
+    }
+
+    logger.info("Creating the entry table")
+    TsvWriter(File("data/03_for-db-import/entry.tsv"), TsvWriterSettings()).let {
+        it.writeHeaders("id", "organism_id", "reference_id", "compound_id", "database_id")
+        var count = 0
+        it.writeRowsAndClose(data.quads.map {
+            listOf(count, it.organism.id, it.reference.id, it.compound.id, it.database.id).also {
+                count += 1
+            }
+        })
+    }
+    logger.info("Done")
 }

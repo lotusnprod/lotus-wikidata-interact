@@ -30,6 +30,8 @@ dependencies {
     implementation("org.wikidata.wdtk:wdtk-datamodel:$wdtkVersion")
     implementation("org.wikidata.wdtk:wdtk-rdf:$wdtkVersion")
 
+    implementation("org.openscience.cdk", "cdk-bundle", "2.3")
+
     implementation("org.eclipse.rdf4j", "rdf4j-client", rdf4jVersion)
     implementation("org.eclipse.rdf4j", "rdf4j-core", rdf4jVersion)
 
