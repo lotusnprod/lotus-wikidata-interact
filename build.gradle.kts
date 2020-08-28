@@ -19,6 +19,10 @@ repositories {
     maven {
         url = uri("https://dl.bintray.com/kotlin/kotlin-eap")
     }
+
+    flatDir {
+        dirs("./libs")
+    }
 }
 dependencies {
     implementation("org.apache.logging.log4j:log4j-api:$log4jVersion")
@@ -50,6 +54,9 @@ dependencies {
     implementation(
         "com.univocity", "univocity-parsers", univocityParserVersion
     )
+
+    implementation(":wiki-java-0.36-SNAPSHOT")
+
     testImplementation(kotlin("test-junit5"))
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitApiVersion")
     testImplementation("org.junit.jupiter:junit-jupiter:$junitApiVersion")
