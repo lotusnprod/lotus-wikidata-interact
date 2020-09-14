@@ -12,6 +12,9 @@ import net.nprod.onpdb.wdimport.wd.models.WDTaxon
 import net.nprod.onpdb.wdimport.wd.sparql.WDSparql
 import org.apache.logging.log4j.LogManager
 
+const val GOLD_PATH = "/home/bjo/Store/01_Research/opennaturalproductsdb/data/interim/tables/4_analysed/gold.tsv.gz"
+
+
 val taxDBToProperty = mapOf<String, RemoteProperty?>(
     "AmphibiaWeb" to InstanceItems::amphibiaTaxonomy,
     "ARKive" to InstanceItems::ARKIVETaxonomy,
@@ -61,7 +64,7 @@ fun main(args: Array<String>) {
 
     publisher.connect()
 
-    val dataTotal = loadGoldData(100)
+    val dataTotal = loadGoldData(GOLD_PATH, 100)
 
     logger.info("Producing organisms")
 
@@ -104,9 +107,11 @@ fun main(args: Array<String>) {
         publisher.publish(article, "Creating a new article")
         it.value to article
     }.toMap()
+
     println("Linking")
+
     dataTotal.compoundCache.store.forEach { (id, compound) ->
-        val compound = WDCompound(
+        val wdcompound = WDCompound(
             name = compound.inchikey,
             inChIKey = compound.inchikey,
             inChI = compound.inchi,
@@ -121,7 +126,7 @@ fun main(args: Array<String>) {
             }
         }
 
-        publisher.publish(compound, "Creating a new compound")
+        publisher.publish(wdcompound, "Creating a new compound")
     }
 /*
 

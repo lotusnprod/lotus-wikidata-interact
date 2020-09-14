@@ -5,40 +5,6 @@ import net.nprod.onpdb.helpers.parseTSVFile
 import org.apache.logging.log4j.LogManager
 import java.util.concurrent.atomic.AtomicLong
 
-const val GOLD_PATH = "/home/bjo/Store/01_Research/opennaturalproductsdb/data/interim/tables/4_analysed/gold.tsv.gz"
-
-interface Cache<T, U> {
-    val store: MutableMap<T,U>
-    fun getOrNew(key: T, value: U): U
-}
-
-class IndexableCache<T, U: Indexable>: Cache<T, U> {
-    override val store = mutableMapOf<T, U>()
-    private var counter = AtomicLong(0)
-    override fun getOrNew(key: T, value: U): U {
-        return store[key] ?: {
-            val count = counter.incrementAndGet()
-            value.id = count
-            store[key] = value
-            value
-        }()
-    }
-
-    fun getOrNew(key: T, generator: ()->U): U {
-        return store[key] ?: {
-            val count = counter.incrementAndGet()
-            val value = generator()
-            value.id = count
-            store[key] = value
-            value
-        }()
-    }
-}
-
-interface Indexable {
-    var id: Long?
-}
-
 data class Database(
     override var id: Long? = null,
     val name: String
@@ -100,12 +66,12 @@ data class DataTotal(
     val referenceCache: IndexableCache<String, Reference> = IndexableCache()
 )
 
-fun loadGoldData(limit: Int? = null): DataTotal {
+fun loadGoldData(fileName: String, limit: Int? = null): DataTotal {
     val logger = LogManager.getLogger("net.nprod.onpdb.goldcleaner.main")
     val dataTotal = DataTotal()
 
     logger.info("Started")
-    var file = parseTSVFile(GZIPRead(GOLD_PATH))
+    var file = parseTSVFile(GZIPRead(fileName))
     if (limit != null) file = file?.take(limit)
 
     file?.map {
@@ -152,7 +118,7 @@ fun loadGoldData(limit: Int? = null): DataTotal {
         it.resolve(dataTotal.taxonomyDatabaseCache)
     }
 
-    println(dataTotal.taxonomyDatabaseCache.store.values)
-    println("Done")
+    logger.info(dataTotal.taxonomyDatabaseCache.store.values)
+    logger.info("Done")
     return dataTotal
 }

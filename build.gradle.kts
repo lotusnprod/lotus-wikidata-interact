@@ -10,7 +10,7 @@ plugins {
     kotlin("jvm") version "1.4.0-rc"
     application
 }
-group = "net.nprod"
+group = "net.nprod.onpdb.wdimport"
 version = "0.1-SNAPSHOT"
 
 repositories {
@@ -52,9 +52,11 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitApiVersion")
     testImplementation("org.junit.jupiter:junit-jupiter:$junitApiVersion")
 }
+
 tasks.withType<KotlinCompile>() {
     kotlinOptions.jvmTarget = "11"
 }
+
 application {
     mainClassName = "MainKt"
 }
