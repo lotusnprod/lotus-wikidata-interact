@@ -1,18 +1,17 @@
 package net.nprod.onpdb.wdimport.wd
 
-import com.fasterxml.jackson.databind.exc.ValueInstantiationException
+import net.nprod.onpdb.wdimport.wd.models.Publishable
+import net.nprod.onpdb.wdimport.wd.models.ReferenceableRemoteItemStatement
+import net.nprod.onpdb.wdimport.wd.models.ReferenceableValueStatement
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import org.wikidata.wdtk.datamodel.helpers.*
 import org.wikidata.wdtk.datamodel.interfaces.*
+import org.wikidata.wdtk.datamodel.interfaces.DatatypeIdValue.DT_STRING
 import org.wikidata.wdtk.util.WebResourceFetcherImpl
 import org.wikidata.wdtk.wikibaseapi.ApiConnection
 import org.wikidata.wdtk.wikibaseapi.BasicApiConnection
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataEditor
-import net.nprod.onpdb.wdimport.wd.models.Publishable
-import net.nprod.onpdb.wdimport.wd.models.ReferenceableRemoteItemStatement
-import net.nprod.onpdb.wdimport.wd.models.ReferenceableValueStatement
-import org.wikidata.wdtk.datamodel.helpers.*
-import org.wikidata.wdtk.datamodel.interfaces.DatatypeIdValue.DT_STRING
 import org.wikidata.wdtk.wikibaseapi.apierrors.MediaWikiApiErrorException
 import java.net.ConnectException
 
@@ -20,9 +19,9 @@ class EnvironmentVariableError(message: String) : Exception(message)
 class InternalError(message: String) : Exception(message)
 
 
-class WDPublisher(override val instanceItems: InstanceItems) : Resolver {
+class WDPublisher(override val instanceItems: InstanceItems) : Resolver, Publisher {
     private val userAgent = "Wikidata Toolkit EditOnlineDataExample"
-    val logger: Logger = LogManager.getLogger(this::class.java)
+    private val logger: Logger = LogManager.getLogger(this::class.java)
     private var user: String? = null
     private var password: String? = null
     private var connection: ApiConnection? = null
@@ -35,37 +34,38 @@ class WDPublisher(override val instanceItems: InstanceItems) : Resolver {
             ?: throw EnvironmentVariableError("Missing environment variable WIKIDATA_PASSWORD")
     }
 
-    fun connect() {
+    override fun connect() {
         connection = BasicApiConnection.getTestWikidataApiConnection()
         connection?.login(user, password) ?: throw ConnectException("Impossible to connect to the WikiData instance.")
         editor = WikibaseDataEditor(connection, instanceItems.siteIri)
         require(connection?.isLoggedIn ?: false) { "Impossible to login in the instance" }
     }
 
-    fun disconnect() = connection?.logout()
+    override fun disconnect() {
+        connection?.logout()
+    }
 
-    fun newProperty(name: String, description: String): PropertyIdValue {
+    override fun newProperty(name: String, description: String): PropertyIdValue {
         logger.info("Building a property with $name $description")
         val doc = PropertyDocumentBuilder.forPropertyIdAndDatatype(PropertyIdValue.NULL, DT_STRING)
             .withLabel(Datamodel.makeMonolingualTextValue(name, "en"))
             .withDescription(Datamodel.makeMonolingualTextValue(description, "en")).build()
         try {
-            try {
+            return try {
                 val o = editor?.createPropertyDocument(
                     doc,
                     "Added a new property for ONPDB", listOf()
                 ) ?: throw Exception("Sorry you can't create a property without connecting first.")
-                return o.entityId
-            } catch (e: ValueInstantiationException) {
-                println("There is a weird bug here, it still creates it, but isn't happy anyway")
-                println("Restarting it…")
-                return newProperty(name, description)
+                o.entityId
+            } catch (e: IllegalArgumentException) {
+                logger.error("There is a weird bug here, it still creates it, but isn't happy anyway")
+                logger.error("Restarting it…")
+                newProperty(name, description)
             }
 
         } catch(e: MediaWikiApiErrorException) {
-
             if ("already has label" in e.errorMessage) {
-                println("It already exists: ${e.errorMessage}")
+                logger.error("This property already exists: ${e.errorMessage}")
                 return Datamodel.makePropertyIdValue(
                     e.errorMessage.subSequence(e.errorMessage.indexOf(':')+1,
                         e.errorMessage.indexOf('|')
@@ -75,7 +75,7 @@ class WDPublisher(override val instanceItems: InstanceItems) : Resolver {
         }
     }
 
-    fun publish(publishable: Publishable, summary: String): ItemIdValue {
+    override fun publish(publishable: Publishable, summary: String): ItemIdValue {
         require(connection != null) { "You need to connect first" }
         require(editor != null) { "The editor should exist, you connection likely failed and we didn't catch that" }
         WebResourceFetcherImpl
@@ -118,8 +118,8 @@ fun StatementBuilder.reference(reference: Reference) {
     this.reference(reference)
 }
 
-fun newDocument(name: String, f: ItemDocumentBuilder.() -> Unit): ItemDocument {
-    val builder = ItemDocumentBuilder.forItemId(ItemIdValue.NULL)
+fun newDocument(name: String, id: ItemIdValue? = null, f: ItemDocumentBuilder.() -> Unit): ItemDocument {
+    val builder = ItemDocumentBuilder.forItemId(id ?: ItemIdValue.NULL)
         .withLabel(name, "en")
 
     builder.apply(f)
@@ -131,16 +131,16 @@ fun ItemDocumentBuilder.statement(statement: Statement) {
     this.withStatement(statement)
 }
 
+fun ItemDocumentBuilder.statement(subject: ItemIdValue? = null, property: PropertyIdValue, value: String, f: (StatementBuilder) -> Unit = {}) =
+    this.withStatement(newStatement(property, subject, Datamodel.makeStringValue(value), f))
 
-fun ItemDocumentBuilder.statement(property: PropertyIdValue, value: String, f: (StatementBuilder) -> Unit = {}) =
-    this.withStatement(newStatement(property, Datamodel.makeStringValue(value), f))
+fun ItemDocumentBuilder.statement(subject: ItemIdValue? = null, property: PropertyIdValue, value: Value, f: (StatementBuilder) -> Unit = {}) =
+    this.withStatement(newStatement(property, subject, value, f))
 
-fun ItemDocumentBuilder.statement(property: PropertyIdValue, value: Value, f: (StatementBuilder) -> Unit = {}) =
-    this.withStatement(newStatement(property, value, f))
-
-fun ItemDocumentBuilder.statement(referenceableStatement: ReferenceableValueStatement, instanceItems: InstanceItems) {
+fun ItemDocumentBuilder.statement(subject: ItemIdValue? = null, referenceableStatement: ReferenceableValueStatement, instanceItems: InstanceItems) {
     val statement = newStatement(
         referenceableStatement.property.get(instanceItems),
+        subject,
         referenceableStatement.value
     ) { statementBuilder ->
         referenceableStatement.preReferences.forEach {
@@ -151,10 +151,12 @@ fun ItemDocumentBuilder.statement(referenceableStatement: ReferenceableValueStat
 }
 
 fun ItemDocumentBuilder.statement(
+    subject: ItemIdValue?,
     referenceableStatement: ReferenceableRemoteItemStatement,
     instanceItems: InstanceItems
 ) =
     this.statement(
+        subject,
         ReferenceableValueStatement(
             referenceableStatement.property,
             referenceableStatement.value.get(instanceItems),
@@ -163,8 +165,8 @@ fun ItemDocumentBuilder.statement(
         instanceItems
     )
 
-fun newStatement(property: PropertyIdValue, value: Value, f: (StatementBuilder) -> Unit = {}): Statement {
-    val statement = StatementBuilder.forSubjectAndProperty(ItemIdValue.NULL, property)
+fun newStatement(property: PropertyIdValue, subject: ItemIdValue? = null, value: Value, f: (StatementBuilder) -> Unit = {}): Statement {
+    val statement = StatementBuilder.forSubjectAndProperty(subject ?: ItemIdValue.NULL, property)
         .withValue(value)
         .apply(f)
     return statement.build()

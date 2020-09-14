@@ -1,14 +1,12 @@
 package net.nprod.onpdb.wdimport.wd.models
 
-import org.wikidata.wdtk.datamodel.interfaces.ItemDocument
-import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
-import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue
 import net.nprod.onpdb.wdimport.wd.InstanceItems
 import net.nprod.onpdb.wdimport.wd.newDocument
+import net.nprod.onpdb.wdimport.wd.sparql.ISparql
 import net.nprod.onpdb.wdimport.wd.sparql.WDSparql
 import net.nprod.onpdb.wdimport.wd.statement
 import org.wikidata.wdtk.datamodel.helpers.Datamodel
-import org.wikidata.wdtk.datamodel.interfaces.Value
+import org.wikidata.wdtk.datamodel.interfaces.*
 import kotlin.reflect.KProperty1
 
 class ElementNotPublishedError(msg: String): Exception(msg)
@@ -37,24 +35,24 @@ abstract class Publishable {
 
     abstract fun dataStatements(): List<ReferenceableStatement>
 
-    fun document(instanceItems: InstanceItems): ItemDocument {
+    fun document(instanceItems: InstanceItems, subject: ItemIdValue? = null): ItemDocument {
         require(!this.published) { "Cannot request the document of an already published item."}
         preStatements.addAll(dataStatements())
-        return newDocument(name) {
-            statement(instanceItems.instanceOf, type.get(instanceItems))
+        return newDocument(name, subject) {
+            statement(subject, instanceItems.instanceOf, type.get(instanceItems))
 
             // We construct the statements according to this instanceItems value
             preStatements.forEach { refStat ->
                 when (refStat) {
-                    is ReferenceableValueStatement -> statement(refStat, instanceItems)
-                    is ReferenceableRemoteItemStatement -> statement(refStat, instanceItems)
+                    is ReferenceableValueStatement -> statement(subject, refStat, instanceItems)
+                    is ReferenceableRemoteItemStatement -> statement(subject, refStat, instanceItems)
                 }
             }
             preStatements.clear()
         }
     }
 
-    abstract fun tryToFind(wdSparql: WDSparql, instanceItems: InstanceItems): Publishable
+    abstract fun tryToFind(iSparql: ISparql, instanceItems: InstanceItems): Publishable
 
     fun addProperty(remoteProperty: RemoteProperty, value: Value, f: ReferenceableValueStatement.() -> Unit ={}) {
         val refStatement = ReferenceableValueStatement(remoteProperty, value).apply(f)

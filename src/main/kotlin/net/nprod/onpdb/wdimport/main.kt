@@ -1,23 +1,36 @@
 package net.nprod.onpdb.wdimport
 
 import net.nprod.onpdb.goldcleaner.loadGoldData
-import net.nprod.onpdb.wdimport.wd.InstanceItems
-import net.nprod.onpdb.wdimport.wd.MainInstanceItems
-import net.nprod.onpdb.wdimport.wd.TestInstanceItems
-import net.nprod.onpdb.wdimport.wd.WDPublisher
-import net.nprod.onpdb.wdimport.wd.models.RemoteProperty
+import net.nprod.onpdb.mock.TestISparql
+import net.nprod.onpdb.mock.TestPublisher
+import net.nprod.onpdb.wdimport.wd.*
 import net.nprod.onpdb.wdimport.wd.models.WDArticle
 import net.nprod.onpdb.wdimport.wd.models.WDCompound
 import net.nprod.onpdb.wdimport.wd.models.WDTaxon
+import net.nprod.onpdb.wdimport.wd.sparql.ISparql
 import net.nprod.onpdb.wdimport.wd.sparql.WDSparql
 import org.apache.logging.log4j.LogManager
+import org.eclipse.rdf4j.repository.Repository
+import org.eclipse.rdf4j.repository.sail.SailRepository
+import org.eclipse.rdf4j.rio.RDFFormat
+import org.eclipse.rdf4j.rio.RDFHandler
+import org.eclipse.rdf4j.rio.Rio
+import org.eclipse.rdf4j.sail.memory.MemoryStore
+import java.io.File
 
-const val GOLD_PATH = "/home/bjo/Store/01_Research/opennaturalproductsdb/data/interim/tables/4_analysed/gold.tsv.gz"
 
+//const val PREFIX = "/home/bjo/Store/01_Research/opennaturalproductsdb"
+const val PREFIX = "/home/bjo/Software/ONPDB/opennaturalproductsdb"
+const val GOLD_PATH = "$PREFIX/data/interim/tables/4_analysed/gold.tsv.gz"
+
+const val TestMode = true
 
 fun main(args: Array<String>) {
     val logger = LogManager.getLogger("net.nprod.onpdb.wdimport.main")
-    logger.info("Playing with Wikidata Toolkit")
+    logger.info("ONPDB Importer")
+    if (TestMode) {
+        logger.info("We are in test mode")
+    }
 
     val instanceItems = TestInstanceItems
 
@@ -31,41 +44,72 @@ fun main(args: Array<String>) {
     val thing = wikibaseDataFetcher.getEntityDocument("Q212578")
     println(thing)*/
 
-    val wdSparql = WDSparql(MainInstanceItems) // TODO: For tests we use the official…
-    val publisher = WDPublisher(instanceItems)
+    lateinit var wdSparql: ISparql
+    lateinit var publisher: Publisher
+    var repository: Repository? = null
+    if (TestMode) {
+        repository = SailRepository(MemoryStore())
+        wdSparql = TestISparql(MainInstanceItems, repository)
+        publisher = TestPublisher(MainInstanceItems, repository)
+    } else {
+        wdSparql = WDSparql(MainInstanceItems) // TODO: For tests we use the official…
+        publisher = WDPublisher(instanceItems)
+    }
 
     publisher.connect()
 
-    val dataTotal = loadGoldData(GOLD_PATH, 100)
+    val dataTotal = loadGoldData(GOLD_PATH, 10000)
 
     logger.info("Producing organisms")
 
-    val organisms = dataTotal.organismCache.store.values.map {organism ->
-        val (genus, species) = organism.name.split(" ").subList(0,2)
-        val genusWD = WDTaxon(
-            name = genus,
-            parentTaxon = null,
-            taxonName = genus,
-            taxonRank = InstanceItems::genus
-        ).tryToFind(wdSparql, instanceItems)
+    val organisms = dataTotal.organismCache.store.values.mapNotNull { organism ->
+        val organismSplit = organism.name.split(" ")
+        val taxon: WDTaxon? = when (organismSplit.size) {
+            0 -> throw Exception("Empty organism name")
+            1 -> {
+                val genusWD = WDTaxon(
+                    name = organismSplit[0],
+                    parentTaxon = null,
+                    taxonName = organismSplit[0],
+                    taxonRank = InstanceItems::genus
+                ).tryToFind(wdSparql, instanceItems)
 
-        publisher.publish(genusWD, "Created a missing genus")
+                genusWD
+            }
+            2-> {
+                val genusWD = WDTaxon(
+                    name = organismSplit[0],
+                    parentTaxon = null,
+                    taxonName = organismSplit[0],
+                    taxonRank = InstanceItems::genus
+                ).tryToFind(wdSparql, instanceItems)
 
-        val speciesWD = WDTaxon(
-            name = organism.name,
-            parentTaxon = genusWD.id,
-            taxonName = species,
-            taxonRank = InstanceItems::species
-        )
+                publisher.publish(genusWD, "Created a missing genus")
 
-        organism.textIds.forEach { dbEntry ->
-            speciesWD.addTaxoDB(dbEntry.key, dbEntry.value)
+                val speciesWD = WDTaxon(
+                    name = organism.name,
+                    parentTaxon = genusWD.id,
+                    taxonName = organismSplit[1],
+                    taxonRank = InstanceItems::species
+                )
+
+                speciesWD
+            }
+            else -> {
+                logger.error("More than 2 elements in taxon not handled yet for: ${organism.name}")
+                null
+            }
         }
+        taxon?.let {
+            organism.textIds.forEach { dbEntry ->
+                taxon.addTaxoDB(dbEntry.key, dbEntry.value)
+            }
 
-        // Todo, add the taxinfo
+            // Todo, add the taxinfo
 
-        publisher.publish(speciesWD, "Created a missing genus")
-        organism to speciesWD
+            publisher.publish(taxon, "Created a missing taxon")
+            organism to taxon
+        }
     }.toMap()
 
     logger.info("Producing articles")
@@ -81,7 +125,7 @@ fun main(args: Array<String>) {
         it.value to article
     }.toMap()
 
-    println("Linking")
+    logger.info("Linking")
 
     dataTotal.compoundCache.store.forEach { (id, compound) ->
         val wdcompound = WDCompound(
@@ -93,18 +137,32 @@ fun main(args: Array<String>) {
             chemicalFormula = "TODO" // TODO: Calculate chemical formula
         ) {
             dataTotal.quads.filter { it.compound == compound }.distinct().forEach { quad ->
-                naturalProductOfTaxon(organisms[quad.organism] ?: throw Exception("That's bad, we talk about an organism we don't have")) {
-                    statedIn(references[quad.reference]?.id ?: throw Exception("That's bad we talk about a reference we don't have."))
+                val organism = organisms[quad.organism]
+                organism?.let {
+                    naturalProductOfTaxon(
+                        organism
+                    ) {
+                    statedIn(
+                        references[quad.reference]?.id
+                            ?: throw Exception("That's bad we talk about a reference we don't have.")
+                    )
+                }
                 }
             }
         }
 
         publisher.publish(wdcompound, "Creating a new compound")
     }
-/*
 
-
-
-*/
     publisher.disconnect()
+
+    if (TestMode) {
+        val file = File("/tmp/out.xml").bufferedWriter()
+        repository?.let {
+            it.connection
+            val writer: RDFHandler = Rio.createWriter(RDFFormat.RDFXML, file)
+            it.connection.export(writer)
+        }
+        file.close()
+    }
 }

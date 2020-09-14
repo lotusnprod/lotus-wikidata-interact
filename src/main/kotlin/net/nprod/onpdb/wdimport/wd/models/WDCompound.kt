@@ -1,6 +1,7 @@
 package net.nprod.onpdb.wdimport.wd.models
 
 import net.nprod.onpdb.wdimport.wd.InstanceItems
+import net.nprod.onpdb.wdimport.wd.sparql.ISparql
 import net.nprod.onpdb.wdimport.wd.sparql.WDSparql
 
 data class WDCompound(
@@ -27,7 +28,7 @@ data class WDCompound(
             pcId?.let { ReferenceableValueStatement(InstanceItems::pcId, it) }
         )
 
-    override fun tryToFind(wdSparql: WDSparql, instanceItems: InstanceItems): Publishable {
+    override fun tryToFind(iSparql: ISparql, instanceItems: InstanceItems): Publishable {
         TODO("Not yet implemented")
     }
 

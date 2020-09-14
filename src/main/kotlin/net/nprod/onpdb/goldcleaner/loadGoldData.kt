@@ -78,7 +78,7 @@ fun loadGoldData(fileName: String, limit: Int? = null): DataTotal {
         val database = it.getString("database")
         val organismCleaned = it.getString("organismCleaned")
         val organismDb = it.getString("organismCleaned_dbTaxo")
-        val organismID = it.getString("organismCleaned_dbTaxoTaxonId")
+        val organismID = it.getString("organismCleaned_dbTaxoTaxonIds")
         val smiles = it.getString("structureCleanedSmiles")
         val doi = it.getString("referenceCleanedDoi")
 

@@ -16,12 +16,12 @@ data class WDOrganism(
 ) {
     fun document(instanceItems: InstanceItems): ItemDocument {
         return newDocument(name) {
-            statement(instanceItems.instanceOf, instanceItems.chemicalCompound)
-            statement(instanceItems.inChIKey, inChIKey)
-            statement(instanceItems.inChI, inChI)
-            statement(instanceItems.isomericSMILES, isomericSMILES)
-            statement(instanceItems.chemicalFormula, chemicalFormula)
-            pcId?.let { statement(instanceItems.pcId, it) }
+            statement(null, instanceItems.instanceOf, instanceItems.chemicalCompound)
+            statement(null, instanceItems.inChIKey, inChIKey)
+            statement(null, instanceItems.inChI, inChI)
+            statement(null, instanceItems.isomericSMILES, isomericSMILES)
+            statement(null, instanceItems.chemicalFormula, chemicalFormula)
+            pcId?.let { statement(null, instanceItems.pcId, it) }
         }
     }
 }

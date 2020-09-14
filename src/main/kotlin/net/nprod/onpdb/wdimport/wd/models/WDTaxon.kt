@@ -3,6 +3,7 @@ package net.nprod.onpdb.wdimport.wd.models
 import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
 import net.nprod.onpdb.wdimport.wd.InstanceItems
+import net.nprod.onpdb.wdimport.wd.sparql.ISparql
 import net.nprod.onpdb.wdimport.wd.sparql.WDSparql
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -54,24 +55,25 @@ data class WDTaxon(
         )
     // TODO: Grin https://npgsweb.ars-grin.gov/gringlobal/taxonomydetail.aspx?id=12676
 
-    override fun tryToFind(wdSparql: WDSparql, instanceItems: InstanceItems): Publishable {
+    override fun tryToFind(iSparql: ISparql, instanceItems: InstanceItems): WDTaxon {
         // In the case of the test instance, we do not have the ability to do SPARQL queries
 
         val query = """
-            PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+            PREFIX wd: <${InstanceItems::wdURI.get(instanceItems)}>
+            PREFIX wdt: <${InstanceItems::wdtURI.get(instanceItems)}>
             SELECT DISTINCT ?id {
-              ?id wdt:${wdSparql.resolve(InstanceItems::instanceOf).id} wd:${wdSparql.resolve(InstanceItems::taxon).id};
-                  wdt:${wdSparql.resolve(InstanceItems::taxonRank).id} wd:${wdSparql.resolve(taxonRank).id};
-                  wdt:${wdSparql.resolve(InstanceItems::taxonName).id} ${Rdf.literalOf(name).queryString}.
+              ?id wdt:${iSparql.resolve(InstanceItems::instanceOf).id} wd:${iSparql.resolve(InstanceItems::taxon).id};
+                  wdt:${iSparql.resolve(InstanceItems::taxonRank).id} wd:${iSparql.resolve(taxonRank).id};
+                  wdt:${iSparql.resolve(InstanceItems::taxonName).id} ${Rdf.literalOf(name).queryString}.
             }
             """.trimIndent()
         println(query)
-        val results = wdSparql.query(query) { result ->
+        val results = iSparql.query(query) { result ->
             result.map { bindingSet ->
                 bindingSet.getValue("id").stringValue().replace(instanceItems.wdURI, "")
             }
         }
-        if(instanceItems.sparqlEndpoint == null) {
+        if((instanceItems.sparqlEndpoint == null) && results.isNotEmpty()) {
             logger.info("We found $results on the official instance but we can't use them here as we don't have sparql Enabled")
         }
         return this

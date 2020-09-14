@@ -16,6 +16,10 @@ data class ReferenceableValueStatement(
     fun statedIn(value: Value) = preReferences.add(WDPreReference().add(InstanceItems::statedIn, value))
 
     constructor(property: RemoteProperty, value:String): this(property, Datamodel.makeStringValue(value))
+
+    companion object {
+        fun monolingualValue(property: RemoteProperty, value: String) = ReferenceableValueStatement(property, Datamodel.makeMonolingualTextValue(value, "en"))
+    }
 }
 
 data class ReferenceableRemoteItemStatement(

@@ -1,10 +1,11 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val wdtkVersion = "0.11.1"
-val rdf4jVersion = "3.3.0"
+val rdf4jVersion = "3.4.0"
 val log4jVersion = "2.13.3"
 val junitApiVersion = "5.6.0"
 val univocityParserVersion = "2.8.4"
+val jacksonVersion = "2.11.2"
 
 plugins {
     kotlin("jvm") version "1.4.0-rc"
@@ -30,8 +31,13 @@ dependencies {
     implementation("org.wikidata.wdtk:wdtk-datamodel:$wdtkVersion")
     implementation("org.wikidata.wdtk:wdtk-rdf:$wdtkVersion")
 
+    implementation("com.fasterxml.jackson.core:jackson-core:$jacksonVersion")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion")
+
     implementation("org.eclipse.rdf4j", "rdf4j-client", rdf4jVersion)
     implementation("org.eclipse.rdf4j", "rdf4j-core", rdf4jVersion)
+    implementation("org.eclipse.rdf4j", "rdf4j-repository-sail", rdf4jVersion)
+    implementation("org.eclipse.rdf4j", "rdf4j-sail-memory", rdf4jVersion)
 
     implementation("org.jetbrains.exposed", "exposed-core", "0.26.2") {
         exclude("org.jetbrains.kotlin","kotlin-stdlib-jdk7")
