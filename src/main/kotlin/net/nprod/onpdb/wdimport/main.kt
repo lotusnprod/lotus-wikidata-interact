@@ -15,34 +15,6 @@ import org.apache.logging.log4j.LogManager
 const val GOLD_PATH = "/home/bjo/Store/01_Research/opennaturalproductsdb/data/interim/tables/4_analysed/gold.tsv.gz"
 
 
-val taxDBToProperty = mapOf<String, RemoteProperty?>(
-    "AmphibiaWeb" to InstanceItems::amphibiaTaxonomy,
-    "ARKive" to InstanceItems::ARKIVETaxonomy,
-    "BioLib.cz" to null,
-    "BirdLife International" to InstanceItems::birdLifeTaxonomy,
-    "Database of Vascular Plants of Canada (VASCAN)" to InstanceItems::VASCANTaxonomy,
-    "Encyclopedia of Life" to InstanceItems::EOLTaxonomy,
-    "EUNIS" to InstanceItems::EUNISTaxonomy,
-    "FishBase" to InstanceItems::FISHBaseTaxonomy,
-    "GBIF Backbone Taxonomy" to InstanceItems::GBIFTaxonomy,
-    "GRIN Taxonomy for Plants" to InstanceItems::GRINTaxonomy,
-    "iNaturalist" to InstanceItems::iNaturalistTaxonomy,
-    "Index Fungorum" to InstanceItems::IndexFungorumTaxonomy,
-    "ITIS" to InstanceItems::ITISTaxonomy,
-    "IUCN Red List of Threatened Species" to InstanceItems::IUCNTaxonomy,
-    "NCBI" to InstanceItems::NCBITaxonomy,
-    "Phasmida Species File" to InstanceItems::phasmidaTaxonomy,
-    "The eBird/Clements Checklist of Birds of the World" to InstanceItems::eBirdTaxonomy,
-    "The Interim Register of Marine and Nonmarine Genera" to InstanceItems::IRMNGTaxonomy,
-    "The International Plant Names Index" to InstanceItems::IPNITaxonomy,
-    "The Mammal Species of The World" to InstanceItems::MSWTaxonomy,
-    "Tropicos - Missouri Botanical Garden" to InstanceItems::TropicosTaxonomy,
-    "uBio NameBank" to InstanceItems::uBIOTaxonomy,
-    "USDA NRCS PLANTS Database" to null,
-    "World Register of Marine Species" to InstanceItems::WORMSTaxonomy,
-    "ZooBank" to InstanceItems::ZoobankTaxonomy
-)
-
 fun main(args: Array<String>) {
     val logger = LogManager.getLogger("net.nprod.onpdb.wdimport.main")
     logger.info("Playing with Wikidata Toolkit")
@@ -76,7 +48,9 @@ fun main(args: Array<String>) {
             taxonName = genus,
             taxonRank = InstanceItems::genus
         ).tryToFind(wdSparql, instanceItems)
+
         publisher.publish(genusWD, "Created a missing genus")
+
         val speciesWD = WDTaxon(
             name = organism.name,
             parentTaxon = genusWD.id,
@@ -85,8 +59,7 @@ fun main(args: Array<String>) {
         )
 
         organism.textIds.forEach { dbEntry ->
-            val taxDb = taxDBToProperty[dbEntry.key]
-            taxDb?.let { speciesWD.addProperty(taxDb, dbEntry.value) }
+            speciesWD.addTaxoDB(dbEntry.key, dbEntry.value)
         }
 
         // Todo, add the taxinfo
