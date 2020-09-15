@@ -1,9 +1,8 @@
 package net.nprod.onpdb.goldcleaner
 
-import net.nprod.onpdb.helpers.GZIPRead
+import net.nprod.onpdb.helpers.GZIPReader
 import net.nprod.onpdb.helpers.parseTSVFile
 import org.apache.logging.log4j.LogManager
-import java.util.concurrent.atomic.AtomicLong
 
 data class Database(
     override var id: Long? = null,
@@ -71,7 +70,8 @@ fun loadGoldData(fileName: String, limit: Int? = null): DataTotal {
     val dataTotal = DataTotal()
 
     logger.info("Started")
-    var file = parseTSVFile(GZIPRead(fileName))
+    val gzipFileReader = GZIPReader(fileName)
+    var file = parseTSVFile(gzipFileReader.bufferedReader, limit)
     if (limit != null) file = file?.take(limit)
 
     file?.map {
@@ -120,5 +120,6 @@ fun loadGoldData(fileName: String, limit: Int? = null): DataTotal {
 
     logger.info(dataTotal.taxonomyDatabaseCache.store.values)
     logger.info("Done")
+    gzipFileReader.close()
     return dataTotal
 }
