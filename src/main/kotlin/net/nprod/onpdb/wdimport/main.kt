@@ -17,6 +17,7 @@ import org.eclipse.rdf4j.rio.RDFHandler
 import org.eclipse.rdf4j.rio.Rio
 import org.eclipse.rdf4j.sail.memory.MemoryStore
 import java.io.File
+import java.io.FileNotFoundException
 
 
 //const val PREFIX = "/home/bjo/Store/01_Research/opennaturalproductsdb"
@@ -24,6 +25,7 @@ const val PREFIX = "/home/bjo/Software/ONPDB/opennaturalproductsdb"
 const val GOLD_PATH = "$PREFIX/data/interim/tables/4_analysed/gold.tsv.gz"
 
 const val TestMode = true
+const val TestPersistent = true // If true, we are going to reload the previous output in TestMode
 
 fun main(args: Array<String>) {
     val logger = LogManager.getLogger("net.nprod.onpdb.wdimport.main")
@@ -32,7 +34,11 @@ fun main(args: Array<String>) {
         logger.info("We are in test mode")
     }
 
-    val instanceItems = TestInstanceItems
+
+    // This is where we say if we use the test Wikidata instance or not
+    // the issue is that the test wikidata doesn't have sparql, so it is
+    // harder for us to find if something already exist
+    val instanceItems = MainInstanceItems
 
     logger.info("Initializing toolkit")
     /*val wikibaseDataFetcher = WikibaseDataFetcher(
@@ -49,67 +55,96 @@ fun main(args: Array<String>) {
     var repository: Repository? = null
     if (TestMode) {
         repository = SailRepository(MemoryStore())
-        wdSparql = TestISparql(MainInstanceItems, repository)
-        publisher = TestPublisher(MainInstanceItems, repository)
+        if (TestPersistent) {
+            try {
+                logger.info("Loading old data")
+                val file = File("/tmp/out.xml")
+                repository.let {
+                    it.connection
+                    it.connection.add(file.inputStream(), "", RDFFormat.RDFXML)
+                }
+            } catch (e: FileNotFoundException) {
+                logger.info("There is no data from a previous test run.")
+            }
+        }
+        wdSparql = TestISparql(instanceItems, repository)
+        publisher = TestPublisher(instanceItems, repository)
     } else {
-        wdSparql = WDSparql(MainInstanceItems) // TODO: For tests we use the official…
+        wdSparql = WDSparql(instanceItems)
         publisher = WDPublisher(instanceItems)
     }
 
     publisher.connect()
 
-    val dataTotal = loadGoldData(GOLD_PATH, 10000)
+    val dataTotal = loadGoldData(GOLD_PATH, 100000)
 
     logger.info("Producing organisms")
 
+
     val organisms = dataTotal.organismCache.store.values.mapNotNull { organism ->
-        val organismSplit = organism.name.split(" ")
-        val taxon: WDTaxon? = when (organismSplit.size) {
-            0 -> throw Exception("Empty organism name")
-            1 -> {
+
+        logger.info("Organism Ranks and Ids: ${organism.rankIds}")
+
+        var taxon: WDTaxon? = null
+
+
+        listOfNotNull("GBIF", "NCBI", "ITIS", "The Interim Register of Marine and Nonmarine Genera",
+        "World Register of Marine Species", "GBIF Backbone Taxonomy").forEach { taxonDbName ->
+            val taxonDb = organism.rankIds.keys.firstOrNull { it.name == taxonDbName }
+            if (taxon != null) return@forEach
+            taxonDb?.let {
+                val genus = organism.rankIds[taxonDb]?.firstOrNull { it.first == "genus" }?.second?.name
+                val species = organism.rankIds[taxonDb]?.firstOrNull { it.first == "species" }?.second?.name
+
+                val genusId = organism.rankIds[taxonDb]?.firstOrNull { it.first == "genus" }?.second?.id
+                val speciesId = organism.rankIds[taxonDb]?.firstOrNull { it.first == "species" }?.second?.id
+
+                if (genus == null) throw Exception("Sorry we need at least a genus for organism $organism")
+
                 val genusWD = WDTaxon(
-                    name = organismSplit[0],
+                    name = genus,
                     parentTaxon = null,
-                    taxonName = organismSplit[0],
+                    taxonName = genus,
                     taxonRank = InstanceItems::genus
                 ).tryToFind(wdSparql, instanceItems)
 
-                genusWD
-            }
-            2-> {
-                val genusWD = WDTaxon(
-                    name = organismSplit[0],
-                    parentTaxon = null,
-                    taxonName = organismSplit[0],
-                    taxonRank = InstanceItems::genus
-                ).tryToFind(wdSparql, instanceItems)
 
-                publisher.publish(genusWD, "Created a missing genus")
 
-                val speciesWD = WDTaxon(
-                    name = organism.name,
-                    parentTaxon = genusWD.id,
-                    taxonName = organismSplit[1],
-                    taxonRank = InstanceItems::species
-                )
+                taxon = genusWD
+                if (species != null) {
+                    publisher.publish(genusWD, "Created a missing genus")
 
-                speciesWD
-            }
-            else -> {
-                logger.error("More than 2 elements in taxon not handled yet for: ${organism.name}")
-                null
+                    val speciesWD = WDTaxon(
+                        name = species,
+                        parentTaxon = genusWD.id,
+                        taxonName = species,
+                        taxonRank = InstanceItems::species
+                    ).tryToFind(wdSparql, instanceItems)
+                    taxon = speciesWD
+
+                }
+
+
             }
         }
-        taxon?.let {
+
+        if (taxon == null) {
+            throw Exception("Sorry we couldn't find any info from the accepted reference taxonomy source, we only have: ${organism.rankIds.keys.map { it.name}}")
+        }
+
+
+        taxon?.let { taxon ->
+
+
+            // TODO get that to work
             organism.textIds.forEach { dbEntry ->
                 taxon.addTaxoDB(dbEntry.key, dbEntry.value)
             }
 
-            // Todo, add the taxinfo
-
             publisher.publish(taxon, "Created a missing taxon")
             organism to taxon
         }
+
     }.toMap()
 
     logger.info("Producing articles")

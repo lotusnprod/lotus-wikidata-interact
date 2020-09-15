@@ -7,6 +7,7 @@ import net.nprod.onpdb.wdimport.wd.sparql.ISparql
 import net.nprod.onpdb.wdimport.wd.sparql.WDSparql
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import org.wikidata.wdtk.datamodel.implementation.ItemIdValueImpl
 
 
 val taxDBToProperty = mapOf<String, RemoteProperty?>(
@@ -76,6 +77,13 @@ data class WDTaxon(
         if((instanceItems.sparqlEndpoint == null) && results.isNotEmpty()) {
             logger.info("We found $results on the official instance but we can't use them here as we don't have sparql Enabled")
         }
+
+        if (results.isNotEmpty()) {
+            this.published(ItemIdValueImpl.fromId(results.first(), InstanceItems::wdURI.get(instanceItems)) as ItemIdValue)
+        } else {
+            logger.info("This is a new taxon!")
+        }
+
         return this
     }
 

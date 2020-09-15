@@ -44,7 +44,7 @@ class TestItemIdValue(private val prefix: String, private val value: String): It
 }
 
 class TestPublisher(override val instanceItems: InstanceItems, val repository: Repository) : Resolver, Publisher {
-    val site = "http://test.onpdb/"
+    private val site = InstanceItems::wdURI.get(instanceItems)
     private var counter = 0
     private val logger: Logger = LogManager.getLogger(this::class.java)
 
@@ -77,12 +77,13 @@ class TestPublisher(override val instanceItems: InstanceItems, val repository: R
     }
 
     override fun publish(publishable: Publishable, summary: String): ItemIdValue {
+        if (publishable.published) return publishable.id
         logger.debug("Trying to add the publishable: $publishable with a summary $summary")
         val entityId = ItemIdValueImpl.fromId("Q${counter.toString().padStart(8, '0')}", site)
         counter++
         val doc = publishable.document(instanceItems, entityId as ItemIdValue)
 
-        logger.info(doc.entityId)
+        logger.debug(doc.entityId)
         val conn = repository.connection
 
         val stream = ByteArrayOutputStream()
