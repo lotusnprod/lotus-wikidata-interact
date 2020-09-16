@@ -77,8 +77,6 @@ data class WDTaxon(
 
         if (results.isNotEmpty()) {
             this.published(ItemIdValueImpl.fromId(results.first(), InstanceItems::wdURI.get(instanceItems)) as ItemIdValue)
-        } else {
-            logger.info("This is a new taxon!")
         }
 
         return this

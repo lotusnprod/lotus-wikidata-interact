@@ -2,6 +2,7 @@ package net.nprod.onpdb.wdimport.wd.models
 
 import net.nprod.onpdb.wdimport.wd.InstanceItems
 import net.nprod.onpdb.wdimport.wd.newDocument
+import net.nprod.onpdb.wdimport.wd.newStatement
 import net.nprod.onpdb.wdimport.wd.sparql.ISparql
 import net.nprod.onpdb.wdimport.wd.sparql.WDSparql
 import net.nprod.onpdb.wdimport.wd.statement
@@ -36,7 +37,6 @@ abstract class Publishable {
     abstract fun dataStatements(): List<ReferenceableStatement>
 
     fun document(instanceItems: InstanceItems, subject: ItemIdValue? = null): ItemDocument {
-        require(!this.published) { "Cannot request the document of an already published item."}
         preStatements.addAll(dataStatements())
         return newDocument(name, subject) {
             statement(subject, instanceItems.instanceOf, type.get(instanceItems))
@@ -49,6 +49,35 @@ abstract class Publishable {
                 }
             }
             preStatements.clear()
+        }
+    }
+
+    fun listOfStatementsForUpdate(instanceItems: InstanceItems): List<Statement> {
+        return preStatements.map { referenceableStatement ->
+            when (referenceableStatement) {
+                is ReferenceableValueStatement -> newStatement(
+                    referenceableStatement.property.get(instanceItems),
+                    id,
+                    referenceableStatement.value
+                ) { statementBuilder ->
+                    referenceableStatement.preReferences.forEach {
+                        statementBuilder.withReference(it.build(instanceItems))
+                    }
+                }
+                is ReferenceableRemoteItemStatement -> newStatement(
+                    referenceableStatement.property.get(instanceItems),
+                    id,
+                    ReferenceableValueStatement(
+                        referenceableStatement.property,
+                        referenceableStatement.value.get(instanceItems),
+                        referenceableStatement.preReferences
+                    ).value
+                ) { statementBuilder ->
+                    referenceableStatement.preReferences.forEach {
+                        statementBuilder.withReference(it.build(instanceItems))
+                    }
+                }
+            }
         }
     }
 

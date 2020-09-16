@@ -63,15 +63,18 @@ class WDPublisher(override val instanceItems: InstanceItems) : Resolver, Publish
                 newProperty(name, description)
             }
 
-        } catch(e: MediaWikiApiErrorException) {
+        } catch (e: MediaWikiApiErrorException) {
             if ("already has label" in e.errorMessage) {
                 logger.error("This property already exists: ${e.errorMessage}")
                 return Datamodel.makePropertyIdValue(
-                    e.errorMessage.subSequence(e.errorMessage.indexOf(':')+1,
+                    e.errorMessage.subSequence(
+                        e.errorMessage.indexOf(':') + 1,
                         e.errorMessage.indexOf('|')
-                    ).toString()
-                , "")
-            } else { throw e }
+                    ).toString(), ""
+                )
+            } else {
+                throw e
+            }
         }
     }
 
@@ -81,16 +84,26 @@ class WDPublisher(override val instanceItems: InstanceItems) : Resolver, Publish
         WebResourceFetcherImpl
             .setUserAgent(userAgent)
 
-        val newItemDocument: ItemDocument = editor?.createItemDocument(
-            publishable.document(instanceItems),
-            summary, null
-        ) ?: throw InternalError("There is no editor anymore")
+        if (!publishable.published) {
 
-        val newItemId = newItemDocument.entityId
-        logger.info("$summary: ${newItemId.id}")
-        logger.info("you can access it at ${instanceItems.sitePageIri}${newItemId.id}")
-        publishable.published(newItemId)
-        return newItemId
+            val newItemDocument: ItemDocument = editor?.createItemDocument(
+                publishable.document(instanceItems),
+                summary, null
+            ) ?: throw InternalError("There is no editor anymore")
+
+            val itemId = newItemDocument.entityId
+            logger.info("$summary: ${itemId.id}")
+            logger.info("you can access it at ${instanceItems.sitePageIri}${itemId.id}")
+            publishable.published(itemId)
+        } else {
+
+            editor?.updateStatements(
+                publishable.id, publishable.listOfStatementsForUpdate(instanceItems),
+                listOf(), "Updating the statements", null
+            )
+        }
+
+        return publishable.id
     }
 }
 
@@ -127,17 +140,27 @@ fun newDocument(name: String, id: ItemIdValue? = null, f: ItemDocumentBuilder.()
     return builder.build()
 }
 
-fun ItemDocumentBuilder.statement(statement: Statement) {
-    this.withStatement(statement)
-}
-
-fun ItemDocumentBuilder.statement(subject: ItemIdValue? = null, property: PropertyIdValue, value: String, f: (StatementBuilder) -> Unit = {}) =
+fun ItemDocumentBuilder.statement(
+    subject: ItemIdValue? = null,
+    property: PropertyIdValue,
+    value: String,
+    f: (StatementBuilder) -> Unit = {}
+) =
     this.withStatement(newStatement(property, subject, Datamodel.makeStringValue(value), f))
 
-fun ItemDocumentBuilder.statement(subject: ItemIdValue? = null, property: PropertyIdValue, value: Value, f: (StatementBuilder) -> Unit = {}) =
+fun ItemDocumentBuilder.statement(
+    subject: ItemIdValue? = null,
+    property: PropertyIdValue,
+    value: Value,
+    f: (StatementBuilder) -> Unit = {}
+) =
     this.withStatement(newStatement(property, subject, value, f))
 
-fun ItemDocumentBuilder.statement(subject: ItemIdValue? = null, referenceableStatement: ReferenceableValueStatement, instanceItems: InstanceItems) {
+fun ItemDocumentBuilder.statement(
+    subject: ItemIdValue? = null,
+    referenceableStatement: ReferenceableValueStatement,
+    instanceItems: InstanceItems
+) {
     val statement = newStatement(
         referenceableStatement.property.get(instanceItems),
         subject,
@@ -165,7 +188,12 @@ fun ItemDocumentBuilder.statement(
         instanceItems
     )
 
-fun newStatement(property: PropertyIdValue, subject: ItemIdValue? = null, value: Value, f: (StatementBuilder) -> Unit = {}): Statement {
+fun newStatement(
+    property: PropertyIdValue,
+    subject: ItemIdValue? = null,
+    value: Value,
+    f: (StatementBuilder) -> Unit = {}
+): Statement {
     val statement = StatementBuilder.forSubjectAndProperty(subject ?: ItemIdValue.NULL, property)
         .withValue(value)
         .apply(f)
