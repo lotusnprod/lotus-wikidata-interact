@@ -1,6 +1,6 @@
 package net.nprod.onpdb.wdimport
 
-import net.nprod.onpdb.goldcleaner.loadGoldData
+import net.nprod.onpdb.input.loadData
 import net.nprod.onpdb.mock.TestISparql
 import net.nprod.onpdb.mock.TestPublisher
 import net.nprod.onpdb.wdimport.wd.*
@@ -22,10 +22,12 @@ import java.io.FileNotFoundException
 
 //const val PREFIX = "/home/bjo/Store/01_Research/opennaturalproductsdb"
 const val PREFIX = "/home/bjo/Software/ONPDB/opennaturalproductsdb"
-const val GOLD_PATH = "$PREFIX/data/interim/tables/4_analysed/gold.tsv.gz"
+const val DATASET_PATH = "$PREFIX/data/interim/tables/4_analysed/platinum.tsv.gz"
+const val REPOSITORY_FILE = "/tmp/out.xml"
 
 const val TestMode = true
-const val TestPersistent = true // If true, we are going to reload the previous output in TestMode
+const val TestPersistent = false // If true, we are going to reload the previous output in TestMode
+const val TestExport = false // If true export a dump of the RDF repository in REPOSITORY_FILE
 
 fun main(args: Array<String>) {
     val logger = LogManager.getLogger("net.nprod.onpdb.wdimport.main")
@@ -76,20 +78,27 @@ fun main(args: Array<String>) {
 
     publisher.connect()
 
-    val dataTotal = loadGoldData(GOLD_PATH, 100000)
+    val dataTotal = loadData(DATASET_PATH, null)
 
     logger.info("Producing organisms")
 
 
     val organisms = dataTotal.organismCache.store.values.mapNotNull { organism ->
 
-        logger.info("Organism Ranks and Ids: ${organism.rankIds}")
+        logger.debug("Organism Ranks and Ids: ${organism.rankIds}")
 
         var taxon: WDTaxon? = null
 
-
-        listOfNotNull("GBIF", "NCBI", "ITIS", "The Interim Register of Marine and Nonmarine Genera",
-        "World Register of Marine Species", "GBIF Backbone Taxonomy").forEach { taxonDbName ->
+        listOf(
+            "GBIF",
+            "NCBI",
+            "ITIS",
+            "Index Fungorum",
+            "The Interim Register of Marine and Nonmarine Genera",
+            "World Register of Marine Species",
+            "Database of Vascular Plants of Canada (VASCAN)",
+            "GBIF Backbone Taxonomy"
+        ).forEach { taxonDbName ->
             val taxonDb = organism.rankIds.keys.firstOrNull { it.name == taxonDbName }
             if (taxon != null) return@forEach
             taxonDb?.let {
@@ -99,37 +108,35 @@ fun main(args: Array<String>) {
                 val genusId = organism.rankIds[taxonDb]?.firstOrNull { it.first == "genus" }?.second?.id
                 val speciesId = organism.rankIds[taxonDb]?.firstOrNull { it.first == "species" }?.second?.id
 
-                if (genus == null) throw Exception("Sorry we need at least a genus for organism $organism")
+                if (genus != null) {
 
-                val genusWD = WDTaxon(
-                    name = genus,
-                    parentTaxon = null,
-                    taxonName = genus,
-                    taxonRank = InstanceItems::genus
-                ).tryToFind(wdSparql, instanceItems)
-
-
-
-                taxon = genusWD
-                if (species != null) {
-                    publisher.publish(genusWD, "Created a missing genus")
-
-                    val speciesWD = WDTaxon(
-                        name = species,
-                        parentTaxon = genusWD.id,
-                        taxonName = species,
-                        taxonRank = InstanceItems::species
+                    val genusWD = WDTaxon(
+                        name = genus,
+                        parentTaxon = null,
+                        taxonName = genus,
+                        taxonRank = InstanceItems::genus
                     ).tryToFind(wdSparql, instanceItems)
-                    taxon = speciesWD
 
+                    taxon = genusWD
+                    if (species != null) {
+                        publisher.publish(genusWD, "Created a missing genus")
+
+                        val speciesWD = WDTaxon(
+                            name = species,
+                            parentTaxon = genusWD.id,
+                            taxonName = species,
+                            taxonRank = InstanceItems::species
+                        ).tryToFind(wdSparql, instanceItems)
+                        taxon = speciesWD
+
+                    }
                 }
-
 
             }
         }
 
         if (taxon == null) {
-            throw Exception("Sorry we couldn't find any info from the accepted reference taxonomy source, we only have: ${organism.rankIds.keys.map { it.name}}")
+            throw Exception("Sorry we couldn't find any info from the accepted reference taxonomy source, we only have: ${organism.rankIds.keys.map { it.name }}")
         }
 
 
@@ -138,7 +145,7 @@ fun main(args: Array<String>) {
 
             // TODO get that to work
             organism.textIds.forEach { dbEntry ->
-                taxon.addTaxoDB(dbEntry.key, dbEntry.value)
+                taxon.addTaxoDB(dbEntry.key, dbEntry.value.split("|").last())
             }
 
             publisher.publish(taxon, "Created a missing taxon")
@@ -151,8 +158,8 @@ fun main(args: Array<String>) {
 
     val references = dataTotal.referenceCache.store.map {
         val article = WDArticle(
-            name = "No title yet…",
-            title = it.value.doi, // TODO: get the titles
+            name = it.value.title ?: it.value.doi,
+            title = it.value.title,
             doi = it.value.doi,
         )
         // TODO: Add PMID and PMCID
@@ -170,18 +177,19 @@ fun main(args: Array<String>) {
             isomericSMILES = compound.smiles,
             pcId = "TODO", // TODO: Export PCID
             chemicalFormula = "TODO" // TODO: Calculate chemical formula
-        ) {
+        ).tryToFind(wdSparql, instanceItems)
+        wdcompound.apply {
             dataTotal.quads.filter { it.compound == compound }.distinct().forEach { quad ->
                 val organism = organisms[quad.organism]
                 organism?.let {
                     naturalProductOfTaxon(
                         organism
                     ) {
-                    statedIn(
-                        references[quad.reference]?.id
-                            ?: throw Exception("That's bad we talk about a reference we don't have.")
-                    )
-                }
+                        statedIn(
+                            references[quad.reference]?.id
+                                ?: throw Exception("That's bad we talk about a reference we don't have.")
+                        )
+                    }
                 }
             }
         }
@@ -191,8 +199,27 @@ fun main(args: Array<String>) {
 
     publisher.disconnect()
 
+// Counting
+
     if (TestMode) {
-        val file = File("/tmp/out.xml").bufferedWriter()
+        repository?.let {
+            val query = """
+                SELECT (count (distinct ?org) as ?orgcount) WHERE {
+                   ?org <${instanceItems.instanceOf.iri}> <${instanceItems.taxon.iri}>.
+                }
+            """.trimIndent()
+            logger.info(query)
+            val out =
+                it.connection.prepareTupleQuery(query).evaluate().first().getBinding("orgcount").value.stringValue()
+            logger.info("We have $out taxons")
+        }
+
+    }
+
+// Exporting
+
+    if (TestMode && TestExport) {
+        val file = File(REPOSITORY_FILE).bufferedWriter()
         repository?.let {
             it.connection
             val writer: RDFHandler = Rio.createWriter(RDFFormat.RDFXML, file)

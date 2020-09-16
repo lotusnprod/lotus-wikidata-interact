@@ -68,14 +68,11 @@ data class WDTaxon(
                   wdt:${iSparql.resolve(InstanceItems::taxonName).id} ${Rdf.literalOf(name).queryString}.
             }
             """.trimIndent()
-        println(query)
+
         val results = iSparql.query(query) { result ->
             result.map { bindingSet ->
                 bindingSet.getValue("id").stringValue().replace(instanceItems.wdURI, "")
             }
-        }
-        if((instanceItems.sparqlEndpoint == null) && results.isNotEmpty()) {
-            logger.info("We found $results on the official instance but we can't use them here as we don't have sparql Enabled")
         }
 
         if (results.isNotEmpty()) {

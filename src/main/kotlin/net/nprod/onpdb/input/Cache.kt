@@ -1,4 +1,4 @@
-package net.nprod.onpdb.goldcleaner
+package net.nprod.onpdb.input
 
 import java.util.concurrent.atomic.AtomicLong
 

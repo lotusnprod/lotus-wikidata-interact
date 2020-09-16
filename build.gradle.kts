@@ -8,7 +8,7 @@ val univocityParserVersion = "2.8.4"
 val jacksonVersion = "2.11.2"
 
 plugins {
-    kotlin("jvm") version "1.4.0-rc"
+    kotlin("jvm") version "1.4.0"
     application
 }
 group = "net.nprod.onpdb.wdimport"
@@ -17,9 +17,6 @@ version = "0.1-SNAPSHOT"
 repositories {
     mavenCentral()
     jcenter()
-    maven {
-        url = uri("https://dl.bintray.com/kotlin/kotlin-eap")
-    }
 
     flatDir {
         dirs("./libs")

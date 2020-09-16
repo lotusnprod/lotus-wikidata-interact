@@ -47,12 +47,15 @@ interface InstanceItems {
     val sparqlEndpoint: String?
     val wdtURI: String
     val wdURI: String
+    val pURI: String
 
     val wdt: Prefix
     val wd: Prefix
+    val p: Prefix
 
-    fun property(id: String): PropertyIdValue = Datamodel.makePropertyIdValue(id, siteIri)
+    fun property(id: String): PropertyIdValue = Datamodel.makePropertyIdValue(id, pURI)
     fun item(id: String): ItemIdValue = Datamodel.makeItemIdValue(id, siteIri)
+
     val NCBITaxonomy: PropertyIdValue
     val IRMNGTaxonomy: PropertyIdValue
     val GBIFTaxonomy: PropertyIdValue
@@ -82,6 +85,15 @@ interface InstanceItems {
 object TestInstanceItems : InstanceItems {
     override val siteIri = "http://www.test.wikidata.org/entity/"
     override val sitePageIri = "https://test.wikidata.org/w/index.php?title="
+    override val pURI = "http://test.wikidata.org/prop/direct/"
+    override val wdtURI = "http://test.wikidata.org/prop/direct/"
+    override val wdURI = "http://test.wikidata.org/entity/"
+
+    //override val ENDPOINT = "https://query.wikidata.org/bigdata/namespace/wdq/sparql"
+    override val sparqlEndpoint: String? = null
+    override val wdt: Prefix = SparqlBuilder.prefix("wdt", Rdf.iri(wdtURI))
+    override val wd: Prefix = SparqlBuilder.prefix("wd", Rdf.iri(wdURI))
+    override val p: Prefix = SparqlBuilder.prefix("p", Rdf.iri(pURI))
 
     // Properties
     override val inChIKey = property("P95461")
@@ -127,27 +139,26 @@ object TestInstanceItems : InstanceItems {
     override val doi = property("P168")
     override val title = property("P95")
 
-
     // Things
     override val chemicalCompound = item("Q212525")
     override val taxon = item("Q212541")
     override val species = item("Q212542")
     override val genus = item("Q212543")
     override val scholarlyArticle = item("Q212556")
-
-    // Sparql
-
-    override val wdtURI = "http://test.wikidata.org/prop/direct/"
-    override val wdURI = "http://test.wikidata.org/entity/"
-    //override val ENDPOINT = "https://query.wikidata.org/bigdata/namespace/wdq/sparql"
-    override val sparqlEndpoint: String? = null
-    override val wdt: Prefix = SparqlBuilder.prefix("wdt", Rdf.iri(wdtURI))
-    override val wd: Prefix = SparqlBuilder.prefix("net/nprod/onpdb/wdimport/wd", Rdf.iri(wdURI))
 }
 
 object MainInstanceItems : InstanceItems {
     override val siteIri = "http://www.wikidata.org/entity/"
     override val sitePageIri = "https://www.wikidata.org/w/index.php?title="
+
+    override val pURI = "http://www.wikidata.org/prop/direct/"
+    override val wdtURI = "http://www.wikidata.org/prop/direct/"
+    override val wdURI = "http://www.wikidata.org/entity/"
+    override val sparqlEndpoint = "https://query.wikidata.org/bigdata/namespace/wdq/sparql"
+
+    override val wdt: Prefix = SparqlBuilder.prefix("wdt", Rdf.iri(wdtURI))
+    override val wd: Prefix = SparqlBuilder.prefix("wd", Rdf.iri(wdURI))
+    override val p: Prefix = SparqlBuilder.prefix("p", Rdf.iri(pURI))
 
     // Properties
     override val inChIKey = property("P235")
@@ -201,12 +212,4 @@ object MainInstanceItems : InstanceItems {
     override val species = item("Q7432")
     override val genus = item("Q34740")
     override val scholarlyArticle = item("Q13442814")
-
-    // Sparql
-
-    override val wdtURI = "http://www.wikidata.org/prop/direct/"
-    override val wdURI = "http://www.wikidata.org/entity/"
-    override val sparqlEndpoint = "https://query.wikidata.org/bigdata/namespace/wdq/sparql"
-    override val wdt: Prefix = SparqlBuilder.prefix("wdt", Rdf.iri(wdtURI))
-    override val wd: Prefix = SparqlBuilder.prefix("net/nprod/onpdb/wdimport/wd", Rdf.iri(wdURI))
 }
