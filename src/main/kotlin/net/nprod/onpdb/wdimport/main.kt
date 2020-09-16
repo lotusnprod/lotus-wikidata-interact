@@ -167,7 +167,7 @@ fun main(args: Array<String>) {
             name = compound.inchikey,
             inChIKey = compound.inchikey,
             inChI = compound.inchi,
-            isomericSMILES = compound.inchi,
+            isomericSMILES = compound.smiles,
             pcId = "TODO", // TODO: Export PCID
             chemicalFormula = "TODO" // TODO: Calculate chemical formula
         ) {

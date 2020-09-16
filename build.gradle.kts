@@ -20,6 +20,10 @@ repositories {
     maven {
         url = uri("https://dl.bintray.com/kotlin/kotlin-eap")
     }
+
+    flatDir {
+        dirs("./libs")
+    }
 }
 dependencies {
     implementation("org.apache.logging.log4j:log4j-api:$log4jVersion")
@@ -33,6 +37,8 @@ dependencies {
 
     implementation("com.fasterxml.jackson.core:jackson-core:$jacksonVersion")
     implementation("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion")
+
+    implementation("org.openscience.cdk", "cdk-bundle", "2.3")
 
     implementation("org.eclipse.rdf4j", "rdf4j-client", rdf4jVersion)
     implementation("org.eclipse.rdf4j", "rdf4j-core", rdf4jVersion)
@@ -54,6 +60,9 @@ dependencies {
     implementation(
         "com.univocity", "univocity-parsers", univocityParserVersion
     )
+
+    implementation(":wiki-java-0.36-SNAPSHOT")
+
     testImplementation(kotlin("test-junit5"))
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitApiVersion")
     testImplementation("org.junit.jupiter:junit-jupiter:$junitApiVersion")

@@ -1,0 +1,3 @@
+[submodule "external/wiki-java"]
+	path = external/wiki-java
+	url = https://github.com/MER-C/wiki-java.git
