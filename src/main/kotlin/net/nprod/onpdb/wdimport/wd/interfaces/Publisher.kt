@@ -1,4 +1,4 @@
-package net.nprod.onpdb.wdimport.wd
+package net.nprod.onpdb.wdimport.wd.interfaces
 
 import net.nprod.onpdb.wdimport.wd.models.Publishable
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
@@ -8,6 +8,9 @@ import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue
  * An interface to a RDF style store that allows the publication of **Publishables**
  */
 interface Publisher {
+    val newDocuments: Int
+    val updatedDocuments: Int
+
     /**
      * Open a connection
      */
@@ -25,6 +28,7 @@ interface Publisher {
 
     /**
      * Publish the given entity
+     * It HAS to call publishable.document
      */
     fun publish(publishable: Publishable, summary: String): ItemIdValue
 }

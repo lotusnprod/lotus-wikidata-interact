@@ -4,7 +4,6 @@ import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
 import net.nprod.onpdb.wdimport.wd.InstanceItems
 import net.nprod.onpdb.wdimport.wd.sparql.ISparql
-import net.nprod.onpdb.wdimport.wd.sparql.WDSparql
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.wikidata.wdtk.datamodel.implementation.ItemIdValueImpl
@@ -50,8 +49,8 @@ data class WDTaxon(
 
     override fun dataStatements() =
         listOfNotNull(
-            parentTaxon?.let { ReferenceableValueStatement(InstanceItems::parentTaxon, it) },
-            taxonName?.let { ReferenceableValueStatement(InstanceItems::taxonName, it) },
+            parentTaxon?.let { ReferencableValueStatement(InstanceItems::parentTaxon, it) },
+            taxonName?.let { ReferencableValueStatement(InstanceItems::taxonName, it) },
             ReferenceableRemoteItemStatement(InstanceItems::taxonRank, taxonRank)
         )
     // TODO: Grin https://npgsweb.ars-grin.gov/gringlobal/taxonomydetail.aspx?id=12676

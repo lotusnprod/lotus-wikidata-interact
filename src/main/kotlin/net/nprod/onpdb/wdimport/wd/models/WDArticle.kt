@@ -2,7 +2,9 @@ package net.nprod.onpdb.wdimport.wd.models
 
 import net.nprod.onpdb.wdimport.wd.InstanceItems
 import net.nprod.onpdb.wdimport.wd.sparql.ISparql
-import net.nprod.onpdb.wdimport.wd.sparql.WDSparql
+import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
+import org.wikidata.wdtk.datamodel.implementation.ItemIdValueImpl
+import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
 
 // TODO: Identifiers
 
@@ -15,11 +17,32 @@ data class WDArticle(
 
     override fun dataStatements() =
         listOfNotNull(
-            title?.let { ReferenceableValueStatement.monolingualValue(InstanceItems::title, it) },
-            doi?.let { ReferenceableValueStatement(InstanceItems::doi, it) })
+            title?.let { ReferencableValueStatement.monolingualValue(InstanceItems::title, it) },
+            doi?.let { ReferencableValueStatement(InstanceItems::doi, it) })
 
-    override fun tryToFind(iSparql: ISparql, instanceItems: InstanceItems): Publishable {
-        TODO("Not yet implemented")
+
+    override fun tryToFind(iSparql: ISparql, instanceItems: InstanceItems): WDArticle {
+        // In the case of the test instance, we do not have the ability to do SPARQL queries
+
+        val query = """
+            PREFIX wd: <${InstanceItems::wdURI.get(instanceItems)}>
+            PREFIX wdt: <${InstanceItems::wdtURI.get(instanceItems)}>
+            SELECT DISTINCT ?id {
+              ?id wdt:${iSparql.resolve(InstanceItems::instanceOf).id} wd:${iSparql.resolve(InstanceItems::scholarlyArticle).id};
+                  wdt:${iSparql.resolve(InstanceItems::doi).id} ${Rdf.literalOf(doi).queryString}.
+            }
+            """.trimIndent()
+
+        val results = iSparql.query(query) { result ->
+            result.map { bindingSet ->
+                bindingSet.getValue("id").stringValue().replace(instanceItems.wdURI, "")
+            }
+        }
+
+        if (results.isNotEmpty()) {
+            this.published(ItemIdValueImpl.fromId(results.first(), InstanceItems::wdURI.get(instanceItems)) as ItemIdValue)
+        }
+
+        return this
     }
-
 }

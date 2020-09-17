@@ -1,8 +1,7 @@
 package net.nprod.onpdb.wdimport.wd
 
+import net.nprod.onpdb.wdimport.wd.interfaces.Publisher
 import net.nprod.onpdb.wdimport.wd.models.Publishable
-import net.nprod.onpdb.wdimport.wd.models.ReferenceableRemoteItemStatement
-import net.nprod.onpdb.wdimport.wd.models.ReferenceableValueStatement
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.wikidata.wdtk.datamodel.helpers.*
@@ -12,6 +11,7 @@ import org.wikidata.wdtk.util.WebResourceFetcherImpl
 import org.wikidata.wdtk.wikibaseapi.ApiConnection
 import org.wikidata.wdtk.wikibaseapi.BasicApiConnection
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataEditor
+import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher
 import org.wikidata.wdtk.wikibaseapi.apierrors.MediaWikiApiErrorException
 import java.net.ConnectException
 
@@ -19,13 +19,19 @@ class EnvironmentVariableError(message: String) : Exception(message)
 class InternalError(message: String) : Exception(message)
 
 
-class WDPublisher(override val instanceItems: InstanceItems) : Resolver, Publisher {
+class WDPublisher(override val instanceItems: InstanceItems, val pause: Int=0) : Resolver, Publisher {
     private val userAgent = "Wikidata Toolkit EditOnlineDataExample"
     private val logger: Logger = LogManager.getLogger(this::class.java)
     private var user: String? = null
     private var password: String? = null
     private var connection: ApiConnection? = null
     private var editor: WikibaseDataEditor? = null
+    override var newDocuments: Int = 0
+    override var updatedDocuments: Int = 0
+    private var fetcher: WikibaseDataFetcher? = null
+
+    val publishedDocumentsIds: MutableSet<String> = mutableSetOf()
+    val updatedDocumentsIds: MutableSet<String> = mutableSetOf()
 
     init {
         user = System.getenv("WIKIDATA_USER")
@@ -34,10 +40,18 @@ class WDPublisher(override val instanceItems: InstanceItems) : Resolver, Publish
             ?: throw EnvironmentVariableError("Missing environment variable WIKIDATA_PASSWORD")
     }
 
+
     override fun connect() {
-        connection = BasicApiConnection.getTestWikidataApiConnection()
+        connection = BasicApiConnection.getWikidataApiConnection()
         connection?.login(user, password) ?: throw ConnectException("Impossible to connect to the WikiData instance.")
+        logger.info("Connecting to the editor with siteIri: ${instanceItems.siteIri}")
         editor = WikibaseDataEditor(connection, instanceItems.siteIri)
+        logger.info("Connecting to the fetcher")
+        fetcher = WikibaseDataFetcher(connection, instanceItems.siteIri).also {
+            it.filter.excludeAllProperties()
+            it.filter.languageFilter = setOf("en")
+        }
+
         require(connection?.isLoggedIn ?: false) { "Impossible to login in the instance" }
     }
 
@@ -84,118 +98,48 @@ class WDPublisher(override val instanceItems: InstanceItems) : Resolver, Publish
         WebResourceFetcherImpl
             .setUserAgent(userAgent)
 
-        if (!publishable.published) {
+        // The publishable has not been published yet
+        try {
+            if (!publishable.published) {
+                println(publishable)
+                newDocuments++
+                val newItemDocument: ItemDocument = editor?.createItemDocument(
+                    publishable.document(instanceItems),
+                    summary, null
+                ) ?: throw InternalError("There is no editor anymore")
 
-            val newItemDocument: ItemDocument = editor?.createItemDocument(
-                publishable.document(instanceItems),
-                summary, null
-            ) ?: throw InternalError("There is no editor anymore")
+                val itemId = newItemDocument.entityId
+                publishedDocumentsIds.add(itemId.iri)
+                logger.info("New document ${itemId.id} - Summary: $summary")
+                logger.info("you can access it at ${instanceItems.sitePageIri}${itemId.id}")
+                publishable.published(itemId)
+                if (pause > 0) Thread.sleep(pause * 1000L)
+            } else {  // The publishable is already existing, this means we only have to update the statements
+                updatedDocuments++
+                logger.info("Updated document ${publishable.id} - Summary: $summary")
+                val doc = (fetcher?.getEntityDocument(publishable.id.id)
+                    ?: throw Exception("Cannot find a document that should be existing: ${publishable.id}")) as ItemDocument
+                val propertiesExisting = doc.statementGroups.flatMap { it.statements.map { it.mainSnak.propertyId.id } }
 
-            val itemId = newItemDocument.entityId
-            logger.info("$summary: ${itemId.id}")
-            logger.info("you can access it at ${instanceItems.sitePageIri}${itemId.id}")
-            publishable.published(itemId)
-        } else {
+                val statements = publishable.listOfStatementsForUpdate(instanceItems).filter {
+                    // We filter all the statement that do not already exist
+                    !propertiesExisting.contains(it.mainSnak.propertyId.id)
+                }
 
-            editor?.updateStatements(
-                publishable.id, publishable.listOfStatementsForUpdate(instanceItems),
-                listOf(), "Updating the statements", null
-            )
+                if (statements.isNotEmpty()) {
+                    logger.debug("These are the statements to be added: ")
+                    logger.debug(statements)
+                    editor?.updateStatements(
+                        publishable.id, statements,
+                        listOf(), "Updating the statements", listOf()
+                    )
+                    if (pause > 0) Thread.sleep(pause * 1000L)
+                }
+                publishedDocumentsIds.add(publishable.id.iri)
+            }
+        } catch (e: MediaWikiApiErrorException) {
+            logger.error("Failed to save the item for the reason ${e.errorMessage} ${e.message}")
         }
-
         return publishable.id
     }
-}
-
-/**
- * Type safe builder or DSL
- */
-
-fun newReference(f: (ReferenceBuilder) -> Unit): Reference {
-    val reference = ReferenceBuilder.newInstance()
-    reference.apply(f)
-    return reference.build()
-}
-
-fun ReferenceBuilder.propertyValue(property: PropertyIdValue, value: String) =
-    this.propertyValue(property, Datamodel.makeStringValue(value))
-
-fun ReferenceBuilder.propertyValue(property: PropertyIdValue, value: Value) {
-    this.withPropertyValue(
-        property,
-        value
-    )
-}
-
-fun StatementBuilder.reference(reference: Reference) {
-    this.reference(reference)
-}
-
-fun newDocument(name: String, id: ItemIdValue? = null, f: ItemDocumentBuilder.() -> Unit): ItemDocument {
-    val builder = ItemDocumentBuilder.forItemId(id ?: ItemIdValue.NULL)
-        .withLabel(name, "en")
-
-    builder.apply(f)
-
-    return builder.build()
-}
-
-fun ItemDocumentBuilder.statement(
-    subject: ItemIdValue? = null,
-    property: PropertyIdValue,
-    value: String,
-    f: (StatementBuilder) -> Unit = {}
-) =
-    this.withStatement(newStatement(property, subject, Datamodel.makeStringValue(value), f))
-
-fun ItemDocumentBuilder.statement(
-    subject: ItemIdValue? = null,
-    property: PropertyIdValue,
-    value: Value,
-    f: (StatementBuilder) -> Unit = {}
-) =
-    this.withStatement(newStatement(property, subject, value, f))
-
-fun ItemDocumentBuilder.statement(
-    subject: ItemIdValue? = null,
-    referenceableStatement: ReferenceableValueStatement,
-    instanceItems: InstanceItems
-) {
-    val statement = newStatement(
-        referenceableStatement.property.get(instanceItems),
-        subject,
-        referenceableStatement.value
-    ) { statementBuilder ->
-        referenceableStatement.preReferences.forEach {
-            statementBuilder.withReference(it.build(instanceItems))
-        }
-    }
-    this.withStatement(statement)
-}
-
-fun ItemDocumentBuilder.statement(
-    subject: ItemIdValue?,
-    referenceableStatement: ReferenceableRemoteItemStatement,
-    instanceItems: InstanceItems
-) =
-    this.statement(
-        subject,
-        ReferenceableValueStatement(
-            referenceableStatement.property,
-            referenceableStatement.value.get(instanceItems),
-            referenceableStatement.preReferences
-        ),
-        instanceItems
-    )
-
-fun newStatement(
-    property: PropertyIdValue,
-    subject: ItemIdValue? = null,
-    value: Value,
-    f: (StatementBuilder) -> Unit = {}
-): Statement {
-    val statement = StatementBuilder.forSubjectAndProperty(subject ?: ItemIdValue.NULL, property)
-        .withValue(value)
-        .apply(f)
-    return statement.build()
 }

@@ -6,7 +6,7 @@ import net.nprod.onpdb.wdimport.wd.InstanceItems
 
 sealed class ReferenceableStatement
 
-data class ReferenceableValueStatement(
+data class ReferencableValueStatement(
     var property: RemoteProperty,
     var value: Value,
     val preReferences: MutableList<WDPreReference> = mutableListOf()
@@ -18,7 +18,7 @@ data class ReferenceableValueStatement(
     constructor(property: RemoteProperty, value:String): this(property, Datamodel.makeStringValue(value))
 
     companion object {
-        fun monolingualValue(property: RemoteProperty, value: String) = ReferenceableValueStatement(property, Datamodel.makeMonolingualTextValue(value, "en"))
+        fun monolingualValue(property: RemoteProperty, value: String) = ReferencableValueStatement(property, Datamodel.makeMonolingualTextValue(value, "en"))
     }
 }
 

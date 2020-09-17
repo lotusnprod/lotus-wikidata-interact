@@ -1,9 +1,13 @@
 package net.nprod.onpdb.wdimport
 
+import net.nprod.onpdb.chemistry.smilesToFormula
+import net.nprod.onpdb.input.DataTotal
+import net.nprod.onpdb.input.Organism
 import net.nprod.onpdb.input.loadData
 import net.nprod.onpdb.mock.TestISparql
 import net.nprod.onpdb.mock.TestPublisher
 import net.nprod.onpdb.wdimport.wd.*
+import net.nprod.onpdb.wdimport.wd.interfaces.Publisher
 import net.nprod.onpdb.wdimport.wd.models.WDArticle
 import net.nprod.onpdb.wdimport.wd.models.WDCompound
 import net.nprod.onpdb.wdimport.wd.models.WDTaxon
@@ -25,10 +29,11 @@ import java.io.FileNotFoundException
 
 //const val PREFIX = "/home/bjo/Store/01_Research/opennaturalproductsdb"
 const val PREFIX = "/home/bjo/Software/ONPDB/opennaturalproductsdb"
-const val DATASET_PATH = "$PREFIX/data/interim/tables/4_analysed/platinum.tsv.gz"
+//const val DATASET_PATH = "$PREFIX/data/interim/tables/4_analysed/platinum.tsv.gz"
+const val DATASET_PATH = "/tmp/checked.tsv.gz"
 const val REPOSITORY_FILE = "/tmp/out.xml"
 
-const val TestMode = true
+const val TestMode = false
 const val TestPersistent = false // If true, we are going to reload the previous output in TestMode
 const val TestExport = true // If true export a dump of the RDF repository in REPOSITORY_FILE
 const val TestRealSparql = true // If true, we test with the real WikiData sparql
@@ -46,14 +51,6 @@ fun main(args: Array<String>) {
     val instanceItems = MainInstanceItems
 
     logger.info("Initializing toolkit")
-    val wikibaseDataFetcher = WikibaseDataFetcher(
-        BasicApiConnection.getWikidataApiConnection(),
-        "http://www.wikidata.org/entity/"
-    )
-
-    logger.info("Fetching data for something")
-    val thing = wikibaseDataFetcher.getEntityDocument("Q212578")
-    println(thing)
 
     lateinit var wdSparql: ISparql
     lateinit var publisher: Publisher
@@ -80,7 +77,7 @@ fun main(args: Array<String>) {
         publisher = TestPublisher(instanceItems, repository)
     } else {
         wdSparql = WDSparql(instanceItems)
-        publisher = WDPublisher(instanceItems)
+        publisher = WDPublisher(instanceItems, pause=10)
     }
 
     publisher.connect()
@@ -90,7 +87,123 @@ fun main(args: Array<String>) {
     logger.info("Producing organisms")
 
 
-    val organisms = dataTotal.organismCache.store.values.mapNotNull { organism ->
+    val organisms = findAllTaxonForOrganismFromCache(dataTotal, wdSparql, instanceItems, publisher)
+
+    logger.info("Producing articles")
+
+    val references = dataTotal.referenceCache.store.map {
+        val article = WDArticle(
+            name = it.value.title ?: it.value.doi,
+            title = it.value.title,
+            doi = it.value.doi,
+        ).tryToFind(wdSparql, instanceItems)
+        // TODO: Add PMID and PMCID
+        publisher.publish(article, "Creating a new article")
+        it.value to article
+    }.toMap()
+
+    logger.info("Linking")
+
+    logger.info("Creating a local cache of wikidata ids for existing compounds")
+    // We do that so we don't need to do hundreds of thousands of SPARQL queries
+    val wikiCompoundCache = mutableMapOf<String, String>()
+    val inchiKeys = dataTotal.compoundCache.store.map { (id, compound) ->
+        compound.inchikey
+    }
+    inchiKeys.chunked(1000) { inchiKeysBlock ->
+        repository?.let {
+            val query = """
+               SELECT ?id ?inchikey WHERE {
+                   ?id <${instanceItems.inChIKey.iri}> ?inchikey.
+                   VALUES ?inchikey {
+                      ${inchiKeysBlock.joinToString(" ") { key -> Rdf.literalOf(key).queryString }}
+                   }
+                }
+            """.trimIndent()
+            logger.info(query)
+            val o = wdSparql.query(query) {result ->
+                result.forEach {
+                    wikiCompoundCache[it.getValue("inchikey").stringValue()] = it.getValue("id").stringValue().split("/").last()
+                }
+            }
+        }
+    }
+
+    // Adding all compounds
+
+    dataTotal.compoundCache.store.forEach { (id, compound) ->
+        val wdcompound = WDCompound(
+            name = compound.inchikey,
+            inChIKey = compound.inchikey,
+            inChI = compound.inchi,
+            isomericSMILES = compound.smiles,
+            chemicalFormula = smilesToFormula(compound.smiles)
+        ).tryToFind(wdSparql, instanceItems)
+
+        wdcompound.apply {
+            dataTotal.quads.filter { it.compound == compound }.distinct().forEach { quad ->
+                val organism = organisms[quad.organism]
+                organism?.let {
+                    naturalProductOfTaxon(
+                        organism
+                    ) {
+                        statedIn(
+                            references[quad.reference]?.id
+                                ?: throw Exception("That's bad we talk about a reference we don't have.")
+                        )
+                    }
+                }
+            }
+        }
+        publisher.publish(wdcompound, "Creating a new compound")
+    }
+
+    publisher.disconnect()
+
+// Counting
+
+    if (TestMode) {
+        repository?.let {
+            val query = """
+                SELECT * {
+                   { SELECT (count (distinct ?org) as ?orgcount) WHERE {
+                   ?org <${instanceItems.instanceOf.iri}> <${instanceItems.taxon.iri}>.
+                   }
+                   }
+                   
+                   { SELECT (count (distinct ?cpd) as ?cpdcount) WHERE {
+                   ?cpd <${instanceItems.instanceOf.iri}> <${instanceItems.chemicalCompound.iri}>.
+                   }
+                   }
+                }
+            """.trimIndent()
+            logger.info(query)
+            val bindingSet = it.connection.prepareTupleQuery(query).evaluate().first()
+            val orgcount = bindingSet.getBinding("orgcount").value.stringValue()
+            val cpdcount = bindingSet.getBinding("cpdcount").value.stringValue()
+
+            logger.info("We have $orgcount taxa and $cpdcount compounds in the local repository")
+        }
+
+    }
+    logger.info("Publisher has made ${publisher.newDocuments} new documents and updated ${publisher.updatedDocuments}")
+
+// Exporting
+
+    if (TestMode && TestExport) {
+        val file = File(REPOSITORY_FILE).bufferedWriter()
+        repository?.let {
+            it.connection
+            val writer: RDFHandler = Rio.createWriter(RDFFormat.RDFXML, file)
+            it.connection.export(writer)
+        }
+        file.close()
+    }
+}
+
+fun findAllTaxonForOrganismFromCache(dataTotal: DataTotal, wdSparql: ISparql, instanceItems: InstanceItems, publisher: Publisher): Map<Organism, WDTaxon> {
+    val logger = LogManager.getLogger("findAllTAxonForOrganismFromCache")
+    return dataTotal.organismCache.store.values.mapNotNull { organism ->
 
         logger.debug("Organism Ranks and Ids: ${organism.rankIds}")
 
@@ -146,10 +259,7 @@ fun main(args: Array<String>) {
             throw Exception("Sorry we couldn't find any info from the accepted reference taxonomy source, we only have: ${organism.rankIds.keys.map { it.name }}")
         }
 
-
         taxon?.let { taxon ->
-
-
             // TODO get that to work
             organism.textIds.forEach { dbEntry ->
                 taxon.addTaxoDB(dbEntry.key, dbEntry.value.split("|").last())
@@ -160,114 +270,4 @@ fun main(args: Array<String>) {
         }
 
     }.toMap()
-
-    logger.info("Producing articles")
-
-    val references = dataTotal.referenceCache.store.map {
-        val article = WDArticle(
-            name = it.value.title ?: it.value.doi,
-            title = it.value.title,
-            doi = it.value.doi,
-        )
-        // TODO: Add PMID and PMCID
-        publisher.publish(article, "Creating a new article")
-        it.value to article
-    }.toMap()
-
-    logger.info("Linking")
-
-    logger.info("Creating a local cache of wikidata ids for existing compounds")
-    // We do that so we don't need to do hundreds of thousands of SPARQL queries
-    val wikiCompoundCache = mutableMapOf<String, String>()
-    val inchiKeys = dataTotal.compoundCache.store.map { (id, compound) ->
-        compound.inchikey
-    }
-    inchiKeys.chunked(1000) { inchiKeysBlock ->
-        repository?.let {
-            val query = """
-               SELECT ?id ?inchikey WHERE {
-                   ?id <${instanceItems.inChIKey.iri}> ?inchikey.
-                   VALUES ?inchikey {
-                      ${inchiKeysBlock.joinToString(" ") { key -> Rdf.literalOf(key).queryString }}
-                   }
-                }
-            """.trimIndent()
-            logger.info(query)
-            val o = wdSparql.query(query) {result ->
-                result.forEach {
-                    wikiCompoundCache[it.getValue("inchikey").stringValue()] = it.getValue("id").stringValue().split("/").last()
-                }
-            }
-        }
-    }
-    println(wikiCompoundCache)
-    dataTotal.compoundCache.store.forEach { (id, compound) ->
-        val wdcompound = WDCompound(
-            name = compound.inchikey,
-            inChIKey = compound.inchikey,
-            inChI = compound.inchi,
-            isomericSMILES = compound.smiles,
-            pcId = "TODO", // TODO: Export PCID
-            chemicalFormula = "TODO" // TODO: Calculate chemical formula
-        ).tryToFind(wdSparql, instanceItems)
-        wdcompound.apply {
-            dataTotal.quads.filter { it.compound == compound }.distinct().forEach { quad ->
-                val organism = organisms[quad.organism]
-                organism?.let {
-                    naturalProductOfTaxon(
-                        organism
-                    ) {
-                        statedIn(
-                            references[quad.reference]?.id
-                                ?: throw Exception("That's bad we talk about a reference we don't have.")
-                        )
-                    }
-                }
-            }
-        }
-        // TODO : The problem here is that if the compound already exist, we are not adding anything
-        // We need a system to do the update of statements and make sure they are not duplicates
-        publisher.publish(wdcompound, "Creating a new compound")
-    }
-
-    publisher.disconnect()
-
-// Counting
-
-    if (TestMode) {
-        repository?.let {
-            val query = """
-                SELECT * {
-                   { SELECT (count (distinct ?org) as ?orgcount) WHERE {
-                   ?org <${instanceItems.instanceOf.iri}> <${instanceItems.taxon.iri}>.
-                   }
-                   }
-                   
-                   { SELECT (count (distinct ?cpd) as ?cpdcount) WHERE {
-                   ?cpd <${instanceItems.instanceOf.iri}> <${instanceItems.chemicalCompound.iri}>.
-                   }
-                   }
-                }
-            """.trimIndent()
-            logger.info(query)
-            val bindingSet = it.connection.prepareTupleQuery(query).evaluate().first()
-            val orgcount = bindingSet.getBinding("orgcount").value.stringValue()
-            val cpdcount = bindingSet.getBinding("cpdcount").value.stringValue()
-
-            logger.info("We have $orgcount taxons and $cpdcount compounds in the local repository")
-        }
-
-    }
-
-// Exporting
-
-    if (TestMode && TestExport) {
-        val file = File(REPOSITORY_FILE).bufferedWriter()
-        repository?.let {
-            it.connection
-            val writer: RDFHandler = Rio.createWriter(RDFFormat.RDFXML, file)
-            it.connection.export(writer)
-        }
-        file.close()
-    }
 }

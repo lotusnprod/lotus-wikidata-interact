@@ -4,18 +4,20 @@ import net.nprod.onpdb.wdimport.wd.InstanceItems
 import net.nprod.onpdb.wdimport.wd.newDocument
 import net.nprod.onpdb.wdimport.wd.newStatement
 import net.nprod.onpdb.wdimport.wd.sparql.ISparql
-import net.nprod.onpdb.wdimport.wd.sparql.WDSparql
 import net.nprod.onpdb.wdimport.wd.statement
 import org.wikidata.wdtk.datamodel.helpers.Datamodel
 import org.wikidata.wdtk.datamodel.interfaces.*
 import kotlin.reflect.KProperty1
 
-class ElementNotPublishedError(msg: String): Exception(msg)
+class ElementNotPublishedError(msg: String) : Exception(msg)
 
 typealias RemoteItem = KProperty1<InstanceItems, ItemIdValue>
 typealias RemoteProperty = KProperty1<InstanceItems, PropertyIdValue>
 
-
+/**
+ * A publishable is a document and its properties.
+ * This allows to create documents and update them.
+ */
 abstract class Publishable {
     private var _id: ItemIdValue? = null
 
@@ -25,7 +27,8 @@ abstract class Publishable {
     var published: Boolean = false
 
     val id: ItemIdValue
-        get() = _id ?: throw ElementNotPublishedError("This element has not been published yet or failed to get published.")
+        get() = _id
+            ?: throw ElementNotPublishedError("This element has not been published yet or failed to get published.")
 
     val preStatements: MutableList<ReferenceableStatement> = mutableListOf()
 
@@ -36,26 +39,33 @@ abstract class Publishable {
 
     abstract fun dataStatements(): List<ReferenceableStatement>
 
+    /**
+     * Generate a document for that entry.
+     * It will use the internal id if it exists already
+     */
     fun document(instanceItems: InstanceItems, subject: ItemIdValue? = null): ItemDocument {
         preStatements.addAll(dataStatements())
-        return newDocument(name, subject) {
-            statement(subject, instanceItems.instanceOf, type.get(instanceItems))
+        return newDocument(name, subject ?: _id) {
+            statement(subject ?: _id, instanceItems.instanceOf, type.get(instanceItems))
 
             // We construct the statements according to this instanceItems value
             preStatements.forEach { refStat ->
                 when (refStat) {
-                    is ReferenceableValueStatement -> statement(subject, refStat, instanceItems)
-                    is ReferenceableRemoteItemStatement -> statement(subject, refStat, instanceItems)
+                    is ReferencableValueStatement -> statement(subject ?: _id, refStat, instanceItems)
+                    is ReferenceableRemoteItemStatement -> statement(subject ?: _id, refStat, instanceItems)
                 }
             }
             preStatements.clear()
         }
     }
 
+    /**
+     * Generate statements for updating
+     */
     fun listOfStatementsForUpdate(instanceItems: InstanceItems): List<Statement> {
         return preStatements.map { referenceableStatement ->
             when (referenceableStatement) {
-                is ReferenceableValueStatement -> newStatement(
+                is ReferencableValueStatement -> newStatement(
                     referenceableStatement.property.get(instanceItems),
                     id,
                     referenceableStatement.value
@@ -67,7 +77,7 @@ abstract class Publishable {
                 is ReferenceableRemoteItemStatement -> newStatement(
                     referenceableStatement.property.get(instanceItems),
                     id,
-                    ReferenceableValueStatement(
+                    ReferencableValueStatement(
                         referenceableStatement.property,
                         referenceableStatement.value.get(instanceItems),
                         referenceableStatement.preReferences
@@ -83,13 +93,13 @@ abstract class Publishable {
 
     abstract fun tryToFind(iSparql: ISparql, instanceItems: InstanceItems): Publishable
 
-    fun addProperty(remoteProperty: RemoteProperty, value: Value, f: ReferenceableValueStatement.() -> Unit ={}) {
-        val refStatement = ReferenceableValueStatement(remoteProperty, value).apply(f)
+    fun addProperty(remoteProperty: RemoteProperty, value: Value, f: ReferencableValueStatement.() -> Unit = {}) {
+        val refStatement = ReferencableValueStatement(remoteProperty, value).apply(f)
         preStatements.add(refStatement)
     }
 
-    fun addProperty(remoteProperty: RemoteProperty, value: String, f: ReferenceableValueStatement.() -> Unit = {}) {
-        val refStatement = ReferenceableValueStatement(remoteProperty, Datamodel.makeStringValue(value)).apply(f)
+    fun addProperty(remoteProperty: RemoteProperty, value: String, f: ReferencableValueStatement.() -> Unit = {}) {
+        val refStatement = ReferencableValueStatement(remoteProperty, Datamodel.makeStringValue(value)).apply(f)
         preStatements.add(refStatement)
     }
 }
