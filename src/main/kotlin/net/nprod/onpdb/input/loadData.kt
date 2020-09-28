@@ -3,14 +3,17 @@ package net.nprod.onpdb.input
 import net.nprod.onpdb.helpers.GZIPReader
 import net.nprod.onpdb.helpers.parseTSVFile
 import org.apache.logging.log4j.LogManager
+import java.io.File
 
 fun loadData(fileName: String, limit: Int? = null): DataTotal {
     val logger = LogManager.getLogger("net.nprod.onpdb.tools.main")
     val dataTotal = DataTotal()
 
     logger.info("Started")
-    val gzipFileReader = GZIPReader(fileName)
-    val file = parseTSVFile(gzipFileReader.bufferedReader, limit)
+    val fileReader = try { GZIPReader(fileName).bufferedReader } catch (e: java.util.zip.ZipException) {
+        File(fileName).bufferedReader()
+    }
+    val file = parseTSVFile(fileReader, limit)
 
     file?.map {
         val database = it.getString("database")
@@ -50,7 +53,7 @@ fun loadData(fileName: String, limit: Int? = null): DataTotal {
             val referenceObj = dataTotal.referenceCache.getOrNew(doi) {
                 Reference(
                     doi = doi,
-                    title = if (referenceType=="title") { referenceValue } else { null },
+                    title = it.getString("referenceCleanedTitle").ifEqualReplaceByNull("NA")?.ifEqualReplaceByNull(""),
                     pmcid = it.getString("referenceCleanedPmcid").ifEqualReplace("NA", ""),
                     pmid = it.getString("referenceCleanedPmid").ifEqualReplace("NA", "")
                 )
@@ -76,6 +79,6 @@ fun loadData(fileName: String, limit: Int? = null): DataTotal {
 
     logger.info(dataTotal.taxonomyDatabaseCache.store.values)
     logger.info("Done")
-    gzipFileReader.close()
+    fileReader.close()
     return dataTotal
 }

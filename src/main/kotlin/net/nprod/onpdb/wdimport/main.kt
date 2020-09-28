@@ -30,10 +30,10 @@ import java.io.FileNotFoundException
 //const val PREFIX = "/home/bjo/Store/01_Research/opennaturalproductsdb"
 const val PREFIX = "/home/bjo/Software/ONPDB/opennaturalproductsdb"
 //const val DATASET_PATH = "$PREFIX/data/interim/tables/4_analysed/platinum.tsv.gz"
-const val DATASET_PATH = "/tmp/checked.tsv.gz"
+const val DATASET_PATH = "data/manuallyValidated.tsv"
 const val REPOSITORY_FILE = "/tmp/out.xml"
 
-const val TestMode = false
+const val TestMode = true
 const val TestPersistent = false // If true, we are going to reload the previous output in TestMode
 const val TestExport = true // If true export a dump of the RDF repository in REPOSITORY_FILE
 const val TestRealSparql = true // If true, we test with the real WikiData sparql
