@@ -29,17 +29,18 @@ import java.io.FileNotFoundException
 
 //const val PREFIX = "/home/bjo/Store/01_Research/opennaturalproductsdb"
 const val PREFIX = "/home/bjo/Software/ONPDB/opennaturalproductsdb"
+
 //const val DATASET_PATH = "$PREFIX/data/interim/tables/4_analysed/platinum.tsv.gz"
 const val DATASET_PATH = "data/manuallyValidated.tsv"
 const val REPOSITORY_FILE = "/tmp/out.xml"
 
-const val TestMode = true
+const val TestMode = false
 const val TestPersistent = false // If true, we are going to reload the previous output in TestMode
 const val TestExport = true // If true export a dump of the RDF repository in REPOSITORY_FILE
 const val TestRealSparql = true // If true, we test with the real WikiData sparql
 
 fun main(args: Array<String>) {
-    val logger = LogManager.getLogger("net.nprod.onpdb.wdimport.main")
+    val logger = LogManager.getLogger("net.nprod.onpdb.chemistry.main")
     logger.info("ONPDB Importer")
     if (TestMode) {
         logger.info("We are in test mode")
@@ -77,12 +78,12 @@ fun main(args: Array<String>) {
         publisher = TestPublisher(instanceItems, repository)
     } else {
         wdSparql = WDSparql(instanceItems)
-        publisher = WDPublisher(instanceItems, pause=10)
+        publisher = WDPublisher(instanceItems, pause = 10)
     }
 
     publisher.connect()
 
-    val dataTotal = loadData(DATASET_PATH, 10)
+    val dataTotal = loadData(DATASET_PATH, 1)
 
     logger.info("Producing organisms")
 
@@ -93,9 +94,9 @@ fun main(args: Array<String>) {
 
     val references = dataTotal.referenceCache.store.map {
         val article = WDArticle(
-            name = it.value.title ?: it.value.doi,
-            title = it.value.title,
-            doi = it.value.doi,
+                name = it.value.title ?: it.value.doi,
+                title = it.value.title,
+                doi = it.value.doi,
         ).tryToFind(wdSparql, instanceItems)
         // TODO: Add PMID and PMCID
         publisher.publish(article, "Creating a new article")
@@ -121,7 +122,7 @@ fun main(args: Array<String>) {
                 }
             """.trimIndent()
             logger.info(query)
-            val o = wdSparql.query(query) {result ->
+            val o = wdSparql.query(query) { result ->
                 result.forEach {
                     wikiCompoundCache[it.getValue("inchikey").stringValue()] = it.getValue("id").stringValue().split("/").last()
                 }
@@ -133,23 +134,23 @@ fun main(args: Array<String>) {
 
     dataTotal.compoundCache.store.forEach { (id, compound) ->
         val wdcompound = WDCompound(
-            name = compound.inchikey,
-            inChIKey = compound.inchikey,
-            inChI = compound.inchi,
-            isomericSMILES = compound.smiles,
-            chemicalFormula = smilesToFormula(compound.smiles)
+                name = "",
+                inChIKey = compound.inchikey,
+                inChI = compound.inchi,
+                isomericSMILES = compound.smiles,
+                chemicalFormula = smilesToFormula(compound.smiles)
         ).tryToFind(wdSparql, instanceItems)
 
         wdcompound.apply {
             dataTotal.quads.filter { it.compound == compound }.distinct().forEach { quad ->
                 val organism = organisms[quad.organism]
                 organism?.let {
-                    naturalProductOfTaxon(
-                        organism
+                    foundInTaxon(
+                            organism
                     ) {
                         statedIn(
-                            references[quad.reference]?.id
-                                ?: throw Exception("That's bad we talk about a reference we don't have.")
+                                references[quad.reference]?.id
+                                        ?: throw Exception("That's bad we talk about a reference we don't have.")
                         )
                     }
                 }
@@ -210,14 +211,14 @@ fun findAllTaxonForOrganismFromCache(dataTotal: DataTotal, wdSparql: ISparql, in
         var taxon: WDTaxon? = null
 
         listOf(
-            "GBIF",
-            "NCBI",
-            "ITIS",
-            "Index Fungorum",
-            "The Interim Register of Marine and Nonmarine Genera",
-            "World Register of Marine Species",
-            "Database of Vascular Plants of Canada (VASCAN)",
-            "GBIF Backbone Taxonomy"
+                "GBIF",
+                "NCBI",
+                "ITIS",
+                "Index Fungorum",
+                "The Interim Register of Marine and Nonmarine Genera",
+                "World Register of Marine Species",
+                "Database of Vascular Plants of Canada (VASCAN)",
+                "GBIF Backbone Taxonomy"
         ).forEach { taxonDbName ->
             val taxonDb = organism.rankIds.keys.firstOrNull { it.name == taxonDbName }
             if (taxon != null) return@forEach
@@ -231,10 +232,10 @@ fun findAllTaxonForOrganismFromCache(dataTotal: DataTotal, wdSparql: ISparql, in
                 if (genus != null) {
 
                     val genusWD = WDTaxon(
-                        name = genus,
-                        parentTaxon = null,
-                        taxonName = genus,
-                        taxonRank = InstanceItems::genus
+                            name = genus,
+                            parentTaxon = null,
+                            taxonName = genus,
+                            taxonRank = InstanceItems::genus
                     ).tryToFind(wdSparql, instanceItems)
 
                     taxon = genusWD
@@ -242,10 +243,10 @@ fun findAllTaxonForOrganismFromCache(dataTotal: DataTotal, wdSparql: ISparql, in
                         publisher.publish(genusWD, "Created a missing genus")
 
                         val speciesWD = WDTaxon(
-                            name = species,
-                            parentTaxon = genusWD.id,
-                            taxonName = species,
-                            taxonRank = InstanceItems::species
+                                name = species,
+                                parentTaxon = genusWD.id,
+                                taxonName = species,
+                                taxonRank = InstanceItems::species
                         ).tryToFind(wdSparql, instanceItems)
                         taxon = speciesWD
 

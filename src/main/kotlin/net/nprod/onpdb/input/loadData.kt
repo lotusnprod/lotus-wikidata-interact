@@ -6,7 +6,7 @@ import org.apache.logging.log4j.LogManager
 import java.io.File
 
 fun loadData(fileName: String, limit: Int? = null): DataTotal {
-    val logger = LogManager.getLogger("net.nprod.onpdb.tools.main")
+    val logger = LogManager.getLogger("net.nprod.onpdb.chemistry.main")
     val dataTotal = DataTotal()
 
     logger.info("Started")

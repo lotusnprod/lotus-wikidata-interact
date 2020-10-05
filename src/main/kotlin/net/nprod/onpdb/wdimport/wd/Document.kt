@@ -21,8 +21,8 @@ fun newReference(f: (ReferenceBuilder) -> Unit): Reference {
 
 fun newDocument(name: String, id: ItemIdValue? = null, f: ItemDocumentBuilder.() -> Unit): ItemDocument {
     val builder = ItemDocumentBuilder.forItemId(id ?: ItemIdValue.NULL)
-        .withLabel(name, "en")
 
+    if (name != "") builder.withLabel(name, "en")
     builder.apply(f)
 
     return builder.build()

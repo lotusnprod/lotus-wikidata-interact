@@ -9,7 +9,7 @@ import java.io.File
 const val INHOUSE_PATH = "/home/bjo/Store/01_Research/opennaturalproductsdb/data/interim/tables/4_analysed/inhouseDbTriplets.tsv.gz"
 
 fun main() {
-    val logger = LogManager.getLogger("net.nprod.onpdb.tools.main")
+    val logger = LogManager.getLogger("net.nprod.onpdb.chemistry.main")
     logger.info("Loading the data")
     val data = loadData(INHOUSE_PATH)
     logger.info("Creating the organism table")
