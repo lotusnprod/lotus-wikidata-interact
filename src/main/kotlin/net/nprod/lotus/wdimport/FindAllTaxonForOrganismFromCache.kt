@@ -32,9 +32,6 @@ fun findAllTaxonForOrganismFromCache(dataTotal: DataTotal, wdSparql: ISparql, in
                 val genus = organism.rankIds[taxonDb]?.firstOrNull { it.first == "genus" }?.second?.name
                 val species = organism.rankIds[taxonDb]?.firstOrNull { it.first == "species" }?.second?.name
 
-                val genusId = organism.rankIds[taxonDb]?.firstOrNull { it.first == "genus" }?.second?.id
-                val speciesId = organism.rankIds[taxonDb]?.firstOrNull { it.first == "species" }?.second?.id
-
                 if (genus != null) {
 
                     val genusWD = WDTaxon(
@@ -66,14 +63,14 @@ fun findAllTaxonForOrganismFromCache(dataTotal: DataTotal, wdSparql: ISparql, in
             throw Exception("Sorry we couldn't find any info from the accepted reference taxonomy source, we only have: ${organism.rankIds.keys.map { it.name }}")
         }
 
-        taxon?.let { taxon ->
+        taxon?.let {
             // TODO get that to work
             organism.textIds.forEach { dbEntry ->
-                taxon.addTaxoDB(dbEntry.key, dbEntry.value.split("|").last())
+                it.addTaxoDB(dbEntry.key, dbEntry.value.split("|").last())
             }
 
-            publisher.publish(taxon, "Created a missing taxon")
-            organism to taxon
+            publisher.publish(it, "Created a missing taxon")
+            organism to it
         }
 
     }.toMap()

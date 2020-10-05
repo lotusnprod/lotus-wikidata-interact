@@ -19,7 +19,7 @@ class EnvironmentVariableError(message: String) : Exception(message)
 class InternalError(message: String) : Exception(message)
 
 
-class WDPublisher(override val instanceItems: InstanceItems, val pause: Int=0) : Resolver, Publisher {
+class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0) : Resolver, Publisher {
     private val userAgent = "Wikidata Toolkit EditOnlineDataExample"
     private val logger: Logger = LogManager.getLogger(this::class.java)
     private var user: String? = null
@@ -31,9 +31,9 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Int=0) :
     private var fetcher: WikibaseDataFetcher? = null
 
     val publishedDocumentsIds: MutableSet<String> = mutableSetOf()
-    val updatedDocumentsIds: MutableSet<String> = mutableSetOf()
 
     init {
+        validate()
         user = System.getenv("WIKIDATA_USER")
             ?: throw EnvironmentVariableError("Missing environment variable WIKIDATA_USER")
         password = System.getenv("WIKIDATA_PASSWORD")
@@ -43,6 +43,7 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Int=0) :
 
     override fun connect() {
         connection = BasicApiConnection.getWikidataApiConnection()
+        @Suppress("DEPRECATION")
         connection?.login(user, password) ?: throw ConnectException("Impossible to connect to the WikiData instance.")
         logger.info("Connecting to the editor with siteIri: ${instanceItems.siteIri}")
         editor = WikibaseDataEditor(connection, instanceItems.siteIri)
@@ -141,5 +142,15 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Int=0) :
             logger.error("Failed to save the item for the reason ${e.errorMessage} ${e.message}")
         }
         return publishable.id
+    }
+
+    companion object {
+        // Validate the environment
+        fun validate() {
+            System.getenv("WIKIDATA_USER")
+                ?: throw EnvironmentVariableError("Missing environment variable WIKIDATA_USER")
+            System.getenv("WIKIDATA_PASSWORD")
+                ?: throw EnvironmentVariableError("Missing environment variable WIKIDATA_PASSWORD")
+        }
     }
 }

@@ -6,7 +6,7 @@ import org.apache.logging.log4j.LogManager
 import java.io.File
 
 fun loadData(fileName: String, limit: Int? = null): DataTotal {
-    val logger = LogManager.getLogger("net.nprod.lotus.chemistry.main")
+    val logger = LogManager.getLogger("net.nprod.lotus.chemistry.net.nprod.lotus.tools.wdpropcreator.main")
     val dataTotal = DataTotal()
 
     logger.info("Started")
@@ -22,9 +22,6 @@ fun loadData(fileName: String, limit: Int? = null): DataTotal {
         val organismIDs = it.getString("organismCleaned_dbTaxoTaxonIds")
         val organismRanks = it.getString("organismCleaned_dbTaxoTaxonRanks")
         val organismNames = it.getString("organismCleaned_dbTaxoTaxonomy")
-
-        val referenceType = it.getString("referenceType")
-        val referenceValue = it.getString("referenceValue")
 
         val smiles = it.getString("structureCleanedSmiles")
         val doi = it.getString("referenceCleanedDoi")

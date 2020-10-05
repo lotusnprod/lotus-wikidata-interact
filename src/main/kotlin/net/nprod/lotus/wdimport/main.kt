@@ -1,9 +1,10 @@
 package net.nprod.lotus.wdimport
 
+import kotlinx.cli.*
 import net.nprod.lotus.chemistry.smilesToFormula
 import net.nprod.lotus.input.loadData
-import net.nprod.lotus.mock.TestISparql
-import net.nprod.lotus.mock.TestPublisher
+import net.nprod.lotus.wdimport.wd.mock.TestISparql
+import net.nprod.lotus.wdimport.wd.mock.TestPublisher
 import net.nprod.lotus.wdimport.wd.*
 import net.nprod.lotus.wdimport.wd.interfaces.Publisher
 import net.nprod.lotus.wdimport.wd.models.WDArticle
@@ -21,20 +22,29 @@ import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
 import java.io.File
 import java.io.FileNotFoundException
 
-//const val DATASET_PATH = "$PREFIX/data/interim/tables/4_analysed/platinum.tsv.gz"
-const val DATASET_PATH = "data/manuallyValidated.tsv"
-const val REPOSITORY_FILE = "/tmp/out.xml"
-
-const val TestMode = false
-const val TestPersistent = false // If true, we are going to reload the previous output in TestMode
-const val TestExport = true // If true export a dump of the RDF repository in REPOSITORY_FILE
-const val TestRealSparql = true // If true, we test with the real WikiData sparql
-
 fun main(args: Array<String>) {
-    val logger = LogManager.getLogger("net.nprod.lotus.chemistry.main")
-    logger.info("ONPDB Importer")
-    if (TestMode) {
+    val logger = LogManager.getLogger("net.nprod.lotus.chemistry.net.nprod.lotus.tools.wdpropcreator.main")
+    val parser = ArgParser("lotus_importer")
+    val input by parser.option(ArgType.String, shortName = "i", description = "Input file").required()
+    val limit by parser.option(ArgType.Int, shortName = "l", description = "Limit the import to this number of entries (-1 for all)").default(1)
+    val real by parser.option(ArgType.Boolean, shortName = "r", description = "Turn on real mode: this will write to WikiData!").default(false)
+    val persistent by parser.option(ArgType.Boolean, shortName = "p", description = "Turn on persistent mode (only for tests)").default(false)
+    val realSparql by parser.option(ArgType.Boolean, shortName = "s", description = "Use the real WikiData instance for SPARQL queries (only for tests)").default(false)
+    val output by parser.option(ArgType.String, shortName = "o", description = "Output file name (only for test persistent mode)").default("")
+    parser.parse(args)
+
+    WDPublisher.validate()
+
+    logger.info("LOTUS Importer")
+
+    if (!real) {
         logger.info("We are in test mode")
+    }
+
+    val dataTotal = if (limit == -1 ) {
+        loadData(input)
+    } else {
+        loadData(input, limit)
     }
 
     // This is where we say if we use the test Wikidata instance or not
@@ -47,9 +57,9 @@ fun main(args: Array<String>) {
     lateinit var wdSparql: ISparql
     lateinit var publisher: Publisher
     var repository: Repository? = null
-    if (TestMode) {
+    if (!real) {
         repository = SailRepository(MemoryStore())
-        if (TestPersistent) {
+        if (persistent) {
             try {
                 logger.info("Loading old data")
                 val file = File("/tmp/out.xml")
@@ -61,7 +71,7 @@ fun main(args: Array<String>) {
                 logger.info("There is no data from a previous test run.")
             }
         }
-        wdSparql = if (TestRealSparql) {
+        wdSparql = if (realSparql) {
             WDSparql(instanceItems)
         } else {
             TestISparql(instanceItems, repository)
@@ -73,8 +83,6 @@ fun main(args: Array<String>) {
     }
 
     publisher.connect()
-
-    val dataTotal = loadData(DATASET_PATH, 2)
 
     logger.info("Producing organisms")
 
@@ -99,7 +107,7 @@ fun main(args: Array<String>) {
     logger.info("Creating a local cache of wikidata ids for existing compounds")
     // We do that so we don't need to do hundreds of thousands of SPARQL queries
     val wikiCompoundCache = mutableMapOf<String, String>()
-    val inchiKeys = dataTotal.compoundCache.store.map { (id, compound) ->
+    val inchiKeys = dataTotal.compoundCache.store.map { (_, compound) ->
         compound.inchikey
     }
     inchiKeys.chunked(1000) { inchiKeysBlock ->
@@ -113,7 +121,7 @@ fun main(args: Array<String>) {
                 }
             """.trimIndent()
             logger.info(query)
-            val o = wdSparql.query(query) { result ->
+            wdSparql.query(query) { result ->
                 result.forEach {
                     wikiCompoundCache[it.getValue("inchikey").stringValue()] = it.getValue("id").stringValue().split("/").last()
                 }
@@ -123,7 +131,7 @@ fun main(args: Array<String>) {
 
     // Adding all compounds
 
-    dataTotal.compoundCache.store.forEach { (id, compound) ->
+    dataTotal.compoundCache.store.forEach { (_, compound) ->
         val wdcompound = WDCompound(
                 name = "",
                 inChIKey = compound.inchikey,
@@ -154,7 +162,7 @@ fun main(args: Array<String>) {
 
 // Counting
 
-    if (TestMode) {
+    if (!real) {
         repository?.let {
             val query = """
                 SELECT * {
@@ -180,10 +188,10 @@ fun main(args: Array<String>) {
     }
     logger.info("Publisher has made ${publisher.newDocuments} new documents and updated ${publisher.updatedDocuments}")
 
-// Exporting
+    // Exporting
 
-    if (TestMode && TestExport) {
-        val file = File(REPOSITORY_FILE).bufferedWriter()
+    if (!real && output != "") {
+        val file = File(output).bufferedWriter()
         repository?.let {
             it.connection
             val writer: RDFHandler = Rio.createWriter(RDFFormat.RDFXML, file)

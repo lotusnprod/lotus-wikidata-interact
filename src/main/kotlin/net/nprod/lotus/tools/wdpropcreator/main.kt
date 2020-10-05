@@ -1,3 +1,5 @@
+package net.nprod.lotus.tools.wdpropcreator
+
 import net.nprod.lotus.wdimport.wd.MainInstanceItems
 import net.nprod.lotus.wdimport.wd.TestInstanceItems
 import net.nprod.lotus.wdimport.wd.WDPublisher
@@ -39,7 +41,7 @@ fun main() {
                         "Some new property for ONPDB"
                     )
 
-                    println("$property => ${prop?.toString()} ${prop?.iri}")
+                    println("$property => ${prop.toString()} ${prop.iri}")
                 }
             }
         }

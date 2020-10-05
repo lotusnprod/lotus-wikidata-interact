@@ -1,4 +1,4 @@
-package net.nprod.lotus.mock
+package net.nprod.lotus.wdimport.wd.mock
 
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.sparql.ISparql

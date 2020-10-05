@@ -23,7 +23,7 @@ fun parseTSVFile(file: Reader, lines: Int?= null): List<Record>? {
     tsvParser.beginParsing(file)
     var count = 0
     val list = mutableListOf<Record>()
-    var record: Record? = null
+    var record: Record?
     while (true) {
         record = tsvParser.parseNextRecord()
         if (count>=lines) break                     // Reached the amount of lines needed
