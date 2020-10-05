@@ -30,6 +30,7 @@ interface InstanceItems {
     val taxonRank: PropertyIdValue
     val parentTaxon: PropertyIdValue
     val naturalProductOfTaxon: PropertyIdValue
+    val foundInTaxon: PropertyIdValue
 
     // Article
     val doi: PropertyIdValue
@@ -133,6 +134,7 @@ object TestInstanceItems : InstanceItems {
     override val phasmidaTaxonomy = property("P95540")
 
     override val naturalProductOfTaxon = property("P95470")
+    override val foundInTaxon = property("P703")
     override val statedIn = property("P149")
 
     // Article
@@ -199,6 +201,7 @@ object MainInstanceItems : InstanceItems {
     override val phasmidaTaxonomy = property("P4855")
 
     override val naturalProductOfTaxon = property("P1582")
+    override val foundInTaxon = property("P703")
     override val statedIn = property("P248")
 
     // Article
