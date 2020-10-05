@@ -1,12 +1,12 @@
 package wd
 
-import net.nprod.onpdb.helpers.GZIPRead
-import net.nprod.onpdb.helpers.parseTSVFile
-import net.nprod.onpdb.wdimport.wd.MainInstanceItems
+import net.nprod.lotus.helpers.GZIPRead
+import net.nprod.lotus.helpers.parseTSVFile
+import net.nprod.lotus.wdimport.wd.MainInstanceItems
 import org.apache.logging.log4j.LogManager
 import org.junit.jupiter.api.BeforeEach
-import net.nprod.onpdb.wdimport.wd.sparql.WDSparql
-import net.nprod.onpdb.wdimport.wd.sparql.findCompoundsByInChIKey
+import net.nprod.lotus.wdimport.wd.sparql.WDSparql
+import net.nprod.lotus.wdimport.wd.sparql.findCompoundsByInChIKey
 
 class WDCompoundSearchPerformanceTest {
     lateinit var wdSparql: WDSparql

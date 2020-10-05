@@ -1,12 +1,12 @@
 package wd
 
-import net.nprod.onpdb.wdimport.wd.MainInstanceItems
+import net.nprod.lotus.wdimport.wd.MainInstanceItems
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
-import net.nprod.onpdb.wdimport.wd.sparql.WDSparql
-import net.nprod.onpdb.wdimport.wd.sparql.findReferencesByDOI
+import net.nprod.lotus.wdimport.wd.sparql.WDSparql
+import net.nprod.lotus.wdimport.wd.sparql.findReferencesByDOI
 
 internal class WDReferenceTest {
     lateinit var wdSparql: WDSparql
