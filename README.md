@@ -51,7 +51,9 @@ The distribution will be available in **build/distributions** (.zip and .tar.gz)
 There is work to do to reduce the size of the distribution (use java modules, use only the parts of cdk and rdf4j 
 we are really using).
 
-# Upgrade wiki-java
+# Developers
+
+## If you need to upgrade wiki-java
 
 You need to make sure you did a recursive clone of this repository with
 ````
