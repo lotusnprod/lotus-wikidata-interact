@@ -42,8 +42,7 @@ data class WDCompound(
             PREFIX wd: <${InstanceItems::wdURI.get(instanceItems)}>
             PREFIX wdt: <${InstanceItems::wdtURI.get(instanceItems)}>
             SELECT DISTINCT ?id {
-              ?id wdt:${iSparql.resolve(InstanceItems::instanceOf).id} wd:${iSparql.resolve(InstanceItems::chemicalCompound).id};
-                  wdt:${iSparql.resolve(InstanceItems::inChIKey).id} ${Rdf.literalOf(inChIKey).queryString}.
+              ?id wdt:${iSparql.resolve(InstanceItems::inChIKey).id} ${Rdf.literalOf(inChIKey).queryString}.
             }
             """.trimIndent()
 
