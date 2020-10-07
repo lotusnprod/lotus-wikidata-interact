@@ -123,8 +123,10 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0)
                     ?: throw Exception("Cannot find a document that should be existing: ${publishable.id}")) as ItemDocument
                 val propertiesExisting = doc.statementGroups.flatMap { it.statements.map { it.mainSnak.propertyId.id } }
 
+
                 // We need to update the name if needed
                 // We are limited to names < 250 characters
+                /*
                 if (publishable.name.length<250) {
                     editor?.updateTermsStatements(
                         publishable.id,
@@ -137,7 +139,9 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0)
                         "Updating name if needed",
                         listOf()
                     )
-                }
+                }*/
+
+                // We are not doing that as it was overwriting names
 
                 val statements = publishable.listOfStatementsForUpdate(instanceItems).filter {
                     // We filter all the statement that do not already exist
