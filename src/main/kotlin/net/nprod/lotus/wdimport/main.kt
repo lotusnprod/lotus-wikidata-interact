@@ -26,10 +26,11 @@ fun main(args: Array<String>) {
     val logger = LogManager.getLogger("net.nprod.lotus.chemistry.net.nprod.lotus.tools.wdpropcreator.main")
     val parser = ArgParser("lotus_importer")
     val input by parser.option(ArgType.String, shortName = "i", description = "Input file").required()
-    val limit by parser.option(ArgType.Int, shortName = "l", description = "Limit the import to this number of entries (-1 for all)").default(1)
+    val limit by parser.option(ArgType.Int, shortName = "l", description = "Limit the import to this number of entries (-1 for all, default 1)").default(1)
+    val skip by parser.option(ArgType.Int, shortName = "s", description = "Skip this number of entries").default(0)
     val real by parser.option(ArgType.Boolean, shortName = "r", description = "Turn on real mode: this will write to WikiData!").default(false)
     val persistent by parser.option(ArgType.Boolean, shortName = "p", description = "Turn on persistent mode (only for tests)").default(false)
-    val realSparql by parser.option(ArgType.Boolean, shortName = "s", description = "Use the real WikiData instance for SPARQL queries (only for tests)").default(false)
+    val realSparql by parser.option(ArgType.Boolean, shortName = "S", description = "Use the real WikiData instance for SPARQL queries (only for tests)").default(false)
     val output by parser.option(ArgType.String, shortName = "o", description = "Output file name (only for test persistent mode)").default("")
     parser.parse(args)
 
@@ -42,9 +43,9 @@ fun main(args: Array<String>) {
     }
 
     val dataTotal = if (limit == -1 ) {
-        loadData(input)
+        loadData(input, skip)
     } else {
-        loadData(input, limit)
+        loadData(input, skip, limit)
     }
 
     // This is where we say if we use the test Wikidata instance or not

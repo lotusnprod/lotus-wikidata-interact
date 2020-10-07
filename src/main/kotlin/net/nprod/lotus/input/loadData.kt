@@ -5,7 +5,7 @@ import net.nprod.lotus.helpers.parseTSVFile
 import org.apache.logging.log4j.LogManager
 import java.io.File
 
-fun loadData(fileName: String, limit: Int? = null): DataTotal {
+fun loadData(fileName: String, skip: Int=0, limit: Int? = null): DataTotal {
     val logger = LogManager.getLogger("net.nprod.lotus.chemistry.net.nprod.lotus.tools.wdpropcreator.main")
     val dataTotal = DataTotal()
 
@@ -13,7 +13,7 @@ fun loadData(fileName: String, limit: Int? = null): DataTotal {
     val fileReader = try { GZIPReader(fileName).bufferedReader } catch (e: java.util.zip.ZipException) {
         File(fileName).bufferedReader()
     }
-    val file = parseTSVFile(fileReader, limit)
+    val file = parseTSVFile(fileReader, limit, skip)
 
     file?.map {
         val database = it.getString("database")

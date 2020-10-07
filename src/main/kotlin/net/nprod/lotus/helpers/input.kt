@@ -11,7 +11,7 @@ import java.util.zip.GZIPInputStream
  * Returns the full list if lines is null
  */
 
-fun parseTSVFile(file: Reader, lines: Int?= null): List<Record>? {
+fun parseTSVFile(file: Reader, lines: Int?= null, skip: Int=0): List<Record>? {
 
     val settingsParser = TsvParserSettings()
     settingsParser.format.setLineSeparator("\n")
@@ -24,6 +24,7 @@ fun parseTSVFile(file: Reader, lines: Int?= null): List<Record>? {
     var count = 0
     val list = mutableListOf<Record>()
     var record: Record?
+    repeat(skip) { tsvParser.parseNextRecord() }
     while (true) {
         record = tsvParser.parseNextRecord()
         if (count>=lines) break                     // Reached the amount of lines needed
