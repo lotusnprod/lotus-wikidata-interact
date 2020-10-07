@@ -7,6 +7,7 @@ import net.nprod.lotus.wdimport.wd.sparql.ISparql
 import net.nprod.lotus.wdimport.wd.statement
 import org.wikidata.wdtk.datamodel.helpers.Datamodel
 import org.wikidata.wdtk.datamodel.interfaces.*
+import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher
 import kotlin.reflect.KProperty1
 
 class ElementNotPublishedError(msg: String) : Exception(msg)
@@ -47,7 +48,11 @@ abstract class Publishable {
         preStatements.addAll(dataStatements())
 
         // We are limited to names < 250 characters
-        val legalName = if (name.length<250) { name } else { "" }
+        val legalName = if (name.length < 250) {
+            name
+        } else {
+            ""
+        }
 
         return newDocument(legalName, subject ?: _id) {
             statement(subject ?: _id, instanceItems.instanceOf, type.get(instanceItems))
@@ -66,31 +71,53 @@ abstract class Publishable {
     /**
      * Generate statements for updating
      */
-    fun listOfStatementsForUpdate(instanceItems: InstanceItems): List<Statement> {
-        return preStatements.map { referenceableStatement ->
-            when (referenceableStatement) {
+    fun listOfStatementsForUpdate(fetcher: WikibaseDataFetcher?, instanceItems: InstanceItems): List<Statement> {
+        // If we have a fetcher, we take a dump of that entry to make sure we are not modifying existing entries
+        // We generate a list of all the properties' ids
+        val propertiesIDs = fetcher?.let {
+            val id = _id?.id
+            if (id != null) {
+                val doc = it.getEntityDocument(id)
+                if (doc is ItemDocument) {
+                    val statements = doc.allStatements.iterator().asSequence().toList()
+                    statements.map { statement ->
+                        statement.mainSnak.propertyId.id
+                    }
+                } else {
+                    listOf()
+                }
+            } else {
+                listOf()
+            }
+        } ?: listOf()
+
+        return preStatements.filter { statement ->  // Filter statements that already exist and are not overwritable
+            statement.overwritable || !propertiesIDs.contains(statement.property.get(instanceItems).id)
+        }.map { statement ->
+            when (statement) {
                 is ReferencableValueStatement -> newStatement(
-                    referenceableStatement.property.get(instanceItems),
+                    statement.property.get(instanceItems),
                     id,
-                    referenceableStatement.value
+                    statement.value
                 ) { statementBuilder ->
-                    referenceableStatement.preReferences.forEach {
+                    statement.preReferences.forEach {
                         statementBuilder.withReference(it.build(instanceItems))
                     }
                 }
                 is ReferenceableRemoteItemStatement -> newStatement(
-                    referenceableStatement.property.get(instanceItems),
+                    statement.property.get(instanceItems),
                     id,
                     ReferencableValueStatement(
-                        referenceableStatement.property,
-                        referenceableStatement.value.get(instanceItems),
-                        referenceableStatement.preReferences
+                        statement.property,
+                        statement.value.get(instanceItems),
+                        statement.preReferences
                     ).value
                 ) { statementBuilder ->
-                    referenceableStatement.preReferences.forEach {
+                    statement.preReferences.forEach {
                         statementBuilder.withReference(it.build(instanceItems))
                     }
                 }
+                else -> throw Exception("Unhandled statement type.")
             }
         }
     }

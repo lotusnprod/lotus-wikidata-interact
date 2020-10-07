@@ -76,7 +76,7 @@ data class WDCompound(
 
     fun foundInTaxon(wdTaxon: WDTaxon, f: ReferencableValueStatement.() -> Unit) {
         require(wdTaxon.published) { "Can only add an already published taxon." }
-        val refStatement = ReferencableValueStatement(InstanceItems::foundInTaxon, wdTaxon.id).apply(f)
+        val refStatement = ReferencableValueStatement(InstanceItems::foundInTaxon, wdTaxon.id, overwritable = true).apply(f)
         preStatements.add(refStatement)
     }
 }

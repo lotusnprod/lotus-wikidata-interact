@@ -4,13 +4,18 @@ import org.wikidata.wdtk.datamodel.helpers.Datamodel
 import org.wikidata.wdtk.datamodel.interfaces.Value
 import net.nprod.lotus.wdimport.wd.InstanceItems
 
-sealed class ReferenceableStatement
+interface ReferenceableStatement {
+    var property: RemoteProperty
+    val preReferences: MutableList<WDPreReference>
+    val overwritable: Boolean
+}
 
 data class ReferencableValueStatement(
-    var property: RemoteProperty,
+    override var property: RemoteProperty,
     var value: Value,
-    val preReferences: MutableList<WDPreReference> = mutableListOf()
-): ReferenceableStatement() {
+    override val preReferences: MutableList<WDPreReference> = mutableListOf(),
+    override val overwritable: Boolean=false
+): ReferenceableStatement {
     fun reference(property: RemoteProperty, value: Value) = preReferences.add(WDPreReference().add(property, value))
 
     fun statedIn(value: Value) = preReferences.add(WDPreReference().add(InstanceItems::statedIn, value))
@@ -23,10 +28,11 @@ data class ReferencableValueStatement(
 }
 
 data class ReferenceableRemoteItemStatement(
-    var property: RemoteProperty,
+    override var property: RemoteProperty,
     var value: RemoteItem,
-    val preReferences: MutableList<WDPreReference> = mutableListOf()
-): ReferenceableStatement() {
+    override val preReferences: MutableList<WDPreReference> = mutableListOf(),
+    override val overwritable: Boolean=false
+): ReferenceableStatement {
 
     fun reference(property: RemoteProperty, value: Value) = preReferences.add(WDPreReference().add(property, value))
 
