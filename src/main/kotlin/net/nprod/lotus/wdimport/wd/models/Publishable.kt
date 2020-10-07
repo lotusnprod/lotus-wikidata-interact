@@ -31,7 +31,7 @@ abstract class Publishable {
         get() = _id
             ?: throw ElementNotPublishedError("This element has not been published yet or failed to get published.")
 
-    val preStatements: MutableList<ReferenceableStatement> = mutableListOf()
+    val preStatements: MutableSet<ReferenceableStatement> = mutableSetOf()
 
     fun published(id: ItemIdValue) {
         _id = id
@@ -46,6 +46,7 @@ abstract class Publishable {
      */
     fun document(instanceItems: InstanceItems, subject: ItemIdValue? = null): ItemDocument {
         preStatements.addAll(dataStatements())
+        println("We created the document and we added ${dataStatements()}")
 
         // We are limited to names < 250 characters
         val legalName = if (name.length < 250) {
@@ -72,6 +73,8 @@ abstract class Publishable {
      * Generate statements for updating
      */
     fun listOfStatementsForUpdate(fetcher: WikibaseDataFetcher?, instanceItems: InstanceItems): List<Statement> {
+        // Add the data statements
+        preStatements.addAll(dataStatements())
         // If we have a fetcher, we take a dump of that entry to make sure we are not modifying existing entries
         // We generate a list of all the properties' ids
         val propertiesIDs = fetcher?.let {
@@ -90,7 +93,8 @@ abstract class Publishable {
                 listOf()
             }
         } ?: listOf()
-
+        println("Existing ids $propertiesIDs")
+        println("Existing statemts ${preStatements.map{it.property.get(instanceItems).id}}")
         return preStatements.filter { statement ->  // Filter statements that already exist and are not overwritable
             statement.overwritable || !propertiesIDs.contains(statement.property.get(instanceItems).id)
         }.map { statement ->
