@@ -1,5 +1,6 @@
 package net.nprod.lotus.wdimport.wd
 
+import net.nprod.lotus.input.ifEqualReplaceByNull
 import net.nprod.lotus.wdimport.wd.interfaces.Publisher
 import net.nprod.lotus.wdimport.wd.models.Publishable
 import org.apache.logging.log4j.LogManager
@@ -121,6 +122,22 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0)
                 val doc = (fetcher?.getEntityDocument(publishable.id.id)
                     ?: throw Exception("Cannot find a document that should be existing: ${publishable.id}")) as ItemDocument
                 val propertiesExisting = doc.statementGroups.flatMap { it.statements.map { it.mainSnak.propertyId.id } }
+
+                // We need to update the name if needed
+                // We are limited to names < 250 characters
+                if (publishable.name.length<250) {
+                    editor?.updateTermsStatements(
+                        publishable.id,
+                        listOf(Datamodel.makeMonolingualTextValue(publishable.name, "en")),
+                        listOf(),
+                        listOf(),
+                        listOf(),
+                        listOf(),
+                        listOf(),
+                        "Updating name if needed",
+                        listOf()
+                    )
+                }
 
                 val statements = publishable.listOfStatementsForUpdate(instanceItems).filter {
                     // We filter all the statement that do not already exist

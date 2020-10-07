@@ -132,8 +132,9 @@ fun main(args: Array<String>) {
     // Adding all compounds
 
     dataTotal.compoundCache.store.forEach { (_, compound) ->
+        logger.info("Compound with name ${compound.name}")
         val wdcompound = WDCompound(
-                name = "",
+                name = compound.name,
                 inChIKey = compound.inchikey,
                 inChI = compound.inchi,
                 isomericSMILES = compound.smiles,

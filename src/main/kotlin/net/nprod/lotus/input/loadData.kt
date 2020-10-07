@@ -42,6 +42,7 @@ fun loadData(fileName: String, limit: Int? = null): DataTotal {
 
             val compoundObj = dataTotal.compoundCache.getOrNew(smiles) {
                 Compound(
+                    name = it.getString("structureCleanedName"),
                     smiles = smiles, inchi = it.getString("structureCleanedInchi"),
                     inchikey = it.getString("structureCleanedInchikey3D")
                 )

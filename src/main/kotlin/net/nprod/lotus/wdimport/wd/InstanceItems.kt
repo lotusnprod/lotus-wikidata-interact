@@ -1,11 +1,17 @@
 package net.nprod.lotus.wdimport.wd
 
+import net.nprod.lotus.wdimport.wd.models.RemoteProperty
+import org.eclipse.rdf4j.model.vocabulary.RDFS
 import org.eclipse.rdf4j.sparqlbuilder.core.Prefix
 import org.eclipse.rdf4j.sparqlbuilder.core.SparqlBuilder
 import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
 import org.wikidata.wdtk.datamodel.helpers.Datamodel
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
 import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue
+
+object Commons {
+    val rdfsLabel = Datamodel.makePropertyIdValue("label", RDFS.NAMESPACE)
+}
 
 interface InstanceItems {
     val siteIri: String

@@ -45,7 +45,11 @@ abstract class Publishable {
      */
     fun document(instanceItems: InstanceItems, subject: ItemIdValue? = null): ItemDocument {
         preStatements.addAll(dataStatements())
-        return newDocument(name, subject ?: _id) {
+
+        // We are limited to names < 250 characters
+        val legalName = if (name.length<250) { name } else { "" }
+
+        return newDocument(legalName, subject ?: _id) {
             statement(subject ?: _id, instanceItems.instanceOf, type.get(instanceItems))
 
             // We construct the statements according to this instanceItems value

@@ -46,6 +46,7 @@ data class TaxonomyDatabase(
 
 data class Compound(
     override var id: Long? = null,
+    val name: String = "",
     val smiles: String,
     val inchi: String,
     val inchikey: String

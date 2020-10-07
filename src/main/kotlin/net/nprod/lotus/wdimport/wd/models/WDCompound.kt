@@ -1,5 +1,7 @@
 package net.nprod.lotus.wdimport.wd.models
 
+import net.nprod.lotus.input.ifEqualReplaceByNull
+import net.nprod.lotus.wdimport.wd.Commons
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.sparql.ISparql
 import org.apache.logging.log4j.LogManager
