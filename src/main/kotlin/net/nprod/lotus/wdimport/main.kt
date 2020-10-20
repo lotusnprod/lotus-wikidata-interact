@@ -2,6 +2,7 @@ package net.nprod.lotus.wdimport
 
 import kotlinx.cli.*
 import net.nprod.lotus.chemistry.smilesToFormula
+import net.nprod.lotus.chemistry.subscriptFormula
 import net.nprod.lotus.input.loadData
 import net.nprod.lotus.wdimport.wd.mock.TestISparql
 import net.nprod.lotus.wdimport.wd.mock.TestPublisher
@@ -99,7 +100,7 @@ fun main(args: Array<String>) {
                 doi = it.value.doi,
         ).tryToFind(wdSparql, instanceItems)
         // TODO: Add PMID and PMCID
-        publisher.publish(article, "Creating a new article")
+        publisher.publish(article, "upserting article")
         it.value to article
     }.toMap()
 
@@ -139,7 +140,7 @@ fun main(args: Array<String>) {
                 inChIKey = compound.inchikey,
                 inChI = compound.inchi,
                 isomericSMILES = compound.smiles,
-                chemicalFormula = smilesToFormula(compound.smiles)
+                chemicalFormula = subscriptFormula(smilesToFormula(compound.smiles))
         ).tryToFind(wdSparql, instanceItems)
 
         wdcompound.apply {
@@ -157,7 +158,7 @@ fun main(args: Array<String>) {
                 }
             }
         }
-        publisher.publish(wdcompound, "Creating a new compound")
+        publisher.publish(wdcompound, "upserting compound")
     }
 
     publisher.disconnect()

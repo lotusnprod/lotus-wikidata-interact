@@ -32,7 +32,7 @@ data class WDArticle(
                   wdt:${iSparql.resolve(InstanceItems::doi).id} ${Rdf.literalOf(doi).queryString}.
             }
             """.trimIndent()
-
+        println(query)
         val results = iSparql.query(query) { result ->
             result.map { bindingSet ->
                 bindingSet.getValue("id").stringValue().replace(instanceItems.wdURI, "")

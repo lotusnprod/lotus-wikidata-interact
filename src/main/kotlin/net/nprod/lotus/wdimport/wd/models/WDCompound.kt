@@ -1,7 +1,5 @@
 package net.nprod.lotus.wdimport.wd.models
 
-import net.nprod.lotus.input.ifEqualReplaceByNull
-import net.nprod.lotus.wdimport.wd.Commons
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.sparql.ISparql
 import org.apache.logging.log4j.LogManager
@@ -31,7 +29,7 @@ data class WDCompound(
             inChIKey?.let { ReferencableValueStatement(InstanceItems::inChIKey, it) },
             inChI?.let { ReferencableValueStatement(InstanceItems::inChI, it) },
             isomericSMILES?.let { ReferencableValueStatement(InstanceItems::isomericSMILES, it) },
-            chemicalFormula?.let { ReferencableValueStatement(InstanceItems::chemicalFormula, it) },
+            chemicalFormula?.let { ReferencableValueStatement(InstanceItems::chemicalFormula, it, overwriteable = true) },
             pcId?.let { ReferencableValueStatement(InstanceItems::pcId, it) }
         )
 
@@ -75,7 +73,7 @@ data class WDCompound(
 
     fun foundInTaxon(wdTaxon: WDTaxon, f: ReferencableValueStatement.() -> Unit) {
         require(wdTaxon.published) { "Can only add an already published taxon." }
-        val refStatement = ReferencableValueStatement(InstanceItems::foundInTaxon, wdTaxon.id, overwritable = true).apply(f)
+        val refStatement = ReferencableValueStatement(InstanceItems::foundInTaxon, wdTaxon.id, overwriteable = true).apply(f)
         preStatements.add(refStatement)
     }
 }

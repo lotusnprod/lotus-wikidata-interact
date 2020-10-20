@@ -46,7 +46,7 @@ abstract class Publishable {
      */
     fun document(instanceItems: InstanceItems, subject: ItemIdValue? = null): ItemDocument {
         preStatements.addAll(dataStatements())
-        println("We created the document and we added ${dataStatements()}")
+        println("We upserted the document and we added ${dataStatements().size} statements")
 
         // We are limited to names < 250 characters
         val legalName = if (name.length < 250) {
@@ -96,7 +96,7 @@ abstract class Publishable {
         println("Existing ids $propertiesIDs")
         println("Existing statemts ${preStatements.map{it.property.get(instanceItems).id}}")
         return preStatements.filter { statement ->  // Filter statements that already exist and are not overwritable
-            statement.overwritable || !propertiesIDs.contains(statement.property.get(instanceItems).id)
+            statement.overwriteable || !propertiesIDs.contains(statement.property.get(instanceItems).id)
         }.map { statement ->
             when (statement) {
                 is ReferencableValueStatement -> newStatement(

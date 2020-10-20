@@ -12,6 +12,18 @@ fun smilesToSvg(smiles: String): String {
     return depiction.toSvgStr()
 }
 
+fun subscriptFormula(formula: String): String = formula
+    .replace("0", "₀")
+    .replace("1", "₁")
+    .replace("2", "₂")
+    .replace("3", "₃")
+    .replace("4", "₄")
+    .replace("5", "₅")
+    .replace("6", "₆")
+    .replace("7", "₇")
+    .replace("8", "₈")
+    .replace("9", "₉")
+
 fun smilesToFormula(smiles: String): String {
     val atomContainer = SmilesParser(SilentChemObjectBuilder.getInstance()).parseSmiles(smiles)
     val molecularFormula = MolecularFormulaManipulator.getMolecularFormula(atomContainer)
