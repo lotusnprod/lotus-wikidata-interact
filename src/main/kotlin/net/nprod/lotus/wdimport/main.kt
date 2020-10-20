@@ -97,7 +97,7 @@ fun main(args: Array<String>) {
         val article = WDArticle(
                 name = it.value.title ?: it.value.doi,
                 title = it.value.title,
-                doi = it.value.doi,
+                doi = it.value.doi.toUpperCase(), // DOIs are always uppercase
         ).tryToFind(wdSparql, instanceItems)
         // TODO: Add PMID and PMCID
         publisher.publish(article, "upserting article")
