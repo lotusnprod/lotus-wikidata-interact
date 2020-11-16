@@ -49,7 +49,9 @@ data class Compound(
     val name: String = "",
     val smiles: String,
     val inchi: String,
-    val inchikey: String
+    val inchikey: String,
+    val iupac: String,
+    val unspecifiedStereocenters: Int
 ) : Indexable
 
 data class Reference(

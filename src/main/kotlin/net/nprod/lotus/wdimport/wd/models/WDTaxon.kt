@@ -3,6 +3,7 @@ package net.nprod.lotus.wdimport.wd.models
 import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
 import net.nprod.lotus.wdimport.wd.InstanceItems
+import net.nprod.lotus.wdimport.wd.WDFinder
 import net.nprod.lotus.wdimport.wd.sparql.ISparql
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -55,27 +56,36 @@ data class WDTaxon(
         )
     // TODO: Grin https://npgsweb.ars-grin.gov/gringlobal/taxonomydetail.aspx?id=12676
 
-    override fun tryToFind(iSparql: ISparql, instanceItems: InstanceItems): WDTaxon {
+    override fun tryToFind(wdFinder: WDFinder, instanceItems: InstanceItems): WDTaxon {
         // In the case of the test instance, we do not have the ability to do SPARQL queries
 
         val query = """
             PREFIX wd: <${InstanceItems::wdURI.get(instanceItems)}>
             PREFIX wdt: <${InstanceItems::wdtURI.get(instanceItems)}>
             SELECT DISTINCT ?id {
-              ?id wdt:${iSparql.resolve(InstanceItems::instanceOf).id} wd:${iSparql.resolve(InstanceItems::taxon).id};
-                  wdt:${iSparql.resolve(InstanceItems::taxonRank).id} wd:${iSparql.resolve(taxonRank).id};
-                  wdt:${iSparql.resolve(InstanceItems::taxonName).id} ${Rdf.literalOf(name).queryString}.
+              ?id wdt:${wdFinder.sparql.resolve(InstanceItems::instanceOf).id} wd:${
+            wdFinder.sparql.resolve(
+                InstanceItems::taxon
+            ).id
+        };
+                  wdt:${wdFinder.sparql.resolve(InstanceItems::taxonRank).id} wd:${wdFinder.sparql.resolve(taxonRank).id};
+                  wdt:${wdFinder.sparql.resolve(InstanceItems::taxonName).id} ${Rdf.literalOf(name).queryString}.
             }
             """.trimIndent()
 
-        val results = iSparql.query(query) { result ->
+        val results = wdFinder.sparql.query(query) { result ->
             result.map { bindingSet ->
                 bindingSet.getValue("id").stringValue().replace(instanceItems.wdURI, "")
             }
         }
 
         if (results.isNotEmpty()) {
-            this.published(ItemIdValueImpl.fromId(results.first(), InstanceItems::wdURI.get(instanceItems)) as ItemIdValue)
+            this.published(
+                ItemIdValueImpl.fromId(
+                    results.first(),
+                    InstanceItems::wdURI.get(instanceItems)
+                ) as ItemIdValue
+            )
         }
 
         return this

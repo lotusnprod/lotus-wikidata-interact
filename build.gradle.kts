@@ -7,9 +7,12 @@ val rdf4jVersion = "3.4.0"
 val log4jVersion = "2.13.3"
 val junitApiVersion = "5.6.0"
 val univocityParserVersion = "2.8.4"
+val ktorVersion = "1.4.0"
+val serializationVersion = "1.0.1"
 
 plugins {
     kotlin("jvm") version "1.4.10"
+    kotlin("plugin.serialization") version "1.4.10"
     application
 }
 group = "net.nprod.onpdb.wdimport"
@@ -26,7 +29,9 @@ repositories {
 }
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-cli:$kotlinxCliVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
 
+    implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("org.apache.logging.log4j:log4j-api:$log4jVersion")
     implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")
     implementation("org.apache.logging.log4j:log4j-slf4j18-impl:$log4jVersion")

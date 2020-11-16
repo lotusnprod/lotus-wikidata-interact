@@ -10,6 +10,7 @@ import net.nprod.lotus.wdimport.wd.*
 import net.nprod.lotus.wdimport.wd.interfaces.Publisher
 import net.nprod.lotus.wdimport.wd.models.WDArticle
 import net.nprod.lotus.wdimport.wd.models.WDCompound
+import net.nprod.lotus.wdimport.wd.query.WDKT
 import net.nprod.lotus.wdimport.wd.sparql.ISparql
 import net.nprod.lotus.wdimport.wd.sparql.WDSparql
 import org.apache.logging.log4j.LogManager
@@ -23,16 +24,37 @@ import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
 import java.io.File
 import java.io.FileNotFoundException
 
+
 fun main(args: Array<String>) {
     val logger = LogManager.getLogger("net.nprod.lotus.chemistry.net.nprod.lotus.tools.wdpropcreator.main")
     val parser = ArgParser("lotus_importer")
     val input by parser.option(ArgType.String, shortName = "i", description = "Input file").required()
-    val limit by parser.option(ArgType.Int, shortName = "l", description = "Limit the import to this number of entries (-1 for all, default 1)").default(1)
+    val limit by parser.option(
+        ArgType.Int,
+        shortName = "l",
+        description = "Limit the import to this number of entries (-1 for all, default 1)"
+    ).default(1)
     val skip by parser.option(ArgType.Int, shortName = "s", description = "Skip this number of entries").default(0)
-    val real by parser.option(ArgType.Boolean, shortName = "r", description = "Turn on real mode: this will write to WikiData!").default(false)
-    val persistent by parser.option(ArgType.Boolean, shortName = "p", description = "Turn on persistent mode (only for tests)").default(false)
-    val realSparql by parser.option(ArgType.Boolean, shortName = "S", description = "Use the real WikiData instance for SPARQL queries (only for tests)").default(false)
-    val output by parser.option(ArgType.String, shortName = "o", description = "Output file name (only for test persistent mode)").default("")
+    val real by parser.option(
+        ArgType.Boolean,
+        shortName = "r",
+        description = "Turn on real mode: this will write to WikiData!"
+    ).default(false)
+    val persistent by parser.option(
+        ArgType.Boolean,
+        shortName = "p",
+        description = "Turn on persistent mode (only for tests)"
+    ).default(false)
+    val realSparql by parser.option(
+        ArgType.Boolean,
+        shortName = "S",
+        description = "Use the real WikiData instance for SPARQL queries (only for tests)"
+    ).default(false)
+    val output by parser.option(
+        ArgType.String,
+        shortName = "o",
+        description = "Output file name (only for test persistent mode)"
+    ).default("")
     parser.parse(args)
 
     WDPublisher.validate()
@@ -43,7 +65,7 @@ fun main(args: Array<String>) {
         logger.info("We are in test mode")
     }
 
-    val dataTotal = if (limit == -1 ) {
+    val dataTotal = if (limit == -1) {
         loadData(input, skip)
     } else {
         loadData(input, skip, limit)
@@ -84,6 +106,8 @@ fun main(args: Array<String>) {
         publisher = WDPublisher(instanceItems, pause = 10)
     }
 
+    val wdFinder = WDFinder(WDKT(), wdSparql)
+
     publisher.connect()
 
     logger.info("Producing organisms")
@@ -95,10 +119,10 @@ fun main(args: Array<String>) {
 
     val references = dataTotal.referenceCache.store.map {
         val article = WDArticle(
-                name = it.value.title ?: it.value.doi,
-                title = it.value.title,
-                doi = it.value.doi.toUpperCase(), // DOIs are always uppercase
-        ).tryToFind(wdSparql, instanceItems)
+            name = it.value.title ?: it.value.doi,
+            title = it.value.title,
+            doi = it.value.doi.toUpperCase(), // DOIs are always uppercase
+        ).tryToFind(wdFinder, instanceItems)
         // TODO: Add PMID and PMCID
         publisher.publish(article, "upserting article")
         it.value to article
@@ -125,7 +149,8 @@ fun main(args: Array<String>) {
             logger.info(query)
             wdSparql.query(query) { result ->
                 result.forEach {
-                    wikiCompoundCache[it.getValue("inchikey").stringValue()] = it.getValue("id").stringValue().split("/").last()
+                    wikiCompoundCache[it.getValue("inchikey").stringValue()] =
+                        it.getValue("id").stringValue().split("/").last()
                 }
             }
         }
@@ -136,23 +161,25 @@ fun main(args: Array<String>) {
     dataTotal.compoundCache.store.forEach { (_, compound) ->
         logger.info("Compound with name ${compound.name}")
         val wdcompound = WDCompound(
-                name = compound.name,
-                inChIKey = compound.inchikey,
-                inChI = compound.inchi,
-                isomericSMILES = compound.smiles,
-                chemicalFormula = subscriptFormula(smilesToFormula(compound.smiles))
-        ).tryToFind(wdSparql, instanceItems)
+            name = compound.name,
+            inChIKey = compound.inchikey,
+            inChI = compound.inchi,
+            isomericSMILES = compound.smiles,
+            chemicalFormula = subscriptFormula(smilesToFormula(compound.smiles)),
+            iupac = compound.iupac,
+            undefinedStereocenters = compound.unspecifiedStereocenters
+        ).tryToFind(wdFinder, instanceItems)
 
         wdcompound.apply {
             dataTotal.quads.filter { it.compound == compound }.distinct().forEach { quad ->
                 val organism = organisms[quad.organism]
                 organism?.let {
                     foundInTaxon(
-                            organism
+                        organism
                     ) {
                         statedIn(
-                                references[quad.reference]?.id
-                                        ?: throw Exception("That's bad we talk about a reference we don't have.")
+                            references[quad.reference]?.id
+                                ?: throw Exception("That's bad we talk about a reference we don't have.")
                         )
                     }
                 }

@@ -1,6 +1,7 @@
 package net.nprod.lotus.wdimport.wd.models
 
 import net.nprod.lotus.wdimport.wd.InstanceItems
+import net.nprod.lotus.wdimport.wd.WDFinder
 import net.nprod.lotus.wdimport.wd.sparql.ISparql
 import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
 import org.wikidata.wdtk.datamodel.implementation.ItemIdValueImpl
@@ -12,7 +13,7 @@ data class WDArticle(
     override var name: String,
     val title: String?,
     val doi: String?
-): Publishable() {
+) : Publishable() {
     override var type = InstanceItems::scholarlyArticle
 
     override fun dataStatements() =
@@ -20,27 +21,16 @@ data class WDArticle(
             title?.let { ReferencableValueStatement.monolingualValue(InstanceItems::title, it) },
             doi?.let { ReferencableValueStatement(InstanceItems::doi, it) })
 
+    /**
+     * Try to find an article with that DOI, we always take the smallest ID
+     */
+    override fun tryToFind(wdFinder: WDFinder, instanceItems: InstanceItems): WDArticle {
+        require(doi != null) { "The DOI cannot be null" }
+        val dois = wdFinder.wdkt.searchDOI(doi).query.search.map { it.title.trimStart('Q').toInt() to it.title }.toMap()
+            .toSortedMap().values
 
-    override fun tryToFind(iSparql: ISparql, instanceItems: InstanceItems): WDArticle {
-        // In the case of the test instance, we do not have the ability to do SPARQL queries
-
-        val query = """
-            PREFIX wd: <${InstanceItems::wdURI.get(instanceItems)}>
-            PREFIX wdt: <${InstanceItems::wdtURI.get(instanceItems)}>
-            SELECT DISTINCT ?id {
-              ?id wdt:${iSparql.resolve(InstanceItems::instanceOf).id} wd:${iSparql.resolve(InstanceItems::scholarlyArticle).id};
-                  wdt:${iSparql.resolve(InstanceItems::doi).id} ${Rdf.literalOf(doi).queryString}.
-            }
-            """.trimIndent()
-        println(query)
-        val results = iSparql.query(query) { result ->
-            result.map { bindingSet ->
-                bindingSet.getValue("id").stringValue().replace(instanceItems.wdURI, "")
-            }
-        }
-
-        if (results.isNotEmpty()) {
-            this.published(ItemIdValueImpl.fromId(results.first(), InstanceItems::wdURI.get(instanceItems)) as ItemIdValue)
+        if (dois.isNotEmpty()) {
+            this.published(ItemIdValueImpl.fromId(dois.first(), InstanceItems::wdURI.get(instanceItems)) as ItemIdValue)
         }
 
         return this

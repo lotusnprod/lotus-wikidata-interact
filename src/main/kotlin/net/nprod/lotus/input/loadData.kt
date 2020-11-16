@@ -5,12 +5,14 @@ import net.nprod.lotus.helpers.parseTSVFile
 import org.apache.logging.log4j.LogManager
 import java.io.File
 
-fun loadData(fileName: String, skip: Int=0, limit: Int? = null): DataTotal {
+fun loadData(fileName: String, skip: Int = 0, limit: Int? = null): DataTotal {
     val logger = LogManager.getLogger("net.nprod.lotus.chemistry.net.nprod.lotus.tools.wdpropcreator.main")
     val dataTotal = DataTotal()
 
     logger.info("Started")
-    val fileReader = try { GZIPReader(fileName).bufferedReader } catch (e: java.util.zip.ZipException) {
+    val fileReader = try {
+        GZIPReader(fileName).bufferedReader
+    } catch (e: java.util.zip.ZipException) {
         File(fileName).bufferedReader()
     }
     val file = parseTSVFile(fileReader, limit, skip)
@@ -42,9 +44,11 @@ fun loadData(fileName: String, skip: Int=0, limit: Int? = null): DataTotal {
 
             val compoundObj = dataTotal.compoundCache.getOrNew(smiles) {
                 Compound(
-                    name = it.getString("structureCleanedName"),
+                    name = it.getString("structureCleaned_nameTraditional"),
                     smiles = smiles, inchi = it.getString("structureCleanedInchi"),
-                    inchikey = it.getString("structureCleanedInchikey3D")
+                    inchikey = it.getString("structureCleanedInchikey3D"),
+                    iupac = it.getString("structureCleaned_nameIupac"),
+                    unspecifiedStereocenters = it.getInt("structureCleaned_stereocenters_unspecified")
                 )
             }
 

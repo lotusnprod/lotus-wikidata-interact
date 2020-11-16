@@ -18,17 +18,19 @@ import java.net.ConnectException
 class EnvironmentVariableError(message: String) : Exception(message)
 class InternalError(message: String) : Exception(message)
 
-
+/**
+ * Really this does more than Publishing, we should find another name
+ */
 class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0) : Resolver, Publisher {
     private val userAgent = "Wikidata Toolkit EditOnlineDataExample"
     private val logger: Logger = LogManager.getLogger(this::class.java)
     private var user: String? = null
     private var password: String? = null
-    private var connection: ApiConnection? = null
+    var connection: ApiConnection? = null
     private var editor: WikibaseDataEditor? = null
     override var newDocuments: Int = 0
     override var updatedDocuments: Int = 0
-    private var fetcher: WikibaseDataFetcher? = null
+    var fetcher: WikibaseDataFetcher? = null
 
     val publishedDocumentsIds: MutableSet<String> = mutableSetOf()
 
@@ -139,8 +141,6 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0)
                 }*/
 
                 // We are not doing that as it was overwriting names
-
-
 
                 val statements = publishable.listOfStatementsForUpdate(fetcher, instanceItems).filter {
                     // We filter all the statement that do not already exist

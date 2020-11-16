@@ -3,28 +3,35 @@ package net.nprod.lotus.wdimport
 import net.nprod.lotus.input.DataTotal
 import net.nprod.lotus.input.Organism
 import net.nprod.lotus.wdimport.wd.InstanceItems
+import net.nprod.lotus.wdimport.wd.WDFinder
 import net.nprod.lotus.wdimport.wd.interfaces.Publisher
 import net.nprod.lotus.wdimport.wd.models.WDTaxon
+import net.nprod.lotus.wdimport.wd.query.WDKT
 import net.nprod.lotus.wdimport.wd.sparql.ISparql
 import org.apache.logging.log4j.LogManager
 
-fun findAllTaxonForOrganismFromCache(dataTotal: DataTotal, wdSparql: ISparql, instanceItems: InstanceItems, publisher: Publisher): Map<Organism, WDTaxon> {
+fun findAllTaxonForOrganismFromCache(
+    dataTotal: DataTotal,
+    wdSparql: ISparql,
+    instanceItems: InstanceItems,
+    publisher: Publisher
+): Map<Organism, WDTaxon> {
     val logger = LogManager.getLogger("findAllTAxonForOrganismFromCache")
     return dataTotal.organismCache.store.values.mapNotNull { organism ->
 
         logger.debug("Organism Ranks and Ids: ${organism.rankIds}")
-
+        val wdFinder = WDFinder(WDKT(), wdSparql)
         var taxon: WDTaxon? = null
 
         listOf(
-                "GBIF",
-                "NCBI",
-                "ITIS",
-                "Index Fungorum",
-                "The Interim Register of Marine and Nonmarine Genera",
-                "World Register of Marine Species",
-                "Database of Vascular Plants of Canada (VASCAN)",
-                "GBIF Backbone Taxonomy"
+            "GBIF",
+            "NCBI",
+            "ITIS",
+            "Index Fungorum",
+            "The Interim Register of Marine and Nonmarine Genera",
+            "World Register of Marine Species",
+            "Database of Vascular Plants of Canada (VASCAN)",
+            "GBIF Backbone Taxonomy"
         ).forEach { taxonDbName ->
             val taxonDb = organism.rankIds.keys.firstOrNull { it.name == taxonDbName }
             if (taxon != null) return@forEach
@@ -35,27 +42,25 @@ fun findAllTaxonForOrganismFromCache(dataTotal: DataTotal, wdSparql: ISparql, in
                 if (genus != null) {
 
                     val genusWD = WDTaxon(
-                            name = genus,
-                            parentTaxon = null,
-                            taxonName = genus,
-                            taxonRank = InstanceItems::genus
-                    ).tryToFind(wdSparql, instanceItems)
+                        name = genus,
+                        parentTaxon = null,
+                        taxonName = genus,
+                        taxonRank = InstanceItems::genus
+                    ).tryToFind(wdFinder, instanceItems)
 
                     taxon = genusWD
                     if (species != null) {
                         publisher.publish(genusWD, "Created a missing genus")
 
                         val speciesWD = WDTaxon(
-                                name = species,
-                                parentTaxon = genusWD.id,
-                                taxonName = species,
-                                taxonRank = InstanceItems::species
-                        ).tryToFind(wdSparql, instanceItems)
+                            name = species,
+                            parentTaxon = genusWD.id,
+                            taxonName = species,
+                            taxonRank = InstanceItems::species
+                        ).tryToFind(wdFinder, instanceItems)
                         taxon = speciesWD
-
                     }
                 }
-
             }
         }
 

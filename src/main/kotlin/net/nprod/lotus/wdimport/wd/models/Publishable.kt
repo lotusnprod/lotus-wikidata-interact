@@ -1,10 +1,7 @@
 package net.nprod.lotus.wdimport.wd.models
 
-import net.nprod.lotus.wdimport.wd.InstanceItems
-import net.nprod.lotus.wdimport.wd.newDocument
-import net.nprod.lotus.wdimport.wd.newStatement
+import net.nprod.lotus.wdimport.wd.*
 import net.nprod.lotus.wdimport.wd.sparql.ISparql
-import net.nprod.lotus.wdimport.wd.statement
 import org.wikidata.wdtk.datamodel.helpers.Datamodel
 import org.wikidata.wdtk.datamodel.interfaces.*
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher
@@ -126,7 +123,7 @@ abstract class Publishable {
         }
     }
 
-    abstract fun tryToFind(iSparql: ISparql, instanceItems: InstanceItems): Publishable
+    abstract fun tryToFind(wdFinder: WDFinder, instanceItems: InstanceItems): Publishable
 
     fun addProperty(remoteProperty: RemoteProperty, value: Value, f: ReferencableValueStatement.() -> Unit = {}) {
         val refStatement = ReferencableValueStatement(remoteProperty, value).apply(f)
