@@ -10,7 +10,7 @@ import org.wikidata.wdtk.datamodel.implementation.ItemIdValueImpl
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
 
 data class WDCompound(
-    override var name: String="",
+    override var name: String = "",
     val inChIKey: String?,
     val inChI: String?,
     val isomericSMILES: String?,
@@ -20,7 +20,8 @@ data class WDCompound(
     val undefinedStereocenters: Int,
     val f: WDCompound.() -> Unit = {}
 ) : Publishable() {
-    override var type = if (undefinedStereocenters==0) InstanceItems::chemicalCompound else InstanceItems::groupOfIsomers
+    override var type =
+        if (undefinedStereocenters == 0) InstanceItems::chemicalCompound else InstanceItems::groupOfIsomers
     private val logger: Logger = LogManager.getLogger(this::class.qualifiedName)
 
     init {
@@ -32,7 +33,13 @@ data class WDCompound(
             inChIKey?.let { ReferencableValueStatement(InstanceItems::inChIKey, it) },
             inChI?.let { ReferencableValueStatement(InstanceItems::inChI, it) },
             isomericSMILES?.let { ReferencableValueStatement(InstanceItems::isomericSMILES, it) },
-            chemicalFormula?.let { ReferencableValueStatement(InstanceItems::chemicalFormula, it, overwriteable = true) },
+            chemicalFormula?.let {
+                ReferencableValueStatement(
+                    InstanceItems::chemicalFormula,
+                    it,
+                    overwriteable = true
+                )
+            },
             //iupac?.let { ReferencableValueStatement(InstanceItems::iupac, it )},  // For this we need to check the labels first…
             pcId?.let { ReferencableValueStatement(InstanceItems::pcId, it) }
         )
@@ -69,14 +76,15 @@ data class WDCompound(
     }
 
     fun naturalProductOfTaxon(wdTaxon: WDTaxon, f: ReferencableValueStatement.() -> Unit) {
-        require(wdTaxon.published) { "Can only add an already published taxon." }
+        require(wdTaxon.published) { "Can only add for an already published taxon." }
         val refStatement = ReferencableValueStatement(InstanceItems::naturalProductOfTaxon, wdTaxon.id).apply(f)
         preStatements.add(refStatement)
     }
 
     fun foundInTaxon(wdTaxon: WDTaxon, f: ReferencableValueStatement.() -> Unit) {
-        require(wdTaxon.published) { "Can only add an already published taxon." }
-        val refStatement = ReferencableValueStatement(InstanceItems::foundInTaxon, wdTaxon.id, overwriteable = true).apply(f)
+        require(wdTaxon.published) { "Can only add for an already published taxon." }
+        val refStatement =
+            ReferencableValueStatement(InstanceItems::foundInTaxon, wdTaxon.id, overwriteable = true).apply(f)
         preStatements.add(refStatement)
     }
 }

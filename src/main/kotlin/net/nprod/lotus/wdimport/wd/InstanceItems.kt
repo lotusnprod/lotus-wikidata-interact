@@ -61,6 +61,8 @@ interface InstanceItems {
     val wd: Prefix
     val p: Prefix
 
+    fun wdproperty(id: String): PropertyIdValue = Datamodel.makePropertyIdValue(id, wdURI)
+    fun wdtproperty(id: String): PropertyIdValue = Datamodel.makePropertyIdValue(id, wdtURI)
     fun property(id: String): PropertyIdValue = Datamodel.makePropertyIdValue(id, pURI)
     fun item(id: String): ItemIdValue = Datamodel.makeItemIdValue(id, siteIri)
 
@@ -91,9 +93,9 @@ interface InstanceItems {
 
 
 object TestInstanceItems : InstanceItems {
-    override val siteIri = "http://www.test.wikidata.org/entity/"
+    override val siteIri = "http://test.wikidata.org/entity/"
     override val sitePageIri = "https://test.wikidata.org/w/index.php?title="
-    override val pURI = "http://test.wikidata.org/prop/direct/"
+    override val pURI = "http://test.wikidata.org/prop/"
     override val wdtURI = "http://test.wikidata.org/prop/direct/"
     override val wdURI = "http://test.wikidata.org/entity/"
 
@@ -110,9 +112,9 @@ object TestInstanceItems : InstanceItems {
     override val canonicalSMILES = property("P95466")
     override val pcId = property("P95464")
     override val chemicalFormula = property("P95465")
-    override val instanceOf = property("P82")
+    override val instanceOf = wdproperty("P82")
 
-    override val taxonName = property("P49")
+    override val taxonName = wdtproperty("P95494") // This is a random one
     override val taxonRank = property("P522")
     override val parentTaxon = property("P2105")
 
@@ -141,12 +143,12 @@ object TestInstanceItems : InstanceItems {
     override val phasmidaTaxonomy = property("P95540")
 
     override val naturalProductOfTaxon = property("P95470")
-    override val foundInTaxon = property("P703")
+    override val foundInTaxon = property("P95646")
     override val statedIn = property("P149")
 
     // Article
     override val doi = property("P168")
-    override val title = property("P95")
+    override val title = property("P95645")
 
     // Things
     override val chemicalCompound = item("Q212525")

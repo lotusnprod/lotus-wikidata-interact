@@ -2,6 +2,8 @@ package net.nprod.lotus.wdimport.wd.models
 
 import net.nprod.lotus.wdimport.wd.*
 import net.nprod.lotus.wdimport.wd.sparql.ISparql
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 import org.wikidata.wdtk.datamodel.helpers.Datamodel
 import org.wikidata.wdtk.datamodel.interfaces.*
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher
@@ -17,6 +19,8 @@ typealias RemoteProperty = KProperty1<InstanceItems, PropertyIdValue>
  * This allows to create documents and update them.
  */
 abstract class Publishable {
+    private val logger: Logger = LogManager.getLogger(this::class.qualifiedName)
+
     private var _id: ItemIdValue? = null
 
     abstract var name: String
@@ -54,12 +58,18 @@ abstract class Publishable {
 
         return newDocument(legalName, subject ?: _id) {
             statement(subject ?: _id, instanceItems.instanceOf, type.get(instanceItems))
-
+            logger.info("Subject: ${subject ?: _id} - type: ${type.get(instanceItems)}")
             // We construct the statements according to this instanceItems value
             preStatements.forEach { refStat ->
                 when (refStat) {
-                    is ReferencableValueStatement -> statement(subject ?: _id, refStat, instanceItems)
-                    is ReferenceableRemoteItemStatement -> statement(subject ?: _id, refStat, instanceItems)
+                    is ReferencableValueStatement -> {
+                        logger.info(" Adding a ReferencableValueStatement: ${subject ?: _id} - refStat: ${refStat} - instanceItems: ${instanceItems}")
+                        statement(subject ?: _id, refStat, instanceItems)
+                    }
+                    is ReferenceableRemoteItemStatement -> {
+                        logger.info(" Adding a ReferencableRemoteItemStatement: ${subject ?: _id} - refStat: ${refStat} - instanceItems: ${instanceItems}")
+                        statement(subject ?: _id, refStat, instanceItems)
+                    }
                 }
             }
             preStatements.clear()
@@ -91,7 +101,7 @@ abstract class Publishable {
             }
         } ?: listOf()
         println("Existing ids $propertiesIDs")
-        println("Existing statemts ${preStatements.map{it.property.get(instanceItems).id}}")
+        println("Existing statemts ${preStatements.map { it.property.get(instanceItems).id }}")
         return preStatements.filter { statement ->  // Filter statements that already exist and are not overwritable
             statement.overwriteable || !propertiesIDs.contains(statement.property.get(instanceItems).id)
         }.map { statement ->

@@ -44,7 +44,11 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0)
 
 
     override fun connect() {
-        connection = BasicApiConnection.getWikidataApiConnection()
+        connection = if (instanceItems == TestInstanceItems) {
+            BasicApiConnection.getTestWikidataApiConnection()
+        } else {
+            BasicApiConnection.getWikidataApiConnection()
+        }
         @Suppress("DEPRECATION")
         connection?.login(user, password) ?: throw ConnectException("Impossible to connect to the WikiData instance.")
         logger.info("Connecting to the editor with siteIri: ${instanceItems.siteIri}")
@@ -103,6 +107,7 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0)
 
         // The publishable has not been published yet
         try {
+            logger.info("Looking for it. Published status: ${publishable.published}")
             if (!publishable.published) {
                 newDocuments++
                 val newItemDocument: ItemDocument = editor?.createItemDocument(
@@ -160,6 +165,7 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0)
             }
         } catch (e: MediaWikiApiErrorException) {
             logger.error("Failed to save the item for the reason ${e.errorMessage} ${e.message}")
+            throw e
         }
         return publishable.id
     }

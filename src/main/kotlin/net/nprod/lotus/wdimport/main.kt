@@ -74,7 +74,7 @@ fun main(args: Array<String>) {
     // This is where we say if we use the test Wikidata instance or not
     // the issue is that the test wikidata doesn't have sparql, so it is
     // harder for us to find if something already exist
-    val instanceItems = MainInstanceItems
+    val instanceItems: InstanceItems
 
     logger.info("Initializing toolkit")
 
@@ -82,6 +82,7 @@ fun main(args: Array<String>) {
     lateinit var publisher: Publisher
     var repository: Repository? = null
     if (!real) {
+        instanceItems = TestInstanceItems
         repository = SailRepository(MemoryStore())
         if (persistent) {
             try {
@@ -96,14 +97,17 @@ fun main(args: Array<String>) {
             }
         }
         wdSparql = if (realSparql) {
-            WDSparql(instanceItems)
+            WDSparql(MainInstanceItems)
         } else {
             TestISparql(instanceItems, repository)
         }
-        publisher = TestPublisher(instanceItems, repository)
+        publisher = WDPublisher(instanceItems, pause=10)
     } else {
-        wdSparql = WDSparql(instanceItems)
-        publisher = WDPublisher(instanceItems, pause = 10)
+        instanceItems = MainInstanceItems
+        wdSparql =
+            WDSparql(instanceItems)
+
+        publisher = WDPublisher(instanceItems, pause=10)
     }
 
     val wdFinder = WDFinder(WDKT(), wdSparql)
@@ -169,7 +173,7 @@ fun main(args: Array<String>) {
             iupac = compound.iupac,
             undefinedStereocenters = compound.unspecifiedStereocenters
         ).tryToFind(wdFinder, instanceItems)
-
+        logger.info(wdcompound)
         wdcompound.apply {
             dataTotal.quads.filter { it.compound == compound }.distinct().forEach { quad ->
                 val organism = organisms[quad.organism]

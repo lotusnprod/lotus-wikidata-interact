@@ -1,6 +1,7 @@
 package net.nprod.lotus.wdimport.wd.models
 
 import net.nprod.lotus.wdimport.wd.InstanceItems
+import net.nprod.lotus.wdimport.wd.TestInstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
 import net.nprod.lotus.wdimport.wd.sparql.ISparql
 import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
@@ -26,6 +27,7 @@ data class WDArticle(
      */
     override fun tryToFind(wdFinder: WDFinder, instanceItems: InstanceItems): WDArticle {
         require(doi != null) { "The DOI cannot be null" }
+        if (instanceItems == TestInstanceItems) return this
         val dois = wdFinder.wdkt.searchDOI(doi).query.search.map { it.title.trimStart('Q').toInt() to it.title }.toMap()
             .toSortedMap().values
 
