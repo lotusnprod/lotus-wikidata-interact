@@ -45,7 +45,7 @@ interface InstanceItems {
     // Things
 
     val chemicalCompound: ItemIdValue
-    val groupOfIsomers: ItemIdValue
+    val groupOfStereoIsomers: ItemIdValue
     val taxon: ItemIdValue
     val species: ItemIdValue
     val genus: ItemIdValue
@@ -152,7 +152,7 @@ object TestInstanceItems : InstanceItems {
 
     // Things
     override val chemicalCompound = item("Q212525")
-    override val groupOfIsomers: ItemIdValue = item("Q15711994")
+    override val groupOfStereoIsomers: ItemIdValue = item("Q59199015")
     override val taxon = item("Q212541")
     override val species = item("Q212542")
     override val genus = item("Q212543")
@@ -221,7 +221,7 @@ object MainInstanceItems : InstanceItems {
 
     // Things
     override val chemicalCompound = item("Q11173")
-    override val groupOfIsomers: ItemIdValue = item("Q15711994")
+    override val groupOfStereoIsomers: ItemIdValue = item("Q59199015")
     override val taxon = item("Q16521")
     override val species = item("Q7432")
     override val genus = item("Q34740")

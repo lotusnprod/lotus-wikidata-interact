@@ -21,7 +21,7 @@ data class WDCompound(
     val f: WDCompound.() -> Unit = {}
 ) : Publishable() {
     override var type =
-        if (undefinedStereocenters == 0) InstanceItems::chemicalCompound else InstanceItems::groupOfIsomers
+        if (undefinedStereocenters == 0) InstanceItems::chemicalCompound else InstanceItems::groupOfStereoIsomers
     private val logger: Logger = LogManager.getLogger(this::class.qualifiedName)
 
     init {
