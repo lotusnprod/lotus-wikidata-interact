@@ -1,16 +1,15 @@
 package net.nprod.lotus.wdimport.wd.models
 
-import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
-import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
-import net.nprod.lotus.wdimport.wd.sparql.ISparql
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
+import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
 import org.wikidata.wdtk.datamodel.implementation.ItemIdValueImpl
+import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
+import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue
+import kotlin.reflect.KProperty1
 
 
-val taxDBToProperty = mapOf<String, RemoteProperty?>(
+val taxDBToProperty: Map<String, KProperty1<InstanceItems, PropertyIdValue>?> = mapOf(
     "AmphibiaWeb" to InstanceItems::amphibiaTaxonomy,
     "ARKive" to InstanceItems::ARKIVETaxonomy,
     "BioLib.cz" to null,
@@ -45,16 +44,14 @@ data class WDTaxon(
     val taxonName: String?,
     val taxonRank: RemoteItem
 ) : Publishable() {
-    override var type = InstanceItems::taxon
-    private val logger: Logger = LogManager.getLogger(this::class.qualifiedName)
+    override var type: KProperty1<InstanceItems, ItemIdValue> = InstanceItems::taxon
 
-    override fun dataStatements() =
+    override fun dataStatements(): List<ReferenceableStatement> =
         listOfNotNull(
             parentTaxon?.let { ReferencableValueStatement(InstanceItems::parentTaxon, it) },
             taxonName?.let { ReferencableValueStatement(InstanceItems::taxonName, it) },
             ReferenceableRemoteItemStatement(InstanceItems::taxonRank, taxonRank)
         )
-    // TODO: Grin https://npgsweb.ars-grin.gov/gringlobal/taxonomydetail.aspx?id=12676
 
     override fun tryToFind(wdFinder: WDFinder, instanceItems: InstanceItems): WDTaxon {
         // In the case of the test instance, we do not have the ability to do SPARQL queries
@@ -92,6 +89,6 @@ data class WDTaxon(
     }
 
     fun addTaxoDB(key: String, value: String) {
-        taxDBToProperty[key]?.let { this.addProperty(it, value) }
+        taxDBToProperty[key]?.let { prop -> this.addProperty(prop, value) }
     }
 }

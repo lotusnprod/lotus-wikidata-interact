@@ -17,6 +17,8 @@ fun loadData(fileName: String, skip: Int = 0, limit: Int? = null): DataTotal {
     }
     val file = parseTSVFile(fileReader, limit, skip)
 
+    fileReader.close()
+
     file?.map {
         val database = it.getString("database")
         val organismCleaned = it.getString("organismCleaned")

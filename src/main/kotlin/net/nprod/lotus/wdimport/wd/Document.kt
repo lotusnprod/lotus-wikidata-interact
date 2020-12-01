@@ -12,7 +12,7 @@ import org.wikidata.wdtk.datamodel.interfaces.*
 /**
  * Type safe builder or DSL
  */
-
+@Suppress("unused")
 fun newReference(f: (ReferenceBuilder) -> Unit): Reference {
     val reference = ReferenceBuilder.newInstance()
     reference.apply(f)
@@ -28,7 +28,9 @@ fun newDocument(name: String, id: ItemIdValue? = null, f: ItemDocumentBuilder.()
     return builder.build()
 }
 
-fun ReferenceBuilder.propertyValue(property: PropertyIdValue, value: String) =
+
+@Suppress("unused")
+fun ReferenceBuilder.propertyValue(property: PropertyIdValue, value: String): Unit =
     this.propertyValue(property, Datamodel.makeStringValue(value))
 
 fun ReferenceBuilder.propertyValue(property: PropertyIdValue, value: Value) {
@@ -37,18 +39,6 @@ fun ReferenceBuilder.propertyValue(property: PropertyIdValue, value: Value) {
         value
     )
 }
-
-fun StatementBuilder.reference(reference: Reference) {
-    this.reference(reference)
-}
-
-fun ItemDocumentBuilder.statement(
-    subject: ItemIdValue? = null,
-    property: PropertyIdValue,
-    value: String,
-    f: (StatementBuilder) -> Unit = {}
-): ItemDocumentBuilder =
-    this.withStatement(newStatement(property, subject, Datamodel.makeStringValue(value), f))
 
 fun ItemDocumentBuilder.statement(
     subject: ItemIdValue? = null,
@@ -80,7 +70,7 @@ fun ItemDocumentBuilder.statement(
     subject: ItemIdValue?,
     referenceableStatement: ReferenceableRemoteItemStatement,
     instanceItems: InstanceItems
-) =
+): Unit =
     this.statement(
         subject,
         ReferencableValueStatement(

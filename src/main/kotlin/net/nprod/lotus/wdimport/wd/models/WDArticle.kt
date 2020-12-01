@@ -3,10 +3,9 @@ package net.nprod.lotus.wdimport.wd.models
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.TestInstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
-import net.nprod.lotus.wdimport.wd.sparql.ISparql
-import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
 import org.wikidata.wdtk.datamodel.implementation.ItemIdValueImpl
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
+import kotlin.reflect.KProperty1
 
 // TODO: Identifiers
 
@@ -15,9 +14,9 @@ data class WDArticle(
     val title: String?,
     val doi: String?
 ) : Publishable() {
-    override var type = InstanceItems::scholarlyArticle
+    override var type: KProperty1<InstanceItems, ItemIdValue> = InstanceItems::scholarlyArticle
 
-    override fun dataStatements() =
+    override fun dataStatements(): List<ReferencableValueStatement> =
         listOfNotNull(
             title?.let { ReferencableValueStatement.monolingualValue(InstanceItems::title, it) },
             doi?.let { ReferencableValueStatement(InstanceItems::doi, it) })

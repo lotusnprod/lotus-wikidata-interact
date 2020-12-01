@@ -1,7 +1,6 @@
 package net.nprod.lotus.wdimport.wd.models
 
 import net.nprod.lotus.wdimport.wd.*
-import net.nprod.lotus.wdimport.wd.sparql.ISparql
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.wikidata.wdtk.datamodel.helpers.Datamodel
@@ -63,11 +62,11 @@ abstract class Publishable {
             preStatements.forEach { refStat ->
                 when (refStat) {
                     is ReferencableValueStatement -> {
-                        logger.info(" Adding a ReferencableValueStatement: ${subject ?: _id} - refStat: ${refStat} - instanceItems: ${instanceItems}")
+                        logger.info(" Adding a ReferencableValueStatement: ${subject ?: _id} - refStat: $refStat - instanceItems: $instanceItems")
                         statement(subject ?: _id, refStat, instanceItems)
                     }
                     is ReferenceableRemoteItemStatement -> {
-                        logger.info(" Adding a ReferencableRemoteItemStatement: ${subject ?: _id} - refStat: ${refStat} - instanceItems: ${instanceItems}")
+                        logger.info(" Adding a ReferencableRemoteItemStatement: ${subject ?: _id} - refStat: $refStat - instanceItems: $instanceItems")
                         statement(subject ?: _id, refStat, instanceItems)
                     }
                 }
@@ -103,7 +102,7 @@ abstract class Publishable {
         println("Existing ids $propertiesIDs")
         println("Existing statemts ${preStatements.map { it.property.get(instanceItems).id }}")
         return preStatements.filter { statement ->  // Filter statements that already exist and are not overwritable
-            statement.overwriteable || !propertiesIDs.contains(statement.property.get(instanceItems).id)
+            statement.overwritable || !propertiesIDs.contains(statement.property.get(instanceItems).id)
         }.map { statement ->
             when (statement) {
                 is ReferencableValueStatement -> newStatement(
@@ -134,11 +133,6 @@ abstract class Publishable {
     }
 
     abstract fun tryToFind(wdFinder: WDFinder, instanceItems: InstanceItems): Publishable
-
-    fun addProperty(remoteProperty: RemoteProperty, value: Value, f: ReferencableValueStatement.() -> Unit = {}) {
-        val refStatement = ReferencableValueStatement(remoteProperty, value).apply(f)
-        preStatements.add(refStatement)
-    }
 
     fun addProperty(remoteProperty: RemoteProperty, value: String, f: ReferencableValueStatement.() -> Unit = {}) {
         val refStatement = ReferencableValueStatement(remoteProperty, Datamodel.makeStringValue(value)).apply(f)

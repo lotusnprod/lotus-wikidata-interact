@@ -7,23 +7,29 @@ import net.nprod.lotus.wdimport.wd.InstanceItems
 interface ReferenceableStatement {
     var property: RemoteProperty
     val preReferences: MutableList<WDPreReference>
-    val overwriteable: Boolean
+    val overwritable: Boolean
 }
 
 data class ReferencableValueStatement(
     override var property: RemoteProperty,
     var value: Value,
     override val preReferences: MutableList<WDPreReference> = mutableListOf(),
-    override val overwriteable: Boolean=false
-): ReferenceableStatement {
-    fun reference(property: RemoteProperty, value: Value) = preReferences.add(WDPreReference().add(property, value))
+    override val overwritable: Boolean = false
+) : ReferenceableStatement {
+    fun reference(property: RemoteProperty, value: Value): Boolean =
+        preReferences.add(WDPreReference().add(property, value))
 
-    fun statedIn(value: Value) = preReferences.add(WDPreReference().add(InstanceItems::statedIn, value))
+    fun statedIn(value: Value): Boolean = preReferences.add(WDPreReference().add(InstanceItems::statedIn, value))
 
-    constructor(property: RemoteProperty, value:String, overwriteable: Boolean=false): this(property, Datamodel.makeStringValue(value), overwriteable = overwriteable)
+    constructor(property: RemoteProperty, value: String, overwritable: Boolean = false) : this(
+        property,
+        Datamodel.makeStringValue(value),
+        overwritable = overwritable
+    )
 
     companion object {
-        fun monolingualValue(property: RemoteProperty, value: String) = ReferencableValueStatement(property, Datamodel.makeMonolingualTextValue(value, "en"))
+        fun monolingualValue(property: RemoteProperty, value: String): ReferencableValueStatement =
+            ReferencableValueStatement(property, Datamodel.makeMonolingualTextValue(value, "en"))
     }
 }
 
@@ -31,10 +37,11 @@ data class ReferenceableRemoteItemStatement(
     override var property: RemoteProperty,
     var value: RemoteItem,
     override val preReferences: MutableList<WDPreReference> = mutableListOf(),
-    override val overwriteable: Boolean=false
-): ReferenceableStatement {
+    override val overwritable: Boolean = false
+) : ReferenceableStatement {
 
-    fun reference(property: RemoteProperty, value: Value) = preReferences.add(WDPreReference().add(property, value))
+    fun reference(property: RemoteProperty, value: Value): Boolean =
+        preReferences.add(WDPreReference().add(property, value))
 
-    fun statedIn(value: Value) = preReferences.add(WDPreReference().add(InstanceItems::statedIn, value))
+    fun statedIn(value: Value): Boolean = preReferences.add(WDPreReference().add(InstanceItems::statedIn, value))
 }

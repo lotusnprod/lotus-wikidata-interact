@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package net.nprod.lotus.wdimport.wd.sparql
 
 typealias InChIKey = String

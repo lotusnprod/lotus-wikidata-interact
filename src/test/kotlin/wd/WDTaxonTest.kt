@@ -9,7 +9,7 @@ import net.nprod.lotus.wdimport.wd.sparql.WDSparql
 import net.nprod.lotus.wdimport.wd.sparql.findTaxonByName
 
 internal class WDTaxonTest {
-    lateinit var wdSparql: WDSparql
+    private lateinit var wdSparql: WDSparql
 
     @BeforeEach
     fun setUp() {

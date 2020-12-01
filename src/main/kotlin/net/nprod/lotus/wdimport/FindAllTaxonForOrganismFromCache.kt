@@ -6,13 +6,13 @@ import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
 import net.nprod.lotus.wdimport.wd.interfaces.Publisher
 import net.nprod.lotus.wdimport.wd.models.WDTaxon
-import net.nprod.lotus.wdimport.wd.query.WDKT
 import net.nprod.lotus.wdimport.wd.sparql.ISparql
 import org.apache.logging.log4j.LogManager
 
 fun findAllTaxonForOrganismFromCache(
     dataTotal: DataTotal,
     wdSparql: ISparql,
+    wdFinder: WDFinder,
     instanceItems: InstanceItems,
     publisher: Publisher
 ): Map<Organism, WDTaxon> {
@@ -20,7 +20,7 @@ fun findAllTaxonForOrganismFromCache(
     return dataTotal.organismCache.store.values.mapNotNull { organism ->
 
         logger.debug("Organism Ranks and Ids: ${organism.rankIds}")
-        val wdFinder = WDFinder(WDKT(), wdSparql)
+
         var taxon: WDTaxon? = null
 
         listOf(

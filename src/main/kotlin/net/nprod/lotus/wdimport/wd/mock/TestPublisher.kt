@@ -20,8 +20,9 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 
 
-class TestPublisher(override val instanceItems: InstanceItems, val repository: Repository) : Resolver, Publisher {
-    private val logger: Logger = LogManager.getLogger(this::class.java)
+class TestPublisher(override val instanceItems: InstanceItems, private val repository: Repository) : Resolver,
+    Publisher {
+    private val logger: Logger = LogManager.getLogger("Test Publisher")
     override var newDocuments: Int = 0
     override var updatedDocuments: Int = 0
     private val site = InstanceItems::wdURI.get(instanceItems)

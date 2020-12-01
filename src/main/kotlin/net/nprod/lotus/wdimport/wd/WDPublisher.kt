@@ -26,13 +26,13 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0)
     private val logger: Logger = LogManager.getLogger(this::class.java)
     private var user: String? = null
     private var password: String? = null
-    var connection: ApiConnection? = null
+    private var connection: ApiConnection? = null
     private var editor: WikibaseDataEditor? = null
     override var newDocuments: Int = 0
     override var updatedDocuments: Int = 0
-    var fetcher: WikibaseDataFetcher? = null
+    private var fetcher: WikibaseDataFetcher? = null
 
-    val publishedDocumentsIds: MutableSet<String> = mutableSetOf()
+    private val publishedDocumentsIds: MutableSet<String> = mutableSetOf()
 
     init {
         validate()
@@ -126,26 +126,8 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0)
                 logger.info("Updated document ${publishable.id} - Summary: $summary")
                 val doc = (fetcher?.getEntityDocument(publishable.id.id)
                     ?: throw Exception("Cannot find a document that should be existing: ${publishable.id}")) as ItemDocument
-                val propertiesExisting = doc.statementGroups.flatMap { it.statements.map { it.mainSnak.propertyId.id } }
-
-                // We need to update the name if needed
-                // We are limited to names < 250 characters
-                /*
-                if (publishable.name.length<250) {
-                    editor?.updateTermsStatements(
-                        publishable.id,
-                        listOf(Datamodel.makeMonolingualTextValue(publishable.name, "en")),
-                        listOf(),
-                        listOf(),
-                        listOf(),
-                        listOf(),
-                        listOf(),
-                        "Updating name if needed",
-                        listOf()
-                    )
-                }*/
-
-                // We are not doing that as it was overwriting names
+                val propertiesExisting =
+                    doc.statementGroups.flatMap { it.statements.map { statement -> statement.mainSnak.propertyId.id } }
 
                 val statements = publishable.listOfStatementsForUpdate(fetcher, instanceItems).filter {
                     // We filter all the statement that do not already exist
@@ -171,7 +153,9 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0)
     }
 
     companion object {
-        // Validate the environment
+        /**
+         * Validate the environment
+         */
         fun validate() {
             System.getenv("WIKIDATA_USER")
                 ?: throw EnvironmentVariableError("Missing environment variable WIKIDATA_USER")

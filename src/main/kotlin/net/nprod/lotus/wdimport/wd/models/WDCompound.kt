@@ -2,7 +2,6 @@ package net.nprod.lotus.wdimport.wd.models
 
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
-import net.nprod.lotus.wdimport.wd.sparql.ISparql
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
@@ -37,7 +36,7 @@ data class WDCompound(
                 ReferencableValueStatement(
                     InstanceItems::chemicalFormula,
                     it,
-                    overwriteable = true
+                    overwritable = true
                 )
             },
             //iupac?.let { ReferencableValueStatement(InstanceItems::iupac, it )},  // For this we need to check the labels first…
@@ -75,16 +74,10 @@ data class WDCompound(
         return this
     }
 
-    fun naturalProductOfTaxon(wdTaxon: WDTaxon, f: ReferencableValueStatement.() -> Unit) {
-        require(wdTaxon.published) { "Can only add for an already published taxon." }
-        val refStatement = ReferencableValueStatement(InstanceItems::naturalProductOfTaxon, wdTaxon.id).apply(f)
-        preStatements.add(refStatement)
-    }
-
     fun foundInTaxon(wdTaxon: WDTaxon, f: ReferencableValueStatement.() -> Unit) {
         require(wdTaxon.published) { "Can only add for an already published taxon." }
         val refStatement =
-            ReferencableValueStatement(InstanceItems::foundInTaxon, wdTaxon.id, overwriteable = true).apply(f)
+            ReferencableValueStatement(InstanceItems::foundInTaxon, wdTaxon.id, overwritable = true).apply(f)
         preStatements.add(refStatement)
     }
 }

@@ -8,7 +8,7 @@ import net.nprod.lotus.wdimport.wd.sparql.WDSparql
 import net.nprod.lotus.wdimport.wd.sparql.findCompoundsByInChIKey
 
 class WDCompoundSearchTest {
-    lateinit var wdSparql: WDSparql
+    private lateinit var wdSparql: WDSparql
 
     @BeforeEach
     fun setUp() {

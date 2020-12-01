@@ -5,7 +5,7 @@ import net.nprod.lotus.wdimport.wd.Resolver
 import org.eclipse.rdf4j.query.TupleQueryResult
 import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
 
-interface ISparql: Resolver {
+interface ISparql : Resolver {
     fun <T> query(query: String, function: (TupleQueryResult) -> T): T
 
     /**

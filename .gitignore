@@ -2,3 +2,5 @@
 /build/
 /.gradle/
 /dumpfiles/
+/*.log
+/data/platinum.tsv.gz

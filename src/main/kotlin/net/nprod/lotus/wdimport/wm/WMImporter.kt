@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package net.nprod.lotus.wdimport.wm
 
 import net.nprod.lotus.wdimport.wd.EnvironmentVariableError
@@ -9,7 +11,7 @@ import java.io.IOException
 import javax.security.auth.login.FailedLoginException
 
 
-class WMConnector() {
+class WMConnector {
     private val user: String = System.getenv("WIKIDATA_USER")
         ?: throw EnvironmentVariableError("Missing environment variable WIKIDATA_USER")
     private val password: String = System.getenv("WIKIDATA_PASSWORD")
@@ -19,7 +21,7 @@ class WMConnector() {
     init {
         wiki.throttle = 5000
         val owner = System.getenv("OWNER")
-                ?: throw EnvironmentVariableError("Missing environment variable OWNER (please read the doc!)")
+            ?: throw EnvironmentVariableError("Missing environment variable OWNER (please read the doc!)")
         wiki.userAgent = "LOTUS Importer (owned by $owner)/0.1"
         wiki.assertionMode = Wiki.ASSERT_BOT
     }

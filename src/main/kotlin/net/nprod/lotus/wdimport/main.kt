@@ -5,7 +5,6 @@ import net.nprod.lotus.chemistry.smilesToFormula
 import net.nprod.lotus.chemistry.subscriptFormula
 import net.nprod.lotus.input.loadData
 import net.nprod.lotus.wdimport.wd.mock.TestISparql
-import net.nprod.lotus.wdimport.wd.mock.TestPublisher
 import net.nprod.lotus.wdimport.wd.*
 import net.nprod.lotus.wdimport.wd.interfaces.Publisher
 import net.nprod.lotus.wdimport.wd.models.WDArticle
@@ -101,13 +100,13 @@ fun main(args: Array<String>) {
         } else {
             TestISparql(instanceItems, repository)
         }
-        publisher = WDPublisher(instanceItems, pause=10)
+        publisher = WDPublisher(instanceItems, pause = 10)
     } else {
         instanceItems = MainInstanceItems
         wdSparql =
             WDSparql(instanceItems)
 
-        publisher = WDPublisher(instanceItems, pause=10)
+        publisher = WDPublisher(instanceItems, pause = 10)
     }
 
     val wdFinder = WDFinder(WDKT(), wdSparql)
@@ -117,7 +116,7 @@ fun main(args: Array<String>) {
     logger.info("Producing organisms")
 
 
-    val organisms = findAllTaxonForOrganismFromCache(dataTotal, wdSparql, instanceItems, publisher)
+    val organisms = findAllTaxonForOrganismFromCache(dataTotal, wdSparql, wdFinder, instanceItems, publisher)
 
     logger.info("Producing articles")
 
@@ -194,7 +193,7 @@ fun main(args: Array<String>) {
 
     publisher.disconnect()
 
-// Counting
+    // Counting
 
     if (!real) {
         repository?.let {
@@ -233,5 +232,6 @@ fun main(args: Array<String>) {
         }
         file.close()
     }
-}
 
+    wdFinder.close()
+}
