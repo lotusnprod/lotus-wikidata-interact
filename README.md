@@ -18,30 +18,30 @@ This build use a jar version of wiki-java in libs, make sure you update that fro
 
 ## Run
 
-Replace <<WIKIDATA_USER>> and <<WIKIDATA_PASSWORD>> by your users and password. Notice the space in front of that command
+Replace <<foo>> and <<bar>> by your users and password. Notice the space in front of that command
 to not store them in your shell history.
 
 This will run a single entry from the file in test mode:
 
 ```console
- export <<WIKIDATA_USER=foo>>
- export <<WIKIDATA_PASSWORD=bar>>
+ export WIKIDATA_USER=<<foo>>
+ export WIKIDATA_PASSWORD=<<bar>>
 ./gradlew run --args="--input data/manuallyValidated.tsv"
 ```
 
 This will run the full file in test mode:
 
 ```console
- export <<WIKIDATA_USER=foo>>
- export <<WIKIDATA_PASSWORD=bar>>
+ export WIKIDATA_USER=<<foo>>
+ export WIKIDATA_PASSWORD=<<bar>>
 ./gradlew run --args="--input data/manuallyValidated.tsv -l -1"
 ```
 
 This will run the first line of the file in real mode (you will likely need bot rights to do that:
 
 ```console
- export <<WIKIDATA_USER=foo>>
- export <<WIKIDATA_PASSWORD=bar>>
+ export WIKIDATA_USER=<<foo>>
+ export WIKIDATA_PASSWORD=<<bar>>
 ./gradlew run --args="--input data/manuallyValidated.tsv -r"
 ```
 
