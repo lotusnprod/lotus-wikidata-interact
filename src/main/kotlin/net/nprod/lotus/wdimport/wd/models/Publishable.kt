@@ -52,7 +52,7 @@ abstract class Publishable {
         val legalName = if (name.length < 250) {
             name
         } else {
-            ""
+            inchikey
         }
 
         return newDocument(legalName, subject ?: _id) {
