@@ -69,7 +69,6 @@ fun findAllTaxonForOrganismFromCache(
         }
 
         taxon?.let {
-            // TODO get that to work
             organism.textIds.forEach { dbEntry ->
                 it.addTaxoDB(dbEntry.key, dbEntry.value.split("|").last())
             }

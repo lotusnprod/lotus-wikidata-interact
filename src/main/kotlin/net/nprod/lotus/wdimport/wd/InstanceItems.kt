@@ -175,7 +175,7 @@ object MainInstanceItems : InstanceItems {
     override val chemicalFormula: PropertyIdValue = property("P274")
     override val instanceOf: PropertyIdValue = property("P31")
 
-    // Properties of taxons
+    // Properties of taxa
     override val taxonName: PropertyIdValue = property("P225")
     override val taxonRank: PropertyIdValue = property("P105")
     override val parentTaxon: PropertyIdValue = property("P171")
