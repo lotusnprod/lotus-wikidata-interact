@@ -1,5 +1,6 @@
 package net.nprod.lotus.wdimport.wd
 
+import net.nprod.lotus.helpers.tryCount
 import net.nprod.lotus.wdimport.wd.interfaces.Publisher
 import net.nprod.lotus.wdimport.wd.models.Publishable
 import org.apache.logging.log4j.LogManager
@@ -137,10 +138,13 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0)
                 if (statements.isNotEmpty()) {
                     logger.debug("These are the statements to be added: ")
                     logger.debug(statements)
-                    editor?.updateStatements(
-                        publishable.id, statements,
-                        listOf(), "Updating the statements", listOf()
-                    )
+
+                    tryCount<MediaWikiApiErrorException>(delay = 1000L) {  // Sometimes it needs time to let the DB recover
+                        editor?.updateStatements(
+                            publishable.id, statements,
+                            listOf(), "Updating the statements", listOf()
+                        )
+                    }
                     if (pause > 0) Thread.sleep(pause * 1000L)
                 }
                 publishedDocumentsIds.add(publishable.id.iri)

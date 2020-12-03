@@ -100,13 +100,13 @@ fun main(args: Array<String>) {
         } else {
             TestISparql(instanceItems, repository)
         }
-        publisher = WDPublisher(instanceItems, pause = 10)
+        publisher = WDPublisher(instanceItems, pause = 0)
     } else {
         instanceItems = MainInstanceItems
         wdSparql =
             WDSparql(instanceItems)
 
-        publisher = WDPublisher(instanceItems, pause = 10)
+        publisher = WDPublisher(instanceItems, pause = 0)
     }
 
     val wdFinder = WDFinder(WDKT(), wdSparql)
