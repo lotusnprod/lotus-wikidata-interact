@@ -163,6 +163,7 @@ fun main(args: Array<String>) {
 
     dataTotal.compoundCache.store.forEach { (_, compound) ->
         logger.info("Compound with name ${compound.name}")
+        val compoundName = if (compound.name.length < 250) compound.name else compound.inchikey
         val wdcompound = WDCompound(
             name = compound.name,
             inChIKey = compound.inchikey,
