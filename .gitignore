@@ -4,3 +4,4 @@
 /dumpfiles/
 /*.log
 /data/platinum.tsv.gz
+/data/tmp/

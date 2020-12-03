@@ -165,7 +165,7 @@ fun main(args: Array<String>) {
         logger.info("Compound with name ${compound.name}")
         val compoundName = if (compound.name.length < 250) compound.name else compound.inchikey
         val wdcompound = WDCompound(
-            name = compound.name,
+            name = compoundName,
             inChIKey = compound.inchikey,
             inChI = compound.inchi,
             isomericSMILES = compound.smiles,
