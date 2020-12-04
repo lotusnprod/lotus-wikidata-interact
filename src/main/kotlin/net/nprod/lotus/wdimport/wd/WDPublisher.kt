@@ -139,7 +139,7 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0)
                     logger.debug("These are the statements to be added: ")
                     logger.debug(statements)
 
-                    tryCount<MediaWikiApiErrorException>(delay = 1000L) {  // Sometimes it needs time to let the DB recover
+                    tryCount<MediaWikiApiErrorException, Unit>(delaySeconds = 10L) {  // Sometimes it needs time to let the DB recover
                         editor?.updateStatements(
                             publishable.id, statements,
                             listOf(), "Updating the statements", listOf()
