@@ -55,7 +55,14 @@ class WDKT {
      */
     fun searchDOI(doi: String): QueryActionResponse {
         val out: String = runBlocking {
-            client.get("https://www.wikidata.org/w/api.php?action=query&list=search&srsearch=haswbstatement:\"P356=$doi\"&format=json")
+            client.get("https://www.wikidata.org/w/api.php") {
+                parameter("action", "query")
+                parameter("format", "json")
+                parameter("list", "search")
+                parameter("srsearch", "haswbstatement:\"P356=$doi\"")
+            }
+
+
         }
         return Json.decodeFromString(QueryActionResponse.serializer(), out)
     }
