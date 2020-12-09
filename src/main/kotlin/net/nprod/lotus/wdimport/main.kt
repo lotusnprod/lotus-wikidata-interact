@@ -164,11 +164,13 @@ fun main(args: Array<String>) {
     dataTotal.compoundCache.store.forEach { (_, compound) ->
         logger.info("Compound with name ${compound.name}")
         val compoundName = if (compound.name.length < 250) compound.name else compound.inchikey
+        val isomericSMILES = if (compound.atLeastSomeStereoDefined) compound.smiles else null
         val wdcompound = WDCompound(
             name = compoundName,
             inChIKey = compound.inchikey,
             inChI = compound.inchi,
-            isomericSMILES = compound.smiles,
+            isomericSMILES = isomericSMILES,
+            canonicalSMILES = compound.smiles,
             chemicalFormula = subscriptFormula(smilesToFormula(compound.smiles)),
             iupac = compound.iupac,
             undefinedStereocenters = compound.unspecifiedStereocenters

@@ -51,7 +51,8 @@ data class Compound(
     val inchi: String,
     val inchikey: String,
     val iupac: String,
-    val unspecifiedStereocenters: Int
+    val unspecifiedStereocenters: Int,
+    val atLeastSomeStereoDefined: Boolean
 ) : Indexable
 
 data class Reference(

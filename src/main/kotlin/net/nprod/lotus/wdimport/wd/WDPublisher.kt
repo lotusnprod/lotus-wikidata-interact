@@ -53,7 +53,7 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0)
         @Suppress("DEPRECATION")
         connection?.login(user, password) ?: throw ConnectException("Impossible to connect to the WikiData instance.")
         logger.info("Connecting to the editor with siteIri: ${instanceItems.siteIri}")
-        editor = WikibaseDataEditor(connection, instanceItems.siteIri)
+        editor = WikibaseDataEditor(connection, instanceItems.siteIri).also { it.setEditAsBot(true) }
         logger.info("Connecting to the fetcher")
         fetcher = WikibaseDataFetcher(connection, instanceItems.siteIri).also {
             it.filter.excludeAllProperties()

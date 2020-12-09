@@ -13,6 +13,7 @@ data class WDCompound(
     val inChIKey: String?,
     val inChI: String?,
     val isomericSMILES: String?,
+    val canonicalSMILES: String?,
     val pcId: String? = null,
     val chemicalFormula: String?,
     val iupac: String?,
@@ -32,6 +33,7 @@ data class WDCompound(
             inChIKey?.let { ReferencableValueStatement(InstanceItems::inChIKey, it) },
             inChI?.let { ReferencableValueStatement(InstanceItems::inChI, it) },
             isomericSMILES?.let { ReferencableValueStatement(InstanceItems::isomericSMILES, it) },
+            canonicalSMILES?.let { ReferencableValueStatement(InstanceItems::canonicalSMILES, it) },
             chemicalFormula?.let {
                 ReferencableValueStatement(
                     InstanceItems::chemicalFormula,

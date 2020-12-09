@@ -50,7 +50,8 @@ fun loadData(fileName: String, skip: Int = 0, limit: Int? = null): DataTotal {
                     smiles = smiles, inchi = it.getString("structureCleanedInchi"),
                     inchikey = it.getString("structureCleanedInchikey3D"),
                     iupac = it.getString("structureCleaned_nameIupac"),
-                    unspecifiedStereocenters = it.getInt("structureCleaned_stereocenters_unspecified")
+                    unspecifiedStereocenters = it.getInt("structureCleaned_stereocenters_unspecified"),
+                    atLeastSomeStereoDefined = it.getInt("structureCleaned_stereocenters_unspecified") != it.getInt("structureCleaned_stereocenters_total")
                 )
             }
 
