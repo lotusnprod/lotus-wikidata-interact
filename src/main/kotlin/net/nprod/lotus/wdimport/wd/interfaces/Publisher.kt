@@ -6,9 +6,17 @@ import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue
 
 /**
  * An interface to a RDF style store that allows the publication of **Publishables**
+ *
+ * The purpose is to have a single interface for any kind of document.
  */
 interface Publisher {
+    /**
+     * A counter for new Documents made by that publisher
+     */
     val newDocuments: Int
+    /**
+     * A counter for updated Documents made by that publisher
+     */
     val updatedDocuments: Int
 
     /**
