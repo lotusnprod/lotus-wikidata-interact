@@ -1,6 +1,7 @@
 package net.nprod.lotus.wdimport
 
 import kotlinx.cli.*
+import net.nprod.lotus.chemistry.smilesToCanonical
 import net.nprod.lotus.chemistry.smilesToFormula
 import net.nprod.lotus.chemistry.subscriptFormula
 import net.nprod.lotus.input.loadData
@@ -170,7 +171,7 @@ fun main(args: Array<String>) {
             inChIKey = compound.inchikey,
             inChI = compound.inchi,
             isomericSMILES = isomericSMILES,
-            canonicalSMILES = compound.smiles,
+            canonicalSMILES = smilesToCanonical(compound.smiles),
             chemicalFormula = subscriptFormula(smilesToFormula(compound.smiles)),
             iupac = compound.iupac,
             undefinedStereocenters = compound.unspecifiedStereocenters
