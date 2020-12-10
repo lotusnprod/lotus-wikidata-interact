@@ -9,7 +9,7 @@ import net.nprod.lotus.wdimport.wd.models.WDTaxon
 import net.nprod.lotus.wdimport.wd.sparql.ISparql
 import org.apache.logging.log4j.LogManager
 
-class InvalidTaxonName: RuntimeException()
+class InvalidTaxonName : RuntimeException()
 
 fun processOrganisms(
     dataTotal: DataTotal,
@@ -66,7 +66,7 @@ fun processOrganisms(
 
                 taxon = familyWD
 
-                taxon?.let { if(!it.published) publisher.publish(it, "Created a missing taxon") }
+                taxon?.let { if (!it.published) publisher.publish(it, "Created a missing taxon") }
                 if (genus != null) {
                     val genusWD = WDTaxon(
                         name = genus,
@@ -77,7 +77,7 @@ fun processOrganisms(
 
                     taxon = genusWD
                     if (species != null) {
-                        if(!genusWD.published) publisher.publish(genusWD, "Created a missing genus")
+                        if (!genusWD.published) publisher.publish(genusWD, "Created a missing genus")
 
                         val speciesWD = WDTaxon(
                             name = species,

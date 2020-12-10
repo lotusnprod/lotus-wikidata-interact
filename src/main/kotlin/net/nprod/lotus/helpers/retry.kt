@@ -1,7 +1,5 @@
 package net.nprod.lotus.helpers
 
-import java.lang.RuntimeException
-
 inline fun <reified T : Throwable, U> tryCount(maxRetries: Int = 3, delaySeconds: Long = 0, f: () -> U): U {
     var retries = 0
     while (retries < maxRetries) {

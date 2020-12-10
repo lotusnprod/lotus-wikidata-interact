@@ -1,8 +1,8 @@
 package net.nprod.lotus.wdimport.wd.mock
 
 import net.nprod.lotus.wdimport.wd.InstanceItems
-import net.nprod.lotus.wdimport.wd.interfaces.Publisher
 import net.nprod.lotus.wdimport.wd.Resolver
+import net.nprod.lotus.wdimport.wd.interfaces.Publisher
 import net.nprod.lotus.wdimport.wd.models.Publishable
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger

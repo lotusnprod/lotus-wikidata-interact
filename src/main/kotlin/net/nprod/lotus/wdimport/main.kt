@@ -1,12 +1,15 @@
 package net.nprod.lotus.wdimport
 
-import kotlinx.cli.*
+import kotlinx.cli.ArgParser
+import kotlinx.cli.ArgType
+import kotlinx.cli.default
+import kotlinx.cli.required
 import net.nprod.lotus.input.loadData
-import net.nprod.lotus.wdimport.wd.mock.TestISparql
 import net.nprod.lotus.wdimport.wd.*
 import net.nprod.lotus.wdimport.wd.interfaces.Publisher
 import net.nprod.lotus.wdimport.wd.mock.NopSparql
 import net.nprod.lotus.wdimport.wd.mock.NopWDKT
+import net.nprod.lotus.wdimport.wd.mock.TestISparql
 import net.nprod.lotus.wdimport.wd.mock.TestPublisher
 import net.nprod.lotus.wdimport.wd.query.WDKT
 import net.nprod.lotus.wdimport.wd.sparql.ISparql

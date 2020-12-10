@@ -1,9 +1,9 @@
 package net.nprod.lotus.wdimport.wd.models
 
+import net.nprod.lotus.wdimport.wd.InstanceItems
 import org.wikidata.wdtk.datamodel.helpers.ReferenceBuilder
 import org.wikidata.wdtk.datamodel.interfaces.Reference
 import org.wikidata.wdtk.datamodel.interfaces.Value
-import net.nprod.lotus.wdimport.wd.InstanceItems
 
 
 data class PropertyStore(

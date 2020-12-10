@@ -1,8 +1,8 @@
 package net.nprod.lotus.wdimport.wd.models
 
+import net.nprod.lotus.wdimport.wd.InstanceItems
 import org.wikidata.wdtk.datamodel.helpers.Datamodel
 import org.wikidata.wdtk.datamodel.interfaces.Value
-import net.nprod.lotus.wdimport.wd.InstanceItems
 
 interface ReferenceableStatement {
     var property: RemoteProperty

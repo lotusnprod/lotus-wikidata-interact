@@ -14,6 +14,7 @@ interface Publisher {
      * A counter for new Documents made by that publisher
      */
     val newDocuments: Int
+
     /**
      * A counter for updated Documents made by that publisher
      */

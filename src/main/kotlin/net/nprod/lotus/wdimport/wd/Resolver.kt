@@ -1,9 +1,9 @@
 package net.nprod.lotus.wdimport.wd
 
-import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
-import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue
 import net.nprod.lotus.wdimport.wd.models.RemoteItem
 import net.nprod.lotus.wdimport.wd.models.RemoteProperty
+import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
+import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue
 
 /**
  * Resolve the given element according to the instanceItem of that item

@@ -5,9 +5,12 @@ import net.nprod.lotus.wdimport.wd.interfaces.Publisher
 import net.nprod.lotus.wdimport.wd.models.Publishable
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import org.wikidata.wdtk.datamodel.helpers.*
-import org.wikidata.wdtk.datamodel.interfaces.*
+import org.wikidata.wdtk.datamodel.helpers.Datamodel
+import org.wikidata.wdtk.datamodel.helpers.PropertyDocumentBuilder
 import org.wikidata.wdtk.datamodel.interfaces.DatatypeIdValue.DT_STRING
+import org.wikidata.wdtk.datamodel.interfaces.ItemDocument
+import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
+import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue
 import org.wikidata.wdtk.util.WebResourceFetcherImpl
 import org.wikidata.wdtk.wikibaseapi.ApiConnection
 import org.wikidata.wdtk.wikibaseapi.BasicApiConnection

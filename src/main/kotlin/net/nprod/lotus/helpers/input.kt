@@ -5,7 +5,10 @@ package net.nprod.lotus.helpers
 import com.univocity.parsers.common.record.Record
 import com.univocity.parsers.tsv.TsvParser
 import com.univocity.parsers.tsv.TsvParserSettings
-import java.io.*
+import java.io.BufferedReader
+import java.io.FileInputStream
+import java.io.InputStreamReader
+import java.io.Reader
 import java.util.zip.GZIPInputStream
 
 /**

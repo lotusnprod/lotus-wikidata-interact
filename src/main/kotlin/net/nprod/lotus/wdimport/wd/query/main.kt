@@ -46,7 +46,7 @@ interface IWDKT {
 /**
  * A way to run queries directly using WDTK
  */
-class WDKT: IWDKT {
+class WDKT : IWDKT {
     private val client: HttpClient = HttpClient(CIO)
 
     /**
