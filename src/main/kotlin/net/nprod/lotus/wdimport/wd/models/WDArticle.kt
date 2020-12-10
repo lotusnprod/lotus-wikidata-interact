@@ -27,12 +27,12 @@ data class WDArticle(
     override fun tryToFind(wdFinder: WDFinder, instanceItems: InstanceItems): WDArticle {
         require(doi != null) { "The DOI cannot be null" }
         if (instanceItems == TestInstanceItems) return this
-        val dois = wdFinder.wdkt.searchDOI(doi).query.search.map { it.title.trimStart('Q').toInt() to it.title }.toMap()
-            .toSortedMap().values
+        val dois =
+            wdFinder.wdkt.searchDOI(doi)?.query?.search?.map { it.title.trimStart('Q').toInt() to it.title }?.toMap()
+                ?.toSortedMap()?.values ?: listOf()
 
-        if (dois.isNotEmpty()) {
+        if (dois.isNotEmpty())
             this.published(ItemIdValueImpl.fromId(dois.first(), InstanceItems::wdURI.get(instanceItems)) as ItemIdValue)
-        }
 
         return this
     }

@@ -8,6 +8,8 @@ import net.nprod.lotus.input.loadData
 import net.nprod.lotus.wdimport.wd.mock.TestISparql
 import net.nprod.lotus.wdimport.wd.*
 import net.nprod.lotus.wdimport.wd.interfaces.Publisher
+import net.nprod.lotus.wdimport.wd.mock.NopSparql
+import net.nprod.lotus.wdimport.wd.mock.NopWDKT
 import net.nprod.lotus.wdimport.wd.mock.TestPublisher
 import net.nprod.lotus.wdimport.wd.models.WDArticle
 import net.nprod.lotus.wdimport.wd.models.WDCompound
@@ -15,16 +17,7 @@ import net.nprod.lotus.wdimport.wd.query.WDKT
 import net.nprod.lotus.wdimport.wd.sparql.ISparql
 import net.nprod.lotus.wdimport.wd.sparql.WDSparql
 import org.apache.logging.log4j.LogManager
-import org.eclipse.rdf4j.repository.Repository
-import org.eclipse.rdf4j.repository.sail.SailRepository
-import org.eclipse.rdf4j.rio.RDFFormat
-import org.eclipse.rdf4j.rio.RDFHandler
-import org.eclipse.rdf4j.rio.Rio
-import org.eclipse.rdf4j.sail.memory.MemoryStore
 import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
-import java.io.File
-import java.io.FileNotFoundException
-
 
 fun main(args: Array<String>) {
     val logger = LogManager.getLogger("net.nprod.lotus.chemistry.net.nprod.lotus.tools.wdpropcreator.main")
@@ -40,6 +33,11 @@ fun main(args: Array<String>) {
         ArgType.Boolean,
         shortName = "r",
         description = "Turn on real mode: this will write to WikiData!"
+    ).default(false)
+    val validation by parser.option(
+        ArgType.Boolean,
+        shortName = "v",
+        description = "Turn on validation mode: this will do everything in memory to check the dataset"
     ).default(false)
     val local by parser.option(
         ArgType.Boolean,
@@ -59,7 +57,12 @@ fun main(args: Array<String>) {
     val output by parser.option(
         ArgType.String,
         shortName = "o",
-        description = "Output file name (only for test persistent mode)"
+        description = "Repository output file name (only for test persistent mode)"
+    ).default("")
+    val repositoryInputFilename by parser.option(
+        ArgType.String,
+        shortName = "u",
+        description = "Repository input file name (data will be loaded from here)"
     ).default("")
     parser.parse(args)
 
@@ -67,65 +70,49 @@ fun main(args: Array<String>) {
 
     logger.info("LOTUS Importer")
 
-    if (!real) {
-        logger.info("We are in test mode")
-    }
+    if (!real) logger.info("We are in test mode")
 
-    val dataTotal = if (limit == -1) {
-        loadData(input, skip)
-    } else {
-        loadData(input, skip, limit)
-    }
-
-    // This is where we say if we use the test Wikidata instance or not
-    // the issue is that the test wikidata doesn't have sparql, so it is
-    // harder for us to find if something already exist
-    val instanceItems: InstanceItems
+    val dataTotal = if (limit == -1) loadData(input, skip) else loadData(input, skip, limit)
 
     logger.info("Initializing toolkit")
 
     lateinit var wdSparql: ISparql
     lateinit var publisher: Publisher
-    var repository: Repository? = null
-    if (!real) {
-        instanceItems = TestInstanceItems
-        repository = SailRepository(MemoryStore())
-        if (persistent) {
-            try {
-                logger.info("Loading old data")
-                val file = File("/tmp/out.xml")
-                repository.let {
-                    it.connection
-                    it.connection.add(file.inputStream(), "", RDFFormat.RDFXML)
-                }
-            } catch (e: FileNotFoundException) {
-                logger.info("There is no data from a previous test run.")
-            }
-        }
-        wdSparql = if (realSparql) {
-            WDSparql(MainInstanceItems)
-        } else {
-            TestISparql(instanceItems, repository)
-        }
-        publisher = if (local) {
-            TestPublisher(instanceItems, repository)
-        } else {
-            WDPublisher(instanceItems, pause = 0)
-        }
-    } else {
-        instanceItems = MainInstanceItems
-        wdSparql =
-            WDSparql(instanceItems)
 
-        publisher = WDPublisher(instanceItems, pause = 0)
+    if (real && validation) throw IllegalArgumentException("You cannot be in real mode and validation mode")
+
+    // Are we using test-wikidata properties and classes or the main instance ones
+    val instanceItems: InstanceItems = if (real || validation) MainInstanceItems else TestInstanceItems
+
+    // Do we need a local repository
+    val repositoryManager: RepositoryManager? =
+        if (realSparql || validation) null else {
+            if (repositoryInputFilename == "") throw IllegalArgumentException("You need to give a repository input file name")
+            RepositoryManager(persistent, repositoryInputFilename)
+        }
+
+    // What publishing system are we using
+    publisher = if (real) WDPublisher(instanceItems, pause = 0) else TestPublisher(
+        instanceItems,
+        repositoryManager?.repository
+    )
+
+    // Are we using a local instance of sparql?
+    wdSparql = if (realSparql || real) {
+        WDSparql(instanceItems)
+    } else if (validation) NopSparql()
+    else {
+        TestISparql(
+            instanceItems,
+            repositoryManager?.repository ?: throw RuntimeException("Repository not initialized")
+        )
     }
 
-    val wdFinder = WDFinder(WDKT(), wdSparql)
+    val wdFinder = if (!validation) WDFinder(WDKT(), wdSparql) else WDFinder(NopWDKT(), wdSparql)
 
     publisher.connect()
 
     logger.info("Producing organisms")
-
 
     val organisms = findAllTaxonForOrganismFromCache(dataTotal, wdSparql, wdFinder, instanceItems, publisher)
 
@@ -144,15 +131,16 @@ fun main(args: Array<String>) {
 
     logger.info("Linking")
 
-    logger.info("Creating a local cache of wikidata ids for existing compounds")
-    // We do that so we don't need to do hundreds of thousands of SPARQL queries
-    val wikiCompoundCache = mutableMapOf<String, String>()
-    val inchiKeys = dataTotal.compoundCache.store.map { (_, compound) ->
-        compound.inchikey
-    }
-    inchiKeys.chunked(1000) { inchiKeysBlock ->
-        repository?.let {
-            val query = """
+    if (!validation) {
+        logger.info("Creating a local cache of wikidata ids for existing compounds")
+        // We do that so we don't need to do hundreds of thousands of SPARQL queries
+        val wikiCompoundCache = mutableMapOf<String, String>()
+        val inchiKeys = dataTotal.compoundCache.store.map { (_, compound) ->
+            compound.inchikey
+        }
+        inchiKeys.chunked(1000) { inchiKeysBlock ->
+            repositoryManager?.let {
+                val query = """
                SELECT ?id ?inchikey WHERE {
                    ?id <${instanceItems.inChIKey.iri}> ?inchikey.
                    VALUES ?inchikey {
@@ -160,11 +148,12 @@ fun main(args: Array<String>) {
                    }
                 }
             """.trimIndent()
-            logger.info(query)
-            wdSparql.query(query) { result ->
-                result.forEach {
-                    wikiCompoundCache[it.getValue("inchikey").stringValue()] =
-                        it.getValue("id").stringValue().split("/").last()
+                logger.info(query)
+                wdSparql.query(query) { result ->
+                    result.forEach {
+                        wikiCompoundCache[it.getValue("inchikey").stringValue()] =
+                            it.getValue("id").stringValue().split("/").last()
+                    }
                 }
             }
         }
@@ -209,8 +198,8 @@ fun main(args: Array<String>) {
 
     // Counting
 
-    if (!real) {
-        repository?.let {
+    if (!real && !validation) {
+        repositoryManager?.repository?.let {
             val query = """
                 SELECT * {
                    { SELECT (count (distinct ?org) as ?orgcount) WHERE {
@@ -231,20 +220,13 @@ fun main(args: Array<String>) {
 
             logger.info("We have $orgcount taxa and $cpdcount compounds in the local repository")
         }
-
     }
     logger.info("Publisher has made ${publisher.newDocuments} new documents and updated ${publisher.updatedDocuments}")
 
     // Exporting
 
     if (!real && output != "") {
-        val file = File(output).bufferedWriter()
-        repository?.let {
-            it.connection
-            val writer: RDFHandler = Rio.createWriter(RDFFormat.RDFXML, file)
-            it.connection.export(writer)
-        }
-        file.close()
+        repositoryManager?.write(output)
     }
 
     wdFinder.close()

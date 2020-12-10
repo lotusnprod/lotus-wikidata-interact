@@ -20,7 +20,7 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 
 
-class TestPublisher(override val instanceItems: InstanceItems, private val repository: Repository) : Resolver,
+class TestPublisher(override val instanceItems: InstanceItems, private val repository: Repository?) : Resolver,
     Publisher {
     private val logger: Logger = LogManager.getLogger("Test Publisher")
     override var newDocuments: Int = 0
@@ -75,7 +75,7 @@ class TestPublisher(override val instanceItems: InstanceItems, private val repos
                 is StringValue -> if (value.string == "") throw RuntimeException("We cannot send an empty property for entry $doc")
             }
         }
-        val conn = repository.connection
+        val conn = repository?.connection
 
         val stream = ByteArrayOutputStream()
         val serializer = RdfSerializer(
@@ -94,7 +94,7 @@ class TestPublisher(override val instanceItems: InstanceItems, private val repos
         serializer.processItemDocument(doc)
         serializer.close()
 
-        conn.add(Rio.parse(ByteArrayInputStream(stream.toByteArray()), "", RDFFormat.NTRIPLES))
+        conn?.add(Rio.parse(ByteArrayInputStream(stream.toByteArray()), "", RDFFormat.NTRIPLES))
 
         val id = doc.entityId
         publishable.published(id)

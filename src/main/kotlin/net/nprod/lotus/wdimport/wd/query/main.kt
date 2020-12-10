@@ -38,22 +38,27 @@ data class QueryActionResponse(
     val query: QueryResponse
 )
 
+interface IWDKT {
+    fun close()
+    fun searchDOI(doi: String): QueryActionResponse?
+}
+
 /**
  * A way to run queries directly using WDTK
  */
-class WDKT {
+class WDKT: IWDKT {
     private val client: HttpClient = HttpClient(CIO)
 
     /**
      * Close the client
      */
-    fun close(): Unit = client.close()
+    override fun close(): Unit = client.close()
 
     /**
      * Search for a given doi
      * returns the deserialized response
      */
-    fun searchDOI(doi: String): QueryActionResponse {
+    override fun searchDOI(doi: String): QueryActionResponse {
         val out: String = runBlocking {
             client.get("https://www.wikidata.org/w/api.php") {
                 parameter("action", "query")
