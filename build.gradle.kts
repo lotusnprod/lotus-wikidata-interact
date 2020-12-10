@@ -52,7 +52,7 @@ dependencies {
 
     implementation("com.univocity:univocity-parsers:$univocityParserVersion")
 
-    implementation(":wiki-java-0.36-SNAPSHOT")
+    //implementation(":wiki-java-0.36-SNAPSHOT")
 
     testImplementation(kotlin("test-junit5"))
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitApiVersion")

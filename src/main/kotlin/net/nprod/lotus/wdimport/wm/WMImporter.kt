@@ -2,6 +2,12 @@
 
 package net.nprod.lotus.wdimport.wm
 
+/**
+ * This is for later when we will import wikimedia
+ */
+
+/*
+
 import net.nprod.lotus.wdimport.wd.EnvironmentVariableError
 import org.wikipedia.WMFWiki
 import org.wikipedia.Wiki
@@ -9,7 +15,6 @@ import org.wikipedia.Wiki
 import java.io.IOException
 
 import javax.security.auth.login.FailedLoginException
-
 
 class WMConnector {
     private val user: String = System.getenv("WIKIDATA_USER")
@@ -37,3 +42,4 @@ class WMConnector {
         }
     }
 }
+*/
