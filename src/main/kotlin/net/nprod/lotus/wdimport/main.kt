@@ -34,11 +34,6 @@ fun main(args: Array<String>) {
         shortName = "v",
         description = "Turn on validation mode: this will do everything in memory to check the dataset"
     ).default(false)
-    val local by parser.option(
-        ArgType.Boolean,
-        shortName = "L",
-        description = "Turn on local mode: this will write only locally in a virtual WikiData!"
-    ).default(false)
     val persistent by parser.option(
         ArgType.Boolean,
         shortName = "p",
@@ -83,7 +78,7 @@ fun main(args: Array<String>) {
 
     // Do we need a local repository
     val repositoryManager: RepositoryManager? =
-        if (realSparql || validation) null else {
+        if (real || realSparql || validation) null else {
             if (repositoryInputFilename == "") throw IllegalArgumentException("You need to give a repository input file name")
             RepositoryManager(persistent, repositoryInputFilename)
         }
