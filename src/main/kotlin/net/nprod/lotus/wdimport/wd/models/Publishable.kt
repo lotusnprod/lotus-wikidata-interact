@@ -62,11 +62,11 @@ abstract class Publishable {
             preStatements.forEach { refStat ->
                 when (refStat) {
                     is ReferencableValueStatement -> {
-                        logger.info(" Adding a ReferencableValueStatement- refStat: $refStat - instanceItems: $instanceItems")
+                        logger.info(" Adding a ReferencableValueStatement - refStat: ${refStat.property::class.java} = ${refStat.value}")
                         statement(subject ?: _id, refStat, instanceItems)
                     }
                     is ReferenceableRemoteItemStatement -> {
-                        logger.info(" Adding a ReferencableRemoteItemStatement - refStat: $refStat - instanceItems: $instanceItems")
+                        logger.info(" Adding a ReferencableRemoteItemStatement - refStat: ${refStat.property.get(instanceItems)} = ${refStat.value}")
                         statement(subject ?: _id, refStat, instanceItems)
                     }
                 }

@@ -9,6 +9,8 @@ import net.nprod.lotus.wdimport.wd.models.WDTaxon
 import net.nprod.lotus.wdimport.wd.sparql.ISparql
 import org.apache.logging.log4j.LogManager
 
+class InvalidTaxonName: RuntimeException()
+
 fun findAllTaxonForOrganismFromCache(
     dataTotal: DataTotal,
     wdSparql: ISparql,
@@ -24,9 +26,9 @@ fun findAllTaxonForOrganismFromCache(
         var taxon: WDTaxon? = null
 
         listOf(
+            "ITIS",
             "GBIF",
             "NCBI",
-            "ITIS",
             "Index Fungorum",
             "The Interim Register of Marine and Nonmarine Genera",
             "World Register of Marine Species",
@@ -41,17 +43,27 @@ fun findAllTaxonForOrganismFromCache(
                 val genus = organism.rankIds[taxonDb]?.firstOrNull { it.first == "genus" }?.second?.name
                 val species = organism.rankIds[taxonDb]?.firstOrNull { it.first == "species" }?.second?.name
 
-                val familyWD = if (family != null) {
+                // This is a ugly hack, we need to find a way to get a proper taxonomy input
+                // that take every rank into account.
+
+                // We make sure neither genus and species are empty, as we cannot push empty properties to WikiData
+                if (genus == "" || species == "") {
+                    logger.error("A taxon name was empty using the database $taxonDbName (null is ok): family=[$family] genus=[$genus] species=[$species]")
+                    logger.error(organism.prettyPrint())
+                    throw InvalidTaxonName()
+                }
+
+                val familyWD = if (family != null && family != "") {
                     WDTaxon(
                         name = family,
                         parentTaxon = null,
                         taxonName = family,
                         taxonRank = InstanceItems::family
                     ).tryToFind(wdFinder, instanceItems)
-
                 } else {
                     null
                 }
+
                 taxon = familyWD
 
                 taxon?.let { if(!it.published) publisher.publish(it, "Created a missing taxon") }
@@ -76,7 +88,6 @@ fun findAllTaxonForOrganismFromCache(
                         taxon = speciesWD
                     }
                 }
-
             }
         }
 

@@ -37,6 +37,23 @@ data class Organism(
             }
         }
     }
+
+    /**
+     * Pretty printing an organism
+     */
+    fun prettyPrint(): String {
+        val sb = StringBuilder()
+        sb.appendLine("Organism")
+        sb.appendLine(" Name: $name")
+        sb.appendLine(" RankIds: ")
+        rankIds.forEach { (k: TaxonomyDatabase, v: List<Pair<String, OrganismTaxInfo>>) ->
+            sb.appendLine("  Database: ${k.name}")
+            v.forEach {
+                sb.appendLine("    ${it.first} ${it.second.id} ${it.second.name}")
+            }
+        }
+        return sb.toString()
+    }
 }
 
 data class TaxonomyDatabase(
