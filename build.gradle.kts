@@ -9,10 +9,11 @@ val junitApiVersion = "5.6.0"
 val univocityParserVersion = "2.8.4"
 val ktorVersion = "1.4.0"
 val serializationVersion = "1.0.1"
+val kotlinVersion = "1.4.21"
 
 plugins {
-    kotlin("jvm") version "1.4.20"
-    kotlin("plugin.serialization") version "1.4.20"
+    kotlin("jvm") version "1.4.21"
+    kotlin("plugin.serialization") version "1.4.21"
     application
 }
 group = "net.nprod.onpdb.wdimport"
@@ -28,6 +29,7 @@ repositories {
     }
 }
 dependencies {
+    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-cli:$kotlinxCliVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
 
