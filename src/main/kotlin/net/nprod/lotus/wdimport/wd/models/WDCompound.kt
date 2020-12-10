@@ -2,6 +2,7 @@ package net.nprod.lotus.wdimport.wd.models
 
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
+import net.nprod.lotus.wdimport.wd.sparql.InChIKey
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
@@ -45,10 +46,19 @@ data class WDCompound(
             pcId?.let { ReferencableValueStatement(InstanceItems::pcId, it) }
         )
 
-    override fun tryToFind(wdFinder: WDFinder, instanceItems: InstanceItems): WDCompound {
-        // In the case of the test instance, we do not have the ability to do SPARQL queries
+    override fun tryToFind(wdFinder: WDFinder, instanceItems: InstanceItems) =
+        tryToFind(wdFinder, instanceItems, mapOf())
 
-        val query = """
+    fun tryToFind(
+        wdFinder: WDFinder,
+        instanceItems: InstanceItems,
+        cache: Map<InChIKey, String> = mapOf()
+    ): WDCompound {
+        // In the case of the test instance, we do not have the ability to do SPARQL queries
+        val results = if (cache.containsKey(inChIKey)) {
+            listOf(cache[inChIKey])
+        } else {
+            val query = """
             PREFIX wd: <${InstanceItems::wdURI.get(instanceItems)}>
             PREFIX wdt: <${InstanceItems::wdtURI.get(instanceItems)}>
             SELECT DISTINCT ?id {
@@ -56,9 +66,10 @@ data class WDCompound(
             }
             """.trimIndent()
 
-        val results = wdFinder.sparql.query(query) { result ->
-            result.map { bindingSet ->
-                bindingSet.getValue("id").stringValue().replace(instanceItems.wdURI, "")
+            wdFinder.sparql.query(query) { result ->
+                result.map { bindingSet ->
+                    bindingSet.getValue("id").stringValue().replace(instanceItems.wdURI, "")
+                }
             }
         }
 

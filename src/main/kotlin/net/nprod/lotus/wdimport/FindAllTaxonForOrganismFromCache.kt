@@ -11,7 +11,7 @@ import org.apache.logging.log4j.LogManager
 
 class InvalidTaxonName: RuntimeException()
 
-fun findAllTaxonForOrganismFromCache(
+fun processOrganisms(
     dataTotal: DataTotal,
     wdSparql: ISparql,
     wdFinder: WDFinder,

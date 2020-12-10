@@ -1,9 +1,6 @@
 package net.nprod.lotus.wdimport
 
 import kotlinx.cli.*
-import net.nprod.lotus.chemistry.smilesToCanonical
-import net.nprod.lotus.chemistry.smilesToFormula
-import net.nprod.lotus.chemistry.subscriptFormula
 import net.nprod.lotus.input.loadData
 import net.nprod.lotus.wdimport.wd.mock.TestISparql
 import net.nprod.lotus.wdimport.wd.*
@@ -11,13 +8,11 @@ import net.nprod.lotus.wdimport.wd.interfaces.Publisher
 import net.nprod.lotus.wdimport.wd.mock.NopSparql
 import net.nprod.lotus.wdimport.wd.mock.NopWDKT
 import net.nprod.lotus.wdimport.wd.mock.TestPublisher
-import net.nprod.lotus.wdimport.wd.models.WDArticle
-import net.nprod.lotus.wdimport.wd.models.WDCompound
 import net.nprod.lotus.wdimport.wd.query.WDKT
 import net.nprod.lotus.wdimport.wd.sparql.ISparql
+import net.nprod.lotus.wdimport.wd.sparql.InChIKey
 import net.nprod.lotus.wdimport.wd.sparql.WDSparql
 import org.apache.logging.log4j.LogManager
-import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
 
 fun main(args: Array<String>) {
     val logger = LogManager.getLogger("net.nprod.lotus.chemistry.net.nprod.lotus.tools.wdpropcreator.main")
@@ -72,6 +67,8 @@ fun main(args: Array<String>) {
 
     if (!real) logger.info("We are in test mode")
 
+    logger.info("Loading data")
+
     val dataTotal = if (limit == -1) loadData(input, skip) else loadData(input, skip, limit)
 
     logger.info("Initializing toolkit")
@@ -114,120 +111,47 @@ fun main(args: Array<String>) {
 
     logger.info("Producing organisms")
 
-    val organisms = findAllTaxonForOrganismFromCache(dataTotal, wdSparql, wdFinder, instanceItems, publisher)
+    val organisms = processOrganisms(dataTotal, wdSparql, wdFinder, instanceItems, publisher)
 
     logger.info("Producing articles")
 
-    val references = dataTotal.referenceCache.store.map {
-        val article = WDArticle(
-            name = it.value.title ?: it.value.doi,
-            title = it.value.title,
-            doi = it.value.doi.toUpperCase(), // DOIs are always uppercase
-        ).tryToFind(wdFinder, instanceItems)
-        // TODO: Add PMID and PMCID
-        publisher.publish(article, "upserting article")
-        it.value to article
-    }.toMap()
+    val references = processReferences(dataTotal, wdFinder, instanceItems, publisher)
 
-    logger.info("Linking")
+    logger.info("Producing compounds and linking them to organisms, and annotate with articles")
 
+    val wikidataCompoundCache = mutableMapOf<InChIKey, String>()
+
+    // We do that so we don't need to do hundreds of thousands of SPARQL queries
     if (!validation) {
-        logger.info("Creating a local cache of wikidata ids for existing compounds")
-        // We do that so we don't need to do hundreds of thousands of SPARQL queries
-        val wikiCompoundCache = mutableMapOf<String, String>()
-        val inchiKeys = dataTotal.compoundCache.store.map { (_, compound) ->
-            compound.inchikey
-        }
-        inchiKeys.chunked(1000) { inchiKeysBlock ->
-            repositoryManager?.let {
-                val query = """
-               SELECT ?id ?inchikey WHERE {
-                   ?id <${instanceItems.inChIKey.iri}> ?inchikey.
-                   VALUES ?inchikey {
-                      ${inchiKeysBlock.joinToString(" ") { key -> Rdf.literalOf(key).queryString }}
-                   }
-                }
-            """.trimIndent()
-                logger.info(query)
-                wdSparql.query(query) { result ->
-                    result.forEach {
-                        wikiCompoundCache[it.getValue("inchikey").stringValue()] =
-                            it.getValue("id").stringValue().split("/").last()
-                    }
-                }
-            }
-        }
+        logger.info(" Creating a local cache of wikidata ids for existing compounds")
+        buildCompoundCache(dataTotal, repositoryManager, instanceItems, logger, wdSparql, wikidataCompoundCache)
     }
 
     // Adding all compounds
 
-    dataTotal.compoundCache.store.forEach { (_, compound) ->
-        logger.info("Compound with name ${compound.name}")
-        val compoundName = if (compound.name.length < 250) compound.name else compound.inchikey
-        val isomericSMILES = if (compound.atLeastSomeStereoDefined) compound.smiles else null
-        val wdcompound = WDCompound(
-            name = compoundName,
-            inChIKey = compound.inchikey,
-            inChI = compound.inchi,
-            isomericSMILES = isomericSMILES,
-            canonicalSMILES = smilesToCanonical(compound.smiles),
-            chemicalFormula = subscriptFormula(smilesToFormula(compound.smiles)),
-            iupac = compound.iupac,
-            undefinedStereocenters = compound.unspecifiedStereocenters
-        ).tryToFind(wdFinder, instanceItems)
-        logger.info(wdcompound)
-        wdcompound.apply {
-            dataTotal.quads.filter { it.compound == compound }.distinct().forEach { quad ->
-                val organism = organisms[quad.organism]
-                organism?.let {
-                    foundInTaxon(
-                        organism
-                    ) {
-                        statedIn(
-                            references[quad.reference]?.id
-                                ?: throw Exception("That's bad we talk about a reference we don't have.")
-                        )
-                    }
-                }
-            }
-        }
-        publisher.publish(wdcompound, "upserting compound")
-    }
+    processCompounds(
+        dataTotal,
+        logger,
+        wdFinder,
+        instanceItems,
+        wikidataCompoundCache,
+        organisms,
+        references,
+        publisher
+    )
 
     publisher.disconnect()
 
     // Counting
 
     if (!real && !validation) {
-        repositoryManager?.repository?.let {
-            val query = """
-                SELECT * {
-                   { SELECT (count (distinct ?org) as ?orgcount) WHERE {
-                   ?org <${instanceItems.instanceOf.iri}> <${instanceItems.taxon.iri}>.
-                   }
-                   }
-                   
-                   { SELECT (count (distinct ?cpd) as ?cpdcount) WHERE {
-                   ?cpd <${instanceItems.instanceOf.iri}> <${instanceItems.chemicalCompound.iri}>.
-                   }
-                   }
-                }
-            """.trimIndent()
-            logger.info(query)
-            val bindingSet = it.connection.prepareTupleQuery(query).evaluate().first()
-            val orgcount = bindingSet.getBinding("orgcount").value.stringValue()
-            val cpdcount = bindingSet.getBinding("cpdcount").value.stringValue()
-
-            logger.info("We have $orgcount taxa and $cpdcount compounds in the local repository")
-        }
+        countInLocalRepository(repositoryManager, instanceItems, logger)
     }
     logger.info("Publisher has made ${publisher.newDocuments} new documents and updated ${publisher.updatedDocuments}")
 
     // Exporting
 
-    if (!real && output != "") {
-        repositoryManager?.write(output)
-    }
+    if (!real && output != "") repositoryManager?.write(output)
 
     wdFinder.close()
 }
