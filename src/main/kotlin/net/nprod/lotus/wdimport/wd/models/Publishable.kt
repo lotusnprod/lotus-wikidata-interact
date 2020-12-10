@@ -57,16 +57,16 @@ abstract class Publishable {
 
         return newDocument(legalName, subject ?: _id) {
             statement(subject ?: _id, instanceItems.instanceOf, type.get(instanceItems))
-            logger.info("Subject: ${subject ?: _id} - type: ${type.get(instanceItems)}")
+            logger.info("Creating a new document - Subject: ${subject ?: _id} - type: ${type.get(instanceItems)}")
             // We construct the statements according to this instanceItems value
             preStatements.forEach { refStat ->
                 when (refStat) {
                     is ReferencableValueStatement -> {
-                        logger.info(" Adding a ReferencableValueStatement: ${subject ?: _id} - refStat: $refStat - instanceItems: $instanceItems")
+                        logger.info(" Adding a ReferencableValueStatement- refStat: $refStat - instanceItems: $instanceItems")
                         statement(subject ?: _id, refStat, instanceItems)
                     }
                     is ReferenceableRemoteItemStatement -> {
-                        logger.info(" Adding a ReferencableRemoteItemStatement: ${subject ?: _id} - refStat: $refStat - instanceItems: $instanceItems")
+                        logger.info(" Adding a ReferencableRemoteItemStatement - refStat: $refStat - instanceItems: $instanceItems")
                         statement(subject ?: _id, refStat, instanceItems)
                     }
                 }

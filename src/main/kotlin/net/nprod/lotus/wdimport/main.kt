@@ -8,6 +8,7 @@ import net.nprod.lotus.input.loadData
 import net.nprod.lotus.wdimport.wd.mock.TestISparql
 import net.nprod.lotus.wdimport.wd.*
 import net.nprod.lotus.wdimport.wd.interfaces.Publisher
+import net.nprod.lotus.wdimport.wd.mock.TestPublisher
 import net.nprod.lotus.wdimport.wd.models.WDArticle
 import net.nprod.lotus.wdimport.wd.models.WDCompound
 import net.nprod.lotus.wdimport.wd.query.WDKT
@@ -39,6 +40,11 @@ fun main(args: Array<String>) {
         ArgType.Boolean,
         shortName = "r",
         description = "Turn on real mode: this will write to WikiData!"
+    ).default(false)
+    val local by parser.option(
+        ArgType.Boolean,
+        shortName = "L",
+        description = "Turn on local mode: this will write only locally in a virtual WikiData!"
     ).default(false)
     val persistent by parser.option(
         ArgType.Boolean,
@@ -101,7 +107,11 @@ fun main(args: Array<String>) {
         } else {
             TestISparql(instanceItems, repository)
         }
-        publisher = WDPublisher(instanceItems, pause = 0)
+        publisher = if (local) {
+            TestPublisher(instanceItems, repository)
+        } else {
+            WDPublisher(instanceItems, pause = 0)
+        }
     } else {
         instanceItems = MainInstanceItems
         wdSparql =

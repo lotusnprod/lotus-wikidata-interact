@@ -43,6 +43,7 @@ interface InstanceItems {
     val taxon: ItemIdValue
     val species: ItemIdValue
     val genus: ItemIdValue
+    val family: ItemIdValue
     val scholarlyArticle: ItemIdValue
 
     // Sparql
@@ -150,6 +151,7 @@ object TestInstanceItems : InstanceItems {
     override val taxon: ItemIdValue = item("Q212541")
     override val species: ItemIdValue = item("Q212542")
     override val genus: ItemIdValue = item("Q212543")
+    override val family: ItemIdValue = item("Q212544")
     override val scholarlyArticle: ItemIdValue = item("Q212556")
 }
 
@@ -219,5 +221,6 @@ object MainInstanceItems : InstanceItems {
     override val taxon: ItemIdValue = item("Q16521")
     override val species: ItemIdValue = item("Q7432")
     override val genus: ItemIdValue = item("Q34740")
+    override val family: ItemIdValue = item("Q35409")
     override val scholarlyArticle: ItemIdValue = item("Q13442814")
 }

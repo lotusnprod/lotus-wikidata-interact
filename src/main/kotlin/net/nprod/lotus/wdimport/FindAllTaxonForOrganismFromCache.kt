@@ -33,24 +33,39 @@ fun findAllTaxonForOrganismFromCache(
             "Database of Vascular Plants of Canada (VASCAN)",
             "GBIF Backbone Taxonomy"
         ).forEach { taxonDbName ->
+            // First we check if we have that db in the current organism
             val taxonDb = organism.rankIds.keys.firstOrNull { it.name == taxonDbName }
             if (taxon != null) return@forEach
             taxonDb?.let {
+                val family = organism.rankIds[taxonDb]?.firstOrNull { it.first == "family" }?.second?.name
                 val genus = organism.rankIds[taxonDb]?.firstOrNull { it.first == "genus" }?.second?.name
                 val species = organism.rankIds[taxonDb]?.firstOrNull { it.first == "species" }?.second?.name
 
-                if (genus != null) {
+                val familyWD = if (family != null) {
+                    WDTaxon(
+                        name = family,
+                        parentTaxon = null,
+                        taxonName = family,
+                        taxonRank = InstanceItems::family
+                    ).tryToFind(wdFinder, instanceItems)
 
+                } else {
+                    null
+                }
+                taxon = familyWD
+
+                taxon?.let { if(!it.published) publisher.publish(it, "Created a missing taxon") }
+                if (genus != null) {
                     val genusWD = WDTaxon(
                         name = genus,
-                        parentTaxon = null,
+                        parentTaxon = familyWD?.id,
                         taxonName = genus,
                         taxonRank = InstanceItems::genus
                     ).tryToFind(wdFinder, instanceItems)
 
                     taxon = genusWD
                     if (species != null) {
-                        publisher.publish(genusWD, "Created a missing genus")
+                        if(!genusWD.published) publisher.publish(genusWD, "Created a missing genus")
 
                         val speciesWD = WDTaxon(
                             name = species,
@@ -61,10 +76,12 @@ fun findAllTaxonForOrganismFromCache(
                         taxon = speciesWD
                     }
                 }
+
             }
         }
 
         if (taxon == null) {
+            logger.error("This is pretty bad here is what I know about an organism that failed: $organism")
             throw Exception("Sorry we couldn't find any info from the accepted reference taxonomy source, we only have: ${organism.rankIds.keys.map { it.name }}")
         }
 

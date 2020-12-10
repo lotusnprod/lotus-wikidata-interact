@@ -70,7 +70,11 @@ class TestPublisher(override val instanceItems: InstanceItems, private val repos
 
         val doc = publishable.document(instanceItems, entityId as ItemIdValue)
 
-
+        doc.allStatements.asSequence().toList().map {
+            when (val value = it.value) {
+                is StringValue -> if (value.string == "") throw RuntimeException("We cannot send an empty property")
+            }
+        }
         val conn = repository.connection
 
         val stream = ByteArrayOutputStream()

@@ -30,7 +30,7 @@ fun loadData(fileName: String, skip: Int = 0, limit: Int? = null): DataTotal {
         val smiles = it.getString("structureCleanedSmiles")
         val doi = it.getString("referenceCleanedDoi")
 
-        if (organismRanks.contains("genus") || organismRanks.contains("species")) {
+        if (organismRanks.contains("genus") || organismRanks.contains("species") || organismRanks.contains("family")) {
 
             val databaseObj = dataTotal.databaseCache.getOrNew(database) {
                 Database(name = database)
