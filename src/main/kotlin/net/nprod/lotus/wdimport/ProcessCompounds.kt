@@ -4,14 +4,10 @@ import net.nprod.lotus.chemistry.smilesToCanonical
 import net.nprod.lotus.chemistry.smilesToFormula
 import net.nprod.lotus.chemistry.subscriptFormula
 import net.nprod.lotus.input.DataTotal
-import net.nprod.lotus.input.Organism
-import net.nprod.lotus.input.Reference
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
 import net.nprod.lotus.wdimport.wd.interfaces.Publisher
-import net.nprod.lotus.wdimport.wd.models.WDArticle
 import net.nprod.lotus.wdimport.wd.models.WDCompound
-import net.nprod.lotus.wdimport.wd.models.WDTaxon
 import net.nprod.lotus.wdimport.wd.sparql.InChIKey
 import org.apache.logging.log4j.Logger
 
@@ -21,8 +17,8 @@ fun processCompounds(
     wdFinder: WDFinder,
     instanceItems: InstanceItems,
     wikidataCompoundCache: MutableMap<InChIKey, String>,
-    organisms: Map<Organism, WDTaxon>,
-    references: Map<Reference, WDArticle>,
+    organisms: OrganismProcessor,
+    references: ReferencesProcessor,
     publisher: Publisher
 ) {
     dataTotal.compoundCache.store.forEach { (_, compound) ->
@@ -42,15 +38,12 @@ fun processCompounds(
         logger.info(wdcompound)
         wdcompound.apply {
             dataTotal.quads.filter { it.compound == compound }.distinct().forEach { quad ->
-                val organism = organisms[quad.organism]
-                organism?.let {
+                val organism = organisms.get(quad.organism)
+                organism.let {
                     foundInTaxon(
                         organism
                     ) {
-                        statedIn(
-                            references[quad.reference]?.id
-                                ?: throw Exception("That's bad we talk about a reference we don't have.")
-                        )
+                        statedIn(references.get(quad.reference).id)
                     }
                 }
             }

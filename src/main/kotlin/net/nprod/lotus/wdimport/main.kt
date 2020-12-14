@@ -4,6 +4,7 @@ import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.default
 import kotlinx.cli.required
+import net.nprod.lotus.input.DataTotal
 import net.nprod.lotus.input.loadData
 import net.nprod.lotus.wdimport.wd.*
 import net.nprod.lotus.wdimport.wd.interfaces.Publisher
@@ -67,7 +68,7 @@ fun main(args: Array<String>) {
 
     logger.info("Loading data")
 
-    val dataTotal = if (limit == -1) loadData(input, skip) else loadData(input, skip, limit)
+    val dataTotal: DataTotal = if (limit == -1) loadData(input, skip) else loadData(input, skip, limit)
 
     logger.info("Initializing toolkit")
 
@@ -107,15 +108,7 @@ fun main(args: Array<String>) {
 
     publisher.connect()
 
-    logger.info("Producing organisms")
-
-    val organisms = processOrganisms(dataTotal, wdSparql, wdFinder, instanceItems, publisher)
-
-    logger.info("Producing articles")
-
-    val references = processReferences(dataTotal, wdFinder, instanceItems, publisher)
-
-    logger.info("Producing compounds and linking them to organisms, and annotate with articles")
+    logger.info("Producing data")
 
     val wikidataCompoundCache = mutableMapOf<InChIKey, String>()
 
@@ -125,6 +118,9 @@ fun main(args: Array<String>) {
         buildCompoundCache(dataTotal, repositoryManager, instanceItems, logger, wdSparql, wikidataCompoundCache)
     }
 
+    val organismProcessor = OrganismProcessor(dataTotal, publisher, wdFinder, instanceItems)
+    val referencesProcessor = ReferencesProcessor(dataTotal, publisher, wdFinder, instanceItems)
+
     // Adding all compounds
 
     processCompounds(
@@ -133,8 +129,8 @@ fun main(args: Array<String>) {
         wdFinder,
         instanceItems,
         wikidataCompoundCache,
-        organisms,
-        references,
+        organismProcessor,
+        referencesProcessor,
         publisher
     )
 

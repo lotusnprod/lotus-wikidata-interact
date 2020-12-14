@@ -11,16 +11,14 @@ import org.apache.logging.log4j.LogManager
 
 class InvalidTaxonName : RuntimeException()
 
-fun processOrganisms(
-    dataTotal: DataTotal,
-    wdSparql: ISparql,
-    wdFinder: WDFinder,
-    instanceItems: InstanceItems,
-    publisher: Publisher
-): Map<Organism, WDTaxon> {
-    val logger = LogManager.getLogger("findAllTAxonForOrganismFromCache")
-    return dataTotal.organismCache.store.values.mapNotNull { organism ->
 
+class OrganismProcessor(
+    val dataTotal: DataTotal, val publisher: Publisher, val wdFinder: WDFinder,
+    val instanceItems: InstanceItems,
+) {
+    val logger = LogManager.getLogger(OrganismProcessor::class.qualifiedName)
+    val organismCache: MutableMap<Organism, WDTaxon> = mutableMapOf()
+    fun taxonFromOrganism(organism: Organism): WDTaxon {
         logger.debug("Organism Ranks and Ids: ${organism.rankIds}")
 
         var taxon: WDTaxon? = null
@@ -90,20 +88,23 @@ fun processOrganisms(
                 }
             }
         }
-
-        if (taxon == null) {
+        val finalTaxon = taxon
+        if (finalTaxon == null) {
             logger.error("This is pretty bad here is what I know about an organism that failed: $organism")
             throw Exception("Sorry we couldn't find any info from the accepted reference taxonomy source, we only have: ${organism.rankIds.keys.map { it.name }}")
-        }
-
-        taxon?.let {
+        } else {
             organism.textIds.forEach { dbEntry ->
-                it.addTaxoDB(dbEntry.key, dbEntry.value.split("|").last())
+                finalTaxon.addTaxoDB(dbEntry.key, dbEntry.value.split("|").last())
             }
 
-            publisher.publish(it, "Created a missing taxon")
-            organism to it
+            publisher.publish(finalTaxon, "Created a missing taxon")
+            return finalTaxon
         }
+    }
 
-    }.toMap()
+    fun get(key: Organism): WDTaxon {
+        return organismCache.getOrPut(key) {
+            taxonFromOrganism(key)
+        }
+    }
 }
