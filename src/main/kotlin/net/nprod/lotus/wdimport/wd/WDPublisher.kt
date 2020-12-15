@@ -114,10 +114,14 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0)
             logger.info("Looking for it. Published status: ${publishable.published}")
             if (!publishable.published) {
                 newDocuments++
-                val newItemDocument: ItemDocument = editor?.createItemDocument(
-                    publishable.document(instanceItems),
-                    summary, null
-                ) ?: throw InternalError("There is no editor anymore")
+                val newItemDocument: ItemDocument =
+                    tryCount<MediaWikiApiErrorException, ItemDocument>(
+                        delaySeconds = 30L,
+                        maxRetries = 10
+                    ) {  // Sometimes it needs time to let the DB recover
+                        editor?.createItemDocument(publishable.document(instanceItems), summary, null)
+                            ?: throw InternalError("There is no editor anymore")
+                    }
 
                 val itemId = newItemDocument.entityId
                 publishedDocumentsIds.add(itemId.iri)
@@ -142,7 +146,10 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0)
                     logger.debug("These are the statements to be added: ")
                     logger.debug(statements)
 
-                    tryCount<MediaWikiApiErrorException, Unit>(delaySeconds = 10L) {  // Sometimes it needs time to let the DB recover
+                    tryCount<MediaWikiApiErrorException, Unit>(
+                        delaySeconds = 30L,
+                        maxRetries = 10
+                    ) {  // Sometimes it needs time to let the DB recover
                         editor?.updateStatements(
                             publishable.id, statements,
                             listOf(), "Updating the statements", listOf()
