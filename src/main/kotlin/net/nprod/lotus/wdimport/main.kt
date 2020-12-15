@@ -106,6 +106,8 @@ fun main(args: Array<String>) {
 
     val wdFinder = if (!validation) WDFinder(WDKT(), wdSparql) else WDFinder(NopWDKT(), wdSparql)
 
+    logger.info("Connecting to the publisher")
+
     publisher.connect()
 
     logger.info("Producing data")
@@ -122,7 +124,18 @@ fun main(args: Array<String>) {
     val referencesProcessor = ReferencesProcessor(dataTotal, publisher, wdFinder, instanceItems)
 
     // Adding all compounds
-
+    /** TODO >
+     * Exception in thread "main" org.wikidata.wdtk.wikibaseapi.apierrors.MediaWikiApiErrorException: [readonly] The database has been automatically locked while the replica database servers catch up to the master
+    at org.wikidata.wdtk.wikibaseapi.apierrors.MediaWikiApiErrorHandler.throwMediaWikiApiErrorException(MediaWikiApiErrorHandler.java:68)
+    at org.wikidata.wdtk.wikibaseapi.ApiConnection.checkErrors(ApiConnection.java:524)
+    at org.wikidata.wdtk.wikibaseapi.ApiConnection.sendJsonRequest(ApiConnection.java:464)
+    at org.wikidata.wdtk.wikibaseapi.WbEditingAction.performAPIAction(WbEditingAction.java:747)
+    at org.wikidata.wdtk.wikibaseapi.WbEditingAction.wbEditEntity(WbEditingAction.java:308)
+    at org.wikidata.wdtk.wikibaseapi.WikibaseDataEditor.createItemDocument(WikibaseDataEditor.java:291)
+    at net.nprod.lotus.wdimport.wd.WDPublisher.publish(WDPublisher.kt:117)
+    at net.nprod.lotus.wdimport.ProcessCompoundsKt.processCompounds(ProcessCompounds.kt:51)
+    at net.nprod.lotus.wdimport.MainKt.main(main.kt:126)
+     */
     processCompounds(
         dataTotal,
         logger,
@@ -133,6 +146,8 @@ fun main(args: Array<String>) {
         referencesProcessor,
         publisher
     )
+
+    logger.info("We are done disconnecting")
 
     publisher.disconnect()
 

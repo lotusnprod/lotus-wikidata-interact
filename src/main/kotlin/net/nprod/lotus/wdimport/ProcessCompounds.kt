@@ -21,8 +21,9 @@ fun processCompounds(
     references: ReferencesProcessor,
     publisher: Publisher
 ) {
-    dataTotal.compoundCache.store.forEach { (_, compound) ->
-        logger.info("Compound with name ${compound.name}")
+    val count = dataTotal.compoundCache.store.size
+    dataTotal.compoundCache.store.values.forEachIndexed { idx, compound ->
+        logger.info("Compound with name ${compound.name} $idx/$count")
         val compoundName = if (compound.name.length < 250) compound.name else compound.inchikey
         val isomericSMILES = if (compound.atLeastSomeStereoDefined) compound.smiles else null
         val wdcompound = WDCompound(

@@ -7,9 +7,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
-//curl "https://www.wikidata.org/w/api.php?action=query&list=search&srsearch=haswbstatement:"P356=10.1007/S11745-003-1193-7"&format=json"
-// haswbstatement:"P356=10.1007/S11745-003-1193-7"
-
 @Serializable
 data class SearchInfoResponse(
     val totalhits: Int
@@ -47,7 +44,15 @@ interface IWDKT {
  * A way to run queries directly using WDTK
  */
 class WDKT : IWDKT {
-    private val client: HttpClient = HttpClient(CIO)
+    private val client: HttpClient = HttpClient(CIO) {
+        engine {
+            endpoint {
+                keepAliveTime = 10_000
+                connectTimeout = 10_000
+                connectRetryAttempts = 5
+            }
+        }
+    }
 
     /**
      * Close the client
@@ -66,8 +71,6 @@ class WDKT : IWDKT {
                 parameter("list", "search")
                 parameter("srsearch", "haswbstatement:\"P356=$doi\"")
             }
-
-
         }
         return Json.decodeFromString(QueryActionResponse.serializer(), out)
     }
