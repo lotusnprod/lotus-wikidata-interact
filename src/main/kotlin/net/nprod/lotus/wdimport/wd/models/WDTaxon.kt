@@ -89,6 +89,11 @@ data class WDTaxon(
     }
 
     fun addTaxoDB(key: String, value: String) {
-        taxDBToProperty[key]?.let { prop -> this.addProperty(prop, value) }
+        taxDBToProperty[key]?.let { prop ->
+            when (prop) {
+                InstanceItems::WORMSTaxonomy -> this.addProperty(prop, value.split(":").last())
+                else -> this.addProperty(prop, value)
+            }
+        }
     }
 }
