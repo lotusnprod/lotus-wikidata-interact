@@ -1,12 +1,19 @@
 package net.nprod.lotus.helpers
 
-inline fun <reified T : Throwable, U> tryCount(maxRetries: Int = 3, delaySeconds: Long = 0, f: () -> U): U {
+import kotlin.reflect.KClass
+
+inline fun <U> tryCount(
+    listExceptions: List<KClass<out Exception>>,
+    maxRetries: Int = 3,
+    delaySeconds: Long = 0,
+    f: () -> U
+): U {
     var retries = 0
     while (retries < maxRetries) {
         try {
             return f()
         } catch (e: Exception) {
-            if (e is T) {
+            if (listExceptions.any { it -> e::class == it }) {
                 retries += 1
                 if (retries == maxRetries) throw e
                 if (delaySeconds > 0) Thread.sleep(delaySeconds * 1000L)

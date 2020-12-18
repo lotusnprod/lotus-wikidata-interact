@@ -17,7 +17,9 @@ import org.wikidata.wdtk.wikibaseapi.BasicApiConnection
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataEditor
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher
 import org.wikidata.wdtk.wikibaseapi.apierrors.MediaWikiApiErrorException
+import java.io.IOException
 import java.net.ConnectException
+import java.net.NoRouteToHostException
 
 class EnvironmentVariableError(message: String) : Exception(message)
 class InternalError(message: String) : Exception(message)
@@ -27,7 +29,7 @@ class InternalError(message: String) : Exception(message)
  */
 class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0) : Resolver, Publisher {
     private val userAgent = "Wikidata Toolkit EditOnlineDataExample"
-    private val logger: Logger = LogManager.getLogger(this::class.java)
+    private val logger: Logger = LogManager.getLogger(WDPublisher::class.java)
     private var user: String? = null
     private var password: String? = null
     private var connection: ApiConnection? = null
@@ -115,7 +117,8 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0)
             if (!publishable.published) {
                 newDocuments++
                 val newItemDocument: ItemDocument =
-                    tryCount<MediaWikiApiErrorException, ItemDocument>(
+                    tryCount<ItemDocument>(
+                        listOf(MediaWikiApiErrorException::class, IOException::class),
                         delaySeconds = 30L,
                         maxRetries = 10
                     ) {  // Sometimes it needs time to let the DB recover
@@ -146,7 +149,8 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0)
                     logger.debug("These are the statements to be added: ")
                     logger.debug(statements)
 
-                    tryCount<MediaWikiApiErrorException, Unit>(
+                    tryCount<Unit>( // TODO: Find a way to specify exceptions from a list
+                        listExceptions = listOf(MediaWikiApiErrorException::class, IOException::class),
                         delaySeconds = 30L,
                         maxRetries = 10
                     ) {  // Sometimes it needs time to let the DB recover
@@ -159,8 +163,10 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0)
                 }
                 publishedDocumentsIds.add(publishable.id.iri)
             }
-        } catch (e: MediaWikiApiErrorException) {
-            logger.error("Failed to save the item for the reason ${e.errorMessage} ${e.message}")
+        } catch (e: Exception) {
+            logger.error("Failed to save the item for the reason, we tried to restart multiple times but it continued to fail")
+            logger.error(" CAUSE: ${e.cause}")
+            logger.error(" MESSAGE: ${e.message}")
             throw e
         }
         return publishable.id

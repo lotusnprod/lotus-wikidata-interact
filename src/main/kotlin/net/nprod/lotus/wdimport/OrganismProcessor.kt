@@ -6,7 +6,6 @@ import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
 import net.nprod.lotus.wdimport.wd.interfaces.Publisher
 import net.nprod.lotus.wdimport.wd.models.WDTaxon
-import net.nprod.lotus.wdimport.wd.sparql.ISparql
 import org.apache.logging.log4j.LogManager
 
 class InvalidTaxonName : RuntimeException()
@@ -65,39 +64,44 @@ class OrganismProcessor(
                 taxon = familyWD
 
                 taxon?.let { if (!it.published) publisher.publish(it, "Created a missing taxon") }
-                if (genus != null) {
-                    val genusWD = WDTaxon(
+
+                val genusWD = if (genus != null) {
+                    WDTaxon(
                         name = genus,
                         parentTaxon = familyWD?.id,
                         taxonName = genus,
                         taxonRank = InstanceItems::genus
                     ).tryToFind(wdFinder, instanceItems)
+                } else {
+                    null
+                }
 
-                    taxon = genusWD
-                    if (species != null) {
-                        if (!genusWD.published) publisher.publish(genusWD, "Created a missing genus")
+                taxon = genusWD
+                taxon?.let { if (!it.published) publisher.publish(it, "Created a missing genus") }
 
-                        val speciesWD = WDTaxon(
-                            name = species,
-                            parentTaxon = genusWD.id,
-                            taxonName = species,
-                            taxonRank = InstanceItems::species
-                        ).tryToFind(wdFinder, instanceItems)
-                        taxon = speciesWD
-                    }
+                if (species != null) {
+                    val speciesWD = WDTaxon(
+                        name = species,
+                        parentTaxon = genusWD?.id,
+                        taxonName = species,
+                        taxonRank = InstanceItems::species
+                    ).tryToFind(wdFinder, instanceItems)
+                    taxon = speciesWD
+
                 }
             }
         }
+
         val finalTaxon = taxon
         if (finalTaxon == null) {
-            logger.error("This is pretty bad here is what I know about an organism that failed: $organism")
+            logger.error("This is pretty bad. Here is what I know about an organism that failed: $organism")
             throw Exception("Sorry we couldn't find any info from the accepted reference taxonomy source, we only have: ${organism.rankIds.keys.map { it.name }}")
         } else {
             organism.textIds.forEach { dbEntry ->
                 finalTaxon.addTaxoDB(dbEntry.key, dbEntry.value.split("|").last())
             }
 
-            publisher.publish(finalTaxon, "Created a missing taxon")
+            if (!finalTaxon.published) publisher.publish(finalTaxon, "Created a missing taxon")
             return finalTaxon
         }
     }

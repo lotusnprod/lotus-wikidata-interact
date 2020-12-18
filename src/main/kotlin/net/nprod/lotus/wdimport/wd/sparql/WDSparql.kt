@@ -21,7 +21,10 @@ class WDSparql(override val instanceItems: InstanceItems) : Resolver, ISparql {
 
     override fun <T> query(query: String, function: (TupleQueryResult) -> T): T {
         return repository.connection.use {
-            tryCount<QueryEvaluationException, TupleQueryResult>(delaySeconds = 10L) {
+            tryCount<TupleQueryResult>(
+                listOf(QueryEvaluationException::class),
+                delaySeconds = 10L
+            ) {
                 it.prepareTupleQuery(query).evaluate()
             }.use { result ->
                 function(result)
