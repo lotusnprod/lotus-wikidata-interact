@@ -29,7 +29,7 @@ fun processCompounds(
         val wdcompound = WDCompound(
             name = compoundName,
             inChIKey = compound.inchikey,
-            inChI = compound.inchi,
+            inChI = if (compound.inchi.length < 1500) compound.inchi else null, // InChIs are limited to 1500 on WikiData
             isomericSMILES = isomericSMILES,
             canonicalSMILES = smilesToCanonical(compound.smiles),
             chemicalFormula = subscriptFormula(smilesToFormula(compound.smiles)),
