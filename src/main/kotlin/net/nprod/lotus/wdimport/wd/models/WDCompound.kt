@@ -23,7 +23,7 @@ data class WDCompound(
 ) : Publishable() {
     override var type =
         if (undefinedStereocenters == 0) InstanceItems::chemicalCompound else InstanceItems::groupOfStereoIsomers
-    private val logger: Logger = LogManager.getLogger(this::class.qualifiedName)
+    private val logger: Logger = LogManager.getLogger(WDCompound::class.qualifiedName)
 
     init {
         apply(f)
@@ -38,8 +38,7 @@ data class WDCompound(
             chemicalFormula?.let {
                 ReferencableValueStatement(
                     InstanceItems::chemicalFormula,
-                    it,
-                    overwritable = true
+                    it
                 )
             },
             //iupac?.let { ReferencableValueStatement(InstanceItems::iupac, it )},  // For this we need to check the labels first…
@@ -90,7 +89,7 @@ data class WDCompound(
     fun foundInTaxon(wdTaxon: WDTaxon, f: ReferencableValueStatement.() -> Unit) {
         require(wdTaxon.published) { "Can only add for an already published taxon." }
         val refStatement =
-            ReferencableValueStatement(InstanceItems::foundInTaxon, wdTaxon.id, overwritable = true).apply(f)
+            ReferencableValueStatement(InstanceItems::foundInTaxon, wdTaxon.id, overwritable = true).apply(f) // We make it overwritable, meaning we can add duplicates if needed
         preStatements.add(refStatement)
     }
 }

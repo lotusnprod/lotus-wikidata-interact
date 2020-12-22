@@ -7,9 +7,16 @@ import net.nprod.lotus.wdimport.wd.WDFinder
 import net.nprod.lotus.wdimport.wd.interfaces.Publisher
 import net.nprod.lotus.wdimport.wd.models.WDTaxon
 import org.apache.logging.log4j.LogManager
+import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
+import kotlin.reflect.KProperty1
 
 class InvalidTaxonName : RuntimeException()
 
+data class AcceptedTaxonEntry(
+    val rank: String,
+    val instanceItem: KProperty1<InstanceItems, ItemIdValue>,
+    val value: String
+)
 
 class OrganismProcessor(
     val dataTotal: DataTotal, val publisher: Publisher, val wdFinder: WDFinder,
@@ -22,6 +29,10 @@ class OrganismProcessor(
 
         var taxon: WDTaxon? = null
 
+        val acceptedRanks = mutableListOf<AcceptedTaxonEntry>()
+        var fullTaxonFound = false
+
+        // We are going to go over this list of DBs, by order of trust and check if we have taxon info in them
         listOf(
             "ITIS",
             "GBIF",
@@ -33,63 +44,51 @@ class OrganismProcessor(
             "GBIF Backbone Taxonomy"
         ).forEach { taxonDbName ->
             // First we check if we have that db in the current organism
+            if (fullTaxonFound) return@forEach
             val taxonDb = organism.rankIds.keys.firstOrNull { it.name == taxonDbName }
-            if (taxon != null) return@forEach
+            acceptedRanks.clear()
             taxonDb?.let {
-                val family = organism.rankIds[taxonDb]?.firstOrNull { it.first == "family" }?.second?.name
-                val genus = organism.rankIds[taxonDb]?.firstOrNull { it.first == "genus" }?.second?.name
-                val species = organism.rankIds[taxonDb]?.firstOrNull { it.first == "species" }?.second?.name
+                val ranks = listOf(
+                    "family" to InstanceItems::family,
+                    "subfamily" to InstanceItems::subfamily,
+                    "tribe" to InstanceItems::tribe,
+                    "subtribe" to InstanceItems::subtribe,
+                    "genus" to InstanceItems::genus,
+                    "species" to InstanceItems::species,
+                    "variety" to InstanceItems::variety
+                )
+                var lowerTaxonIdFound = false
 
-                // This is a ugly hack, we need to find a way to get a proper taxonomy input
-                // that take every rank into account.
+                ranks.forEach { (rankName, rankItem) ->
+                    val entity = organism.rankIds[taxonDb]?.firstOrNull { it.first.toLowerCase() == rankName }?.second?.name
+                    if (!entity.isNullOrEmpty()) {
+                        acceptedRanks.add(AcceptedTaxonEntry(rankName, rankItem, entity))
+                        if (rankName in listOf("genus", "species", "variety", "family")) {
+                            lowerTaxonIdFound = true
+                            fullTaxonFound = true
+                        }
+                    }
+                }
 
-                // We make sure neither genus and species are empty, as we cannot push empty properties to WikiData
-                if (genus == "" || species == "") {
-                    logger.error("A taxon name was empty using the database $taxonDbName (null is ok): family=[$family] genus=[$genus] species=[$species]")
+                if (!lowerTaxonIdFound) {
+                    logger.error("A taxon name was empty using the database $taxonDbName (null is ok): ${organism.rankIds[taxonDb]}")
                     logger.error(organism.prettyPrint())
                     throw InvalidTaxonName()
                 }
-
-                val familyWD = if (family != null && family != "") {
-                    WDTaxon(
-                        name = family,
-                        parentTaxon = null,
-                        taxonName = family,
-                        taxonRank = InstanceItems::family
-                    ).tryToFind(wdFinder, instanceItems)
-                } else {
-                    null
-                }
-
-                taxon = familyWD
-
-                taxon?.let { if (!it.published) publisher.publish(it, "Created a missing taxon") }
-
-                val genusWD = if (genus != null) {
-                    WDTaxon(
-                        name = genus,
-                        parentTaxon = familyWD?.id,
-                        taxonName = genus,
-                        taxonRank = InstanceItems::genus
-                    ).tryToFind(wdFinder, instanceItems)
-                } else {
-                    null
-                }
-
-                taxon = genusWD
-                taxon?.let { if (!it.published) publisher.publish(it, "Created a missing genus") }
-
-                if (species != null) {
-                    val speciesWD = WDTaxon(
-                        name = species,
-                        parentTaxon = genusWD?.id,
-                        taxonName = species,
-                        taxonRank = InstanceItems::species
-                    ).tryToFind(wdFinder, instanceItems)
-                    taxon = speciesWD
-
-                }
             }
+        }
+
+        // If we have no entry we would have exited already with a InvalidTaxonName exception
+
+        acceptedRanks.forEach {
+            taxon?.let { if (!it.published) publisher.publish(it, "Created a missing taxon") }
+            val tax = WDTaxon(
+                name = it.value,
+                parentTaxon = taxon?.id,
+                taxonName = it.value,
+                taxonRank = it.instanceItem
+            ).tryToFind(wdFinder, instanceItems)
+            taxon = tax
         }
 
         val finalTaxon = taxon

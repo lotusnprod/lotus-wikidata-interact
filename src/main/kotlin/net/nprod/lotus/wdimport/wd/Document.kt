@@ -92,3 +92,15 @@ fun newStatement(
         .apply(f)
     return statement.build()
 }
+
+fun newStatement(
+    property: PropertyIdValue,
+    subject: ItemIdValue? = null,
+    value: Value,
+    references: Collection<Reference>
+): Statement {
+    val statement = StatementBuilder.forSubjectAndProperty(subject ?: ItemIdValue.NULL, property)
+        .withValue(value)
+    references.forEach { statement.withReference(it) }
+    return statement.build()
+}

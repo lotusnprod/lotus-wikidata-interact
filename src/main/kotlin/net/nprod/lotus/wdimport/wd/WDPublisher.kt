@@ -19,7 +19,6 @@ import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher
 import org.wikidata.wdtk.wikibaseapi.apierrors.MediaWikiApiErrorException
 import java.io.IOException
 import java.net.ConnectException
-import java.net.NoRouteToHostException
 
 class EnvironmentVariableError(message: String) : Exception(message)
 class InternalError(message: String) : Exception(message)
@@ -135,20 +134,10 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0)
             } else {  // The publishable is already existing, this means we only have to update the statements
                 updatedDocuments++
                 logger.info("Updated document ${publishable.id} - Summary: $summary")
-                val doc = (fetcher?.getEntityDocument(publishable.id.id)
-                    ?: throw Exception("Cannot find a document that should be existing: ${publishable.id}")) as ItemDocument
-                val propertiesExisting =
-                    doc.statementGroups.flatMap { it.statements.map { statement -> statement.mainSnak.propertyId.id } }
 
-                val statements = publishable.listOfStatementsForUpdate(fetcher, instanceItems).filter {
-                    // We filter all the statement that do not already exist
-                    !propertiesExisting.contains(it.mainSnak.propertyId.id)
-                }
+                val statements = publishable.listOfStatementsForUpdate(fetcher, instanceItems)
 
                 if (statements.isNotEmpty()) {
-                    logger.debug("These are the statements to be added: ")
-                    logger.debug(statements)
-
                     tryCount<Unit>( // TODO: Find a way to specify exceptions from a list
                         listExceptions = listOf(MediaWikiApiErrorException::class, IOException::class),
                         delaySeconds = 30L,

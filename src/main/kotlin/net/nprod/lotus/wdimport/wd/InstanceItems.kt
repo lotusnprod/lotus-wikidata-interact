@@ -41,9 +41,14 @@ interface InstanceItems {
     val chemicalCompound: ItemIdValue
     val groupOfStereoIsomers: ItemIdValue
     val taxon: ItemIdValue
+    val variety: ItemIdValue
     val species: ItemIdValue
     val genus: ItemIdValue
+    val subtribe: ItemIdValue
+    val tribe: ItemIdValue
+    val subfamily: ItemIdValue
     val family: ItemIdValue
+    val order: ItemIdValue
     val scholarlyArticle: ItemIdValue
 
     // Sparql
@@ -149,9 +154,14 @@ object TestInstanceItems : InstanceItems {
     override val chemicalCompound: ItemIdValue = item("Q212525")
     override val groupOfStereoIsomers: ItemIdValue = item("Q59199015")
     override val taxon: ItemIdValue = item("Q212541")
+    override val variety: ItemIdValue = item("Q767728")
     override val species: ItemIdValue = item("Q212542")
     override val genus: ItemIdValue = item("Q212543")
+    override val subtribe: ItemIdValue = item("Q3965313")
+    override val tribe: ItemIdValue = item("Q227936")
+    override val subfamily: ItemIdValue = item("Q164280")
     override val family: ItemIdValue = item("Q212544")
+    override val order: ItemIdValue = item("Q36602")
     override val scholarlyArticle: ItemIdValue = item("Q212556")
 }
 
@@ -219,8 +229,13 @@ object MainInstanceItems : InstanceItems {
     override val chemicalCompound: ItemIdValue = item("Q11173")
     override val groupOfStereoIsomers: ItemIdValue = item("Q59199015")
     override val taxon: ItemIdValue = item("Q16521")
+    override val variety: ItemIdValue = item("Q767728")
     override val species: ItemIdValue = item("Q7432")
     override val genus: ItemIdValue = item("Q34740")
+    override val subtribe: ItemIdValue = item("Q3965313")
+    override val tribe: ItemIdValue = item("Q227936")
+    override val subfamily: ItemIdValue = item("Q164280")
     override val family: ItemIdValue = item("Q35409")
+    override val order: ItemIdValue = item("Q36602")
     override val scholarlyArticle: ItemIdValue = item("Q13442814")
 }

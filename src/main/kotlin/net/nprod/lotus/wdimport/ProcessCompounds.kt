@@ -39,14 +39,16 @@ fun processCompounds(
         logger.info(wdcompound)
         wdcompound.apply {
             dataTotal.quads.filter { it.compound == compound }.distinct().forEach { quad ->
+                logger.info("Ok lets go for a quad: $quad")
                 val organism = organisms.get(quad.organism)
-                organism.let {
-                    foundInTaxon(
-                        organism
-                    ) {
-                        statedIn(references.get(quad.reference).id)
-                    }
+                logger.info(" Found organism $organism")
+
+                foundInTaxon(
+                    organism
+                ) {
+                    statedIn(references.get(quad.reference).id)
                 }
+
             }
         }
         publisher.publish(wdcompound, "upserting compound")

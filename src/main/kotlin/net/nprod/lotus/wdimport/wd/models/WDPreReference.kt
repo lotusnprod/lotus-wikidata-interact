@@ -25,6 +25,7 @@ class WDPreReference {
     }
 
     fun add(property: RemoteProperty, value: Value): WDPreReference {
+        println("Adding with $property $value")
         listOfProperties.add(PropertyStore(property, value))
         return this
     }

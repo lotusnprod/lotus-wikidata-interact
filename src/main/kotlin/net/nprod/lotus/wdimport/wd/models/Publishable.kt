@@ -4,10 +4,8 @@ import net.nprod.lotus.wdimport.wd.*
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.wikidata.wdtk.datamodel.helpers.Datamodel
-import org.wikidata.wdtk.datamodel.interfaces.ItemDocument
-import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
-import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue
-import org.wikidata.wdtk.datamodel.interfaces.Statement
+import org.wikidata.wdtk.datamodel.implementation.ReferenceImpl
+import org.wikidata.wdtk.datamodel.interfaces.*
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher
 import kotlin.reflect.KProperty1
 
@@ -21,7 +19,7 @@ typealias RemoteProperty = KProperty1<InstanceItems, PropertyIdValue>
  * This allows to create documents and update them.
  */
 abstract class Publishable {
-    private val logger: Logger = LogManager.getLogger(this::class.qualifiedName)
+    private val logger: Logger = LogManager.getLogger(Publishable::class.qualifiedName)
 
     private var _id: ItemIdValue? = null
 
@@ -85,54 +83,72 @@ abstract class Publishable {
         // Add the data statements
         preStatements.addAll(dataStatements())
         // If we have a fetcher, we take a dump of that entry to make sure we are not modifying existing entries
-        // We generate a list of all the properties' ids
-        val propertiesIDs = fetcher?.let {
+        // We generate a list of all the properties on the existing object (if it exist)
+        val existingStatements = fetcher?.let {
             val id = _id?.id
             if (id != null) {
                 val doc = it.getEntityDocument(id)
                 if (doc is ItemDocument) {
-                    val statements = doc.allStatements.iterator().asSequence().toList()
-                    statements.map { statement ->
-                        statement.mainSnak.propertyId.id
-                    }
-                } else {
-                    listOf()
-                }
-            } else {
-                listOf()
-            }
+                    doc.allStatements.iterator().asSequence().toList() // so we have types
+                } else listOf()
+            } else listOf()
         } ?: listOf()
-        println("Existing ids $propertiesIDs")
-        println("Existing statemts ${preStatements.map { it.property.get(instanceItems).id }}")
-        return preStatements.filter { statement ->  // Filter statements that already exist and are not overwritable
-            statement.overwritable || !propertiesIDs.contains(statement.property.get(instanceItems).id)
-        }.map { statement ->
-            when (statement) {
-                is ReferencableValueStatement -> newStatement(
-                    statement.property.get(instanceItems),
-                    id,
-                    statement.value
-                ) { statementBuilder ->
-                    statement.preReferences.forEach {
-                        statementBuilder.withReference(it.build(instanceItems))
-                    }
-                }
-                is ReferenceableRemoteItemStatement -> newStatement(
-                    statement.property.get(instanceItems),
-                    id,
-                    ReferencableValueStatement(
-                        statement.property,
-                        statement.value.get(instanceItems),
-                        statement.preReferences
-                    ).value
-                ) { statementBuilder ->
-                    statement.preReferences.forEach {
-                        statementBuilder.withReference(it.build(instanceItems))
-                    }
-                }
-                else -> throw Exception("Unhandled statement type.")
-            }
+
+        val existingPropertyValueCoupleToReferencesIds: Map<String, Map<Value, Pair<Statement, MutableList<Reference>>>> =
+            existingStatements.map {
+                it.mainSnak.propertyId.id to it
+            }.groupBy { it.first }.map {
+                it.key to it.value.map { it.second.value to Pair(it.second, it.second.references) }.toMap()
+            }.toMap()
+
+        return preStatements.mapNotNull { statement ->
+            constructStatement(statement, instanceItems, existingPropertyValueCoupleToReferencesIds)
         }
+    }
+
+    /**
+     * We need to find a cleaner and safer way to do that, for now it will crash the bot on purpose to make sure nothing bad
+     * happens if anything is not of the expected type.
+     */
+    fun Reference.forceGetStatedInValue(): List<Value> = (this as ReferenceImpl).snaks.filter { it.key == "P248" }
+        .flatMap { it.value.map { (it as ValueSnak).value } }
+
+
+    /**
+     * This is where the magic happens and the new statements are compared to existing statements
+     *
+     */
+    private fun constructStatement(
+        statement: ReferenceableStatement,
+        instanceItems: InstanceItems,
+        existingPropertyValueCoupleToReferences: Map<String, Map<Value, Pair<Statement, List<Reference>>>>
+    ): Statement? {
+        val newStatementValue: Value = when (statement) {
+            is ReferencableValueStatement -> statement.value
+            is ReferenceableRemoteItemStatement -> statement.value.get(instanceItems)
+            else -> null
+        } ?: return null  // The statement is currently invalid if we do not know how to handle its values
+
+        val newStatementProperty: PropertyIdValue = statement.property.get(instanceItems)
+
+        val builtStatements = statement.preReferences.map { it.build(instanceItems) }
+
+        val existingProperty = existingPropertyValueCoupleToReferences[newStatementProperty.id]
+        val (existingStatement, existingReferences) = existingProperty?.let { existingValueToReferences ->
+            existingValueToReferences[newStatementValue]
+        } ?: Pair(null, null)
+
+        existingProperty?.let { if (!statement.overwritable) return null } // We do not try to add or modify a non overridable statement
+
+        val existingSet = existingReferences?.map { it.forceGetStatedInValue() }?.toSet() ?: setOf()
+
+        // Anything that is not in the existing set should be a new reference
+        val newReferences = builtStatements.filterNot { it.forceGetStatedInValue() in existingSet }
+
+        // If we have an existing statement we just add it
+        existingStatement?.references?.addAll(newReferences)
+
+        return existingStatement ?: newStatement(newStatementProperty, id, newStatementValue, newReferences)
     }
 
     abstract fun tryToFind(wdFinder: WDFinder, instanceItems: InstanceItems): Publishable
