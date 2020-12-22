@@ -9,8 +9,9 @@ plugins {
     id("org.jmailen.kotlinter")
     application
 }
-group = "net.nprod.onpdb.wdimport"
-version = "0.2-SNAPSHOT"
+
+group = "net.nprod.lotus.wdimport"
+version = "0.3-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -21,6 +22,7 @@ repositories {
         dirs("./libs")
     }
 }
+
 dependencies {
     val kotlinxCliVersion: String by project
     val cdkVersion: String by project
@@ -63,12 +65,26 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:$junitApiVersion")
 }
 
+kotlinter {
+    ignoreFailures = project.hasProperty("lintContinueOnError")
+    experimentalRules = project.hasProperty("lintKotlinExperimental")
+}
+
+detekt {
+    val detektVersion: String by project
+    toolVersion = detektVersion
+    config = rootProject.files("qc/detekt.yml")
+    buildUponDefaultConfig = true
+    baseline = rootProject.file("qc/detekt-baseline.xml")
+}
+
+
 tasks.withType<KotlinCompile>() {
     kotlinOptions.jvmTarget = "11"
 }
 
 application {
-    mainClassName = "net.nprod.lotus.wdimport.MainKt"
+    mainClass.set("net.nprod.lotus.wdimport.MainKt")
 }
 
 tasks.withType<Test>().configureEach {
