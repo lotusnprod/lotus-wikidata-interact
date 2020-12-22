@@ -1,19 +1,12 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-val kotlinxCliVersion = "0.3"
-val cdkVersion = "2.3"
-val wdtkVersion = "0.11.1"
-val rdf4jVersion = "3.4.0"
-val log4jVersion = "2.13.3"
-val junitApiVersion = "5.6.0"
-val univocityParserVersion = "2.8.4"
-val ktorVersion = "1.4.0"
-val serializationVersion = "1.0.1"
-val kotlinVersion = "1.4.21"
-
 plugins {
-    kotlin("jvm") version "1.4.21"
-    kotlin("plugin.serialization") version "1.4.21"
+    kotlin("jvm")
+    kotlin("plugin.serialization")
+    id("com.github.ben-manes.versions")
+    id("io.gitlab.arturbosch.detekt")
+    id("org.jlleitschuh.gradle.ktlint")
+    id("org.jmailen.kotlinter")
     application
 }
 group = "net.nprod.onpdb.wdimport"
@@ -29,6 +22,17 @@ repositories {
     }
 }
 dependencies {
+    val kotlinxCliVersion: String by project
+    val cdkVersion: String by project
+    val wdtkVersion: String by project
+    val rdf4jVersion: String by project
+    val log4jVersion: String by project
+    val junitApiVersion: String by project
+    val univocityParserVersion: String by project
+    val ktorVersion: String by project
+    val serializationVersion: String by project
+    val kotlinVersion: String by project
+
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-cli:$kotlinxCliVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
