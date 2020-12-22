@@ -23,11 +23,11 @@ data class AcceptedTaxonEntry(
     val value: String
 )
 
-class OrganismProcessor(
+class TaxonProcessor(
     val dataTotal: DataTotal, val publisher: Publisher, val wdFinder: WDFinder,
     val instanceItems: InstanceItems,
 ) {
-    val logger = LogManager.getLogger(OrganismProcessor::class.qualifiedName)
+    val logger = LogManager.getLogger(TaxonProcessor::class.qualifiedName)
     val organismCache: MutableMap<Organism, WDTaxon> = mutableMapOf()
     fun taxonFromOrganism(organism: Organism): WDTaxon {
         logger.debug("Organism Ranks and Ids: ${organism.rankIds}")
@@ -65,7 +65,8 @@ class OrganismProcessor(
                 var lowerTaxonIdFound = false
 
                 ranks.forEach { (rankName, rankItem) ->
-                    val entity = organism.rankIds[taxonDb]?.firstOrNull { it.first.toLowerCase() == rankName }?.second?.name
+                    val entity =
+                        organism.rankIds[taxonDb]?.firstOrNull { it.first.toLowerCase() == rankName }?.second?.name
                     if (!entity.isNullOrEmpty()) {
                         acceptedRanks.add(AcceptedTaxonEntry(rankName, rankItem, entity))
                         if (rankName in listOf("genus", "species", "variety", "family")) {
@@ -76,7 +77,8 @@ class OrganismProcessor(
                 }
 
                 if (!lowerTaxonIdFound) {
-                    logger.error("A taxon name was empty using the database $taxonDbName (null is ok): ${organism.rankIds[taxonDb]}")
+                    logger.error("Taxon name empty using the BD: $taxonDbName (null is ok)")
+                    logger.error("${organism.rankIds[taxonDb]}")
                     logger.error(organism.prettyPrint())
                     throw InvalidTaxonName()
                 }
@@ -99,7 +101,8 @@ class OrganismProcessor(
         val finalTaxon = taxon
         if (finalTaxon == null) {
             logger.error("This is pretty bad. Here is what I know about an organism that failed: $organism")
-            throw Exception("Sorry we couldn't find any info from the accepted reference taxonomy source, we only have: ${organism.rankIds.keys.map { it.name }}")
+            throw Exception("""Sorry we couldn't find any info from the accepted reference taxonomy source,
+                | we only have: ${organism.rankIds.keys.map { it.name }}""".trimMargin())
         } else {
             organism.textIds.forEach { dbEntry ->
                 finalTaxon.addTaxoDB(dbEntry.key, dbEntry.value.split("|").last())

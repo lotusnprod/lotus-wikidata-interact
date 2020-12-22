@@ -14,13 +14,13 @@ import net.nprod.lotus.wdimport.wd.models.WDArticle
 import org.apache.logging.log4j.LogManager
 
 
-class ReferencesProcessor(
+class ReferenceProcessor(
     val dataTotal: DataTotal,
     val publisher: Publisher,
     val wdFinder: WDFinder,
     val instanceItems: InstanceItems
 ) {
-    private val logger = LogManager.getLogger(ReferencesProcessor::class.qualifiedName)
+    private val logger = LogManager.getLogger(ReferenceProcessor::class.qualifiedName)
     private val articlesCache: MutableMap<Reference, WDArticle> = mutableMapOf()
 
     private fun articleFromReference(reference: Reference): WDArticle {
@@ -29,7 +29,7 @@ class ReferencesProcessor(
             title = reference.title,
             doi = reference.doi.toUpperCase(), // DOIs are always uppercase
         ).tryToFind(wdFinder, instanceItems)
-        // TODO: Add PMID and PMCID
+
         publisher.publish(article, "upserting article")
         return article
     }

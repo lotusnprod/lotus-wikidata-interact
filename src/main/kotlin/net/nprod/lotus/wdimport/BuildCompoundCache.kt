@@ -12,6 +12,15 @@ import net.nprod.lotus.wdimport.wd.sparql.InChIKey
 import org.apache.logging.log4j.Logger
 import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
 
+/**
+ * Amount of compounds to query by SPARQL to get the compound info from the InChiKeys
+ */
+const val COMPOUNDS_PROCESSING_CHUNK_SIZE: Int = 1000
+
+/**
+ * Used to build a local cache of the compounds so we are querying only at the beginning of the run and not for each
+ * new entry.
+ */
 fun buildCompoundCache(
     dataTotal: DataTotal,
     repositoryManager: RepositoryManager?,
@@ -23,7 +32,7 @@ fun buildCompoundCache(
     val inchiKeys = dataTotal.compoundCache.store.map { (_, compound) ->
         compound.inchikey
     }
-    inchiKeys.chunked(1000) { inchiKeysBlock ->
+    inchiKeys.chunked(COMPOUNDS_PROCESSING_CHUNK_SIZE) { inchiKeysBlock ->
         repositoryManager?.let {
             val query = """
                SELECT ?id ?inchikey WHERE {

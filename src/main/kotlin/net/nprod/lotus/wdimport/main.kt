@@ -125,8 +125,8 @@ fun main(args: Array<String>) {
         buildCompoundCache(dataTotal, repositoryManager, instanceItems, logger, wdSparql, wikidataCompoundCache)
     }
 
-    val organismProcessor = OrganismProcessor(dataTotal, publisher, wdFinder, instanceItems)
-    val referencesProcessor = ReferencesProcessor(dataTotal, publisher, wdFinder, instanceItems)
+    val organismProcessor = TaxonProcessor(dataTotal, publisher, wdFinder, instanceItems)
+    val referencesProcessor = ReferenceProcessor(dataTotal, publisher, wdFinder, instanceItems)
 
     // Adding all compounds
 
