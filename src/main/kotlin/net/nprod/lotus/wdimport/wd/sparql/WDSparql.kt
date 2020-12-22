@@ -1,6 +1,8 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-/**
+/*
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
  * Copyright (c) 2020 Jonathan Bisson
+ *
  */
 
 package net.nprod.lotus.wdimport.wd.sparql
@@ -13,8 +15,11 @@ import org.eclipse.rdf4j.query.TupleQueryResult
 import org.eclipse.rdf4j.repository.Repository
 import org.eclipse.rdf4j.repository.sparql.SPARQLRepository
 
-typealias WDEntity = String
-
+/**
+ * A Sparql resolver for Wikidata
+ *
+ * @param instanceItems the items specific to that instance
+ */
 class WDSparql(override val instanceItems: InstanceItems) : Resolver, ISparql {
     private val repository: Repository
 
@@ -28,7 +33,7 @@ class WDSparql(override val instanceItems: InstanceItems) : Resolver, ISparql {
         return repository.connection.use {
             tryCount<TupleQueryResult>(
                 listOf(QueryEvaluationException::class),
-                delaySeconds = 10L
+                delayMilliSeconds = 10_000L
             ) {
                 it.prepareTupleQuery(query).evaluate()
             }.use { result ->

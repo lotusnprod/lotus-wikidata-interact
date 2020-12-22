@@ -1,6 +1,8 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-/**
+/*
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
  * Copyright (c) 2020 Jonathan Bisson
+ *
  */
 
 @file:Suppress("unused")
@@ -37,9 +39,9 @@ fun parseTSVFile(file: Reader, lines: Int? = null, skip: Int = 0): List<Record>?
     repeat(skip) { tsvParser.parseNextRecord() }
     while (true) {
         record = tsvParser.parseNextRecord()
-        if (count >= lines) break                     // Reached the amount of lines needed
-        if (tsvParser.context.isStopped) break      // The parser stopped
-        if (record == null) break                   // Reached the end of the file
+        if (count >= lines) break // Reached the amount of lines needed
+        if (tsvParser.context.isStopped) break // The parser stopped
+        if (record == null) break // Reached the end of the file
 
         list.add(record)
         count++

@@ -1,9 +1,11 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-/**
+/*
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
  * Copyright (c) 2020 Jonathan Bisson
+ *
  */
 
-package net.nprod.lotus.wdimport.wd.mock
+package net.nprod.lotus.wdimport.wd.sparql.mock
 
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.MainInstanceItems
@@ -13,15 +15,16 @@ import org.eclipse.rdf4j.query.TupleQueryResult
 import org.eclipse.rdf4j.query.impl.EmptyBindingSet
 import org.eclipse.rdf4j.repository.Repository
 
+/**
+ * A test class that use a local repository to answer SPARQL queries
+ */
 class TestISparql(override val instanceItems: InstanceItems, private val repository: Repository) : ISparql {
     override fun <T> query(query: String, function: (TupleQueryResult) -> T): T {
+        val conn = repository.connection
         return try {
-            val conn = repository.connection
-            val out = function(conn.prepareTupleQuery(query).evaluate())
-            conn.close()
-            out
+            function(conn.prepareTupleQuery(query).evaluate())
         } finally {
-
+            conn.close()
         }
     }
 }

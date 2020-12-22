@@ -2,8 +2,6 @@ package net.nprod.lotus.wdimport.wd.query
 
 import org.junit.jupiter.api.Test
 
-import org.junit.jupiter.api.Assertions.*
-
 internal class WDKTTest {
 
     @Test

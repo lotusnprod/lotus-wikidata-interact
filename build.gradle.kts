@@ -58,7 +58,7 @@ dependencies {
 
     implementation("com.univocity:univocity-parsers:$univocityParserVersion")
 
-    //implementation(":wiki-java-0.36-SNAPSHOT")
+    // implementation(":wiki-java-0.36-SNAPSHOT")
 
     testImplementation(kotlin("test-junit5"))
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitApiVersion")
@@ -77,7 +77,6 @@ detekt {
     buildUponDefaultConfig = true
     baseline = rootProject.file("qc/detekt-baseline.xml")
 }
-
 
 tasks.withType<KotlinCompile>() {
     kotlinOptions.jvmTarget = "11"

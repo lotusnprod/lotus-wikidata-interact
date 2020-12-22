@@ -1,6 +1,8 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-/**
+/*
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
  * Copyright (c) 2020 Jonathan Bisson
+ *
  */
 
 package net.nprod.lotus.input
@@ -24,7 +26,7 @@ data class Organism(
     // We are not using a map for the organismTaxInfo as we want to keep the order
     val rankIds: MutableMap<TaxonomyDatabase, List<Pair<String, OrganismTaxInfo>>> = mutableMapOf(),
 
-    ) : Indexable {
+) : Indexable {
     /**
      * Reorganize the ranks and ids per taxonomic database
      */
@@ -94,7 +96,6 @@ fun String.ifEqualReplaceByNull(search: String): String? {
     if (this == search) return null
     return this
 }
-
 
 data class Quad(
     val database: Database,

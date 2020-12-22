@@ -1,10 +1,13 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-/**
+/*
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
  * Copyright (c) 2020 Jonathan Bisson
+ *
  */
 
-package net.nprod.lotus.wdimport
+package net.nprod.lotus.wdimport.tools
 
+import net.nprod.lotus.rdf.RepositoryManager
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import org.apache.logging.log4j.Logger
 
@@ -14,7 +17,8 @@ fun countInLocalRepository(
     logger: Logger
 ) {
     repositoryManager?.repository?.let {
-        val query = """
+        val query =
+            """
                 SELECT * {
                    { SELECT (count (distinct ?org) as ?orgcount) WHERE {
                    ?org <${instanceItems.instanceOf.iri}> <${instanceItems.taxon.iri}>.

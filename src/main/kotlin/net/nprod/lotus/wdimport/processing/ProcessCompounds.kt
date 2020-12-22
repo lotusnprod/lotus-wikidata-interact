@@ -1,9 +1,11 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-/**
+/*
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
  * Copyright (c) 2020 Jonathan Bisson
+ *
  */
 
-package net.nprod.lotus.wdimport
+package net.nprod.lotus.wdimport.processing
 
 import net.nprod.lotus.chemistry.smilesToCanonical
 import net.nprod.lotus.chemistry.smilesToFormula
@@ -11,8 +13,8 @@ import net.nprod.lotus.chemistry.subscriptFormula
 import net.nprod.lotus.input.DataTotal
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
-import net.nprod.lotus.wdimport.wd.interfaces.Publisher
 import net.nprod.lotus.wdimport.wd.models.WDCompound
+import net.nprod.lotus.wdimport.wd.publishing.IPublisher
 import net.nprod.lotus.wdimport.wd.sparql.InChIKey
 import org.apache.logging.log4j.Logger
 
@@ -35,7 +37,7 @@ fun processCompounds(
     wikidataCompoundCache: MutableMap<InChIKey, String>,
     taxonProcessor: TaxonProcessor,
     referenceProcessor: ReferenceProcessor,
-    publisher: Publisher
+    publisher: IPublisher
 ) {
     val count = dataTotal.compoundCache.store.size
     dataTotal.compoundCache.store.values.forEachIndexed { idx, compound ->
@@ -43,7 +45,7 @@ fun processCompounds(
         val compoundName = if (compound.name.length < MAXIMUM_COMPOUND_NAME_LENGTH) compound.name else compound.inchikey
         val isomericSMILES = if (compound.atLeastSomeStereoDefined) compound.smiles else null
         val wdcompound = WDCompound(
-            name = compoundName,
+            label = compoundName,
             inChIKey = compound.inchikey,
             inChI = if (compound.inchi.length < MAXIMUM_INCHI_LENGTH) compound.inchi else null,
             isomericSMILES = isomericSMILES,
@@ -66,7 +68,6 @@ fun processCompounds(
                 ) {
                     statedIn(referenceProcessor.get(quad.reference).id)
                 }
-
             }
         }
         publisher.publish(wdcompound, "upserting compound")

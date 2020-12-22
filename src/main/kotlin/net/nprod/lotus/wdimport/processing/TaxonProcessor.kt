@@ -1,17 +1,20 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-/**
+/*
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
  * Copyright (c) 2020 Jonathan Bisson
+ *
  */
 
-package net.nprod.lotus.wdimport
+package net.nprod.lotus.wdimport.processing
 
 import net.nprod.lotus.input.DataTotal
 import net.nprod.lotus.input.Organism
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
-import net.nprod.lotus.wdimport.wd.interfaces.Publisher
 import net.nprod.lotus.wdimport.wd.models.WDTaxon
+import net.nprod.lotus.wdimport.wd.publishing.IPublisher
 import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
 import kotlin.reflect.KProperty1
 
@@ -24,10 +27,12 @@ data class AcceptedTaxonEntry(
 )
 
 class TaxonProcessor(
-    val dataTotal: DataTotal, val publisher: Publisher, val wdFinder: WDFinder,
+    val dataTotal: DataTotal,
+    val publisher: IPublisher,
+    val wdFinder: WDFinder,
     val instanceItems: InstanceItems,
 ) {
-    val logger = LogManager.getLogger(TaxonProcessor::class.qualifiedName)
+    val logger: Logger = LogManager.getLogger(TaxonProcessor::class.qualifiedName)
     val organismCache: MutableMap<Organism, WDTaxon> = mutableMapOf()
     fun taxonFromOrganism(organism: Organism): WDTaxon {
         logger.debug("Organism Ranks and Ids: ${organism.rankIds}")
@@ -90,7 +95,7 @@ class TaxonProcessor(
         acceptedRanks.forEach {
             taxon?.let { if (!it.published) publisher.publish(it, "Created a missing taxon") }
             val tax = WDTaxon(
-                name = it.value,
+                label = it.value,
                 parentTaxon = taxon?.id,
                 taxonName = it.value,
                 taxonRank = it.instanceItem
@@ -101,8 +106,10 @@ class TaxonProcessor(
         val finalTaxon = taxon
         if (finalTaxon == null) {
             logger.error("This is pretty bad. Here is what I know about an organism that failed: $organism")
-            throw Exception("""Sorry we couldn't find any info from the accepted reference taxonomy source,
-                | we only have: ${organism.rankIds.keys.map { it.name }}""".trimMargin())
+            throw Exception(
+                """Sorry we couldn't find any info from the accepted reference taxonomy source,
+                | we only have: ${organism.rankIds.keys.map { it.name }}""".trimMargin()
+            )
         } else {
             organism.textIds.forEach { dbEntry ->
                 finalTaxon.addTaxoDB(dbEntry.key, dbEntry.value.split("|").last())
@@ -113,9 +120,8 @@ class TaxonProcessor(
         }
     }
 
-    fun get(key: Organism): WDTaxon {
-        return organismCache.getOrPut(key) {
-            taxonFromOrganism(key)
-        }
-    }
+    /**
+     * Get or create a Wikidata taxon entry from an organism
+     */
+    fun get(key: Organism): WDTaxon = organismCache.getOrPut(key) { taxonFromOrganism(key) }
 }

@@ -1,21 +1,39 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-/**
- * Copyright (c) 2020 Jonathan Bisson, Adriano Rutz, Pierre-Marie Allard
+/*
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
+ * Copyright (c) 2020 Jonathan Bisson
+ *
  */
 
 package net.nprod.lotus.wdimport.wd.models
 
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
+import net.nprod.lotus.wdimport.wd.publishing.Publishable
+import net.nprod.lotus.wdimport.wd.publishing.RemoteItem
 import net.nprod.lotus.wdimport.wd.sparql.InChIKey
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
 import org.wikidata.wdtk.datamodel.implementation.ItemIdValueImpl
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
+import kotlin.reflect.KProperty1
 
+/**
+ * Wikidata publishable for a compound (chemical entity or group of isomers)
+ *
+ * @param inChIKey InChiKey
+ * @param inChI InChI
+ * @param isomericSMILES isomeric SMILES of the molecule
+ * @param canonicalSMILES canonical smiles
+ * @param pcId PubChem ID
+ * @param chemicalFormula Chemical formula
+ * @param iupac IUPAC name
+ * @param undefinedStereocenters number of undefined stereocenters
+ * @param f function that will act on that compound to add properties for example
+ */
 data class WDCompound(
-    override var name: String = "",
+    override var label: String = "",
     val inChIKey: String?,
     val inChI: String?,
     val isomericSMILES: String?,
@@ -26,7 +44,7 @@ data class WDCompound(
     val undefinedStereocenters: Int,
     val f: WDCompound.() -> Unit = {}
 ) : Publishable() {
-    override var type =
+    override var type: RemoteItem =
         if (undefinedStereocenters == 0) InstanceItems::chemicalCompound else InstanceItems::groupOfStereoIsomers
     private val logger: Logger = LogManager.getLogger(WDCompound::class.qualifiedName)
 
@@ -34,7 +52,7 @@ data class WDCompound(
         apply(f)
     }
 
-    override fun dataStatements() =
+    override fun dataStatements(): List<ReferencableValueStatement> =
         listOfNotNull(
             inChIKey?.let { ReferencableValueStatement(InstanceItems::inChIKey, it) },
             inChI?.let { ReferencableValueStatement(InstanceItems::inChI, it) },
@@ -46,13 +64,17 @@ data class WDCompound(
                     it
                 )
             },
-            //iupac?.let { ReferencableValueStatement(InstanceItems::iupac, it )},  // For this we need to check the labels first…
+            // For this we need to check the labels first…
+            // iupac?.let { ReferencableValueStatement(InstanceItems::iupac, it )},
             pcId?.let { ReferencableValueStatement(InstanceItems::pcId, it) }
         )
 
-    override fun tryToFind(wdFinder: WDFinder, instanceItems: InstanceItems) =
+    override fun tryToFind(wdFinder: WDFinder, instanceItems: InstanceItems): WDCompound =
         tryToFind(wdFinder, instanceItems, mapOf())
 
+    /**
+     * Try to find this entry, but also uses a cache to not hit the sparql all the time
+     */
     fun tryToFind(
         wdFinder: WDFinder,
         instanceItems: InstanceItems,
@@ -62,13 +84,14 @@ data class WDCompound(
         val results = if (cache.containsKey(inChIKey)) {
             listOf(cache[inChIKey])
         } else {
-            val query = """
+            val query =
+                """
             PREFIX wd: <${InstanceItems::wdURI.get(instanceItems)}>
             PREFIX wdt: <${InstanceItems::wdtURI.get(instanceItems)}>
             SELECT DISTINCT ?id {
               ?id wdt:${wdFinder.sparql.resolve(InstanceItems::inChIKey).id} ${Rdf.literalOf(inChIKey).queryString}.
             }
-            """.trimIndent()
+                """.trimIndent()
 
             wdFinder.sparql.query(query) { result ->
                 result.map { bindingSet ->
@@ -78,7 +101,7 @@ data class WDCompound(
         }
 
         if (results.isNotEmpty()) {
-            this.published(
+            this.publishedAs(
                 ItemIdValueImpl.fromId(
                     results.first(),
                     InstanceItems::wdURI.get(instanceItems)
@@ -91,10 +114,14 @@ data class WDCompound(
         return this
     }
 
+    /**
+     * Add a `found in taxon` property with the given references
+     */
     fun foundInTaxon(wdTaxon: WDTaxon, f: ReferencableValueStatement.() -> Unit) {
         require(wdTaxon.published) { "Can only add for an already published taxon." }
+        // We make it overwritable, meaning we can add duplicates if needed
         val refStatement =
-            ReferencableValueStatement(InstanceItems::foundInTaxon, wdTaxon.id, overwritable = true).apply(f) // We make it overwritable, meaning we can add duplicates if needed
+            ReferencableValueStatement(InstanceItems::foundInTaxon, wdTaxon.id, overwritable = true).apply(f)
         preStatements.add(refStatement)
     }
 }

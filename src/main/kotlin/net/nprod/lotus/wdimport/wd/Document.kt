@@ -1,6 +1,8 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-/**
+/*
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
  * Copyright (c) 2020 Jonathan Bisson
+ *
  */
 
 package net.nprod.lotus.wdimport.wd
@@ -11,8 +13,12 @@ import org.wikidata.wdtk.datamodel.helpers.Datamodel
 import org.wikidata.wdtk.datamodel.helpers.ItemDocumentBuilder
 import org.wikidata.wdtk.datamodel.helpers.ReferenceBuilder
 import org.wikidata.wdtk.datamodel.helpers.StatementBuilder
-import org.wikidata.wdtk.datamodel.interfaces.*
-
+import org.wikidata.wdtk.datamodel.interfaces.ItemDocument
+import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
+import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue
+import org.wikidata.wdtk.datamodel.interfaces.Reference
+import org.wikidata.wdtk.datamodel.interfaces.Statement
+import org.wikidata.wdtk.datamodel.interfaces.Value
 
 /**
  * Type safe builder or DSL
@@ -32,7 +38,6 @@ fun newDocument(name: String, id: ItemIdValue? = null, f: ItemDocumentBuilder.()
 
     return builder.build()
 }
-
 
 @Suppress("unused")
 fun ReferenceBuilder.propertyValue(property: PropertyIdValue, value: String): Unit =

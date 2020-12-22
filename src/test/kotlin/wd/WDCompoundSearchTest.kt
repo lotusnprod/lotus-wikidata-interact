@@ -1,11 +1,11 @@
 package wd
 
 import net.nprod.lotus.wdimport.wd.MainInstanceItems
+import net.nprod.lotus.wdimport.wd.sparql.WDSparql
+import net.nprod.lotus.wdimport.wd.sparql.findCompoundsByInChIKey
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import net.nprod.lotus.wdimport.wd.sparql.WDSparql
-import net.nprod.lotus.wdimport.wd.sparql.findCompoundsByInChIKey
 
 class WDCompoundSearchTest {
     private lateinit var wdSparql: WDSparql

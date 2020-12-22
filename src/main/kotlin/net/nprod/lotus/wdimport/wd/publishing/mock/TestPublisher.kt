@@ -1,14 +1,16 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-/**
+/*
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
  * Copyright (c) 2020 Jonathan Bisson
+ *
  */
 
-package net.nprod.lotus.wdimport.wd.mock
+package net.nprod.lotus.wdimport.wd.publishing.mock
 
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.Resolver
-import net.nprod.lotus.wdimport.wd.interfaces.Publisher
-import net.nprod.lotus.wdimport.wd.models.Publishable
+import net.nprod.lotus.wdimport.wd.publishing.IPublisher
+import net.nprod.lotus.wdimport.wd.publishing.Publishable
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.eclipse.rdf4j.repository.Repository
@@ -17,16 +19,23 @@ import org.eclipse.rdf4j.rio.Rio
 import org.wikidata.wdtk.datamodel.helpers.Datamodel
 import org.wikidata.wdtk.datamodel.helpers.PropertyDocumentBuilder
 import org.wikidata.wdtk.datamodel.implementation.ItemIdValueImpl
-import org.wikidata.wdtk.datamodel.interfaces.*
+import org.wikidata.wdtk.datamodel.interfaces.DatatypeIdValue
+import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
+import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue
+import org.wikidata.wdtk.datamodel.interfaces.Sites
+import org.wikidata.wdtk.datamodel.interfaces.StringValue
 import org.wikidata.wdtk.dumpfiles.DumpProcessingController
 import org.wikidata.wdtk.rdf.PropertyRegister
 import org.wikidata.wdtk.rdf.RdfSerializer
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 
-
-class TestPublisher(override val instanceItems: InstanceItems, private val repository: Repository?) : Resolver,
-    Publisher {
+/**
+ * A Test publisher to test the publishing system
+ */
+class TestPublisher(override val instanceItems: InstanceItems, private val repository: Repository?) :
+    Resolver,
+    IPublisher {
     private val logger: Logger = LogManager.getLogger("Test Publisher")
     override var newDocuments: Int = 0
     override var updatedDocuments: Int = 0
@@ -63,8 +72,7 @@ class TestPublisher(override val instanceItems: InstanceItems, private val repos
     override fun publish(publishable: Publishable, summary: String): ItemIdValue {
         logger.debug("Trying to add the publishable: $publishable with a summary $summary")
 
-
-        val entityId = ItemIdValueImpl.fromId("Q${counter.toString().padStart(8, '0')}", site)
+        val entityId = ItemIdValueImpl.fromId("Q${counter.toString().padStart(length = 8, '0')}", site)
         counter++
 
         if (publishable.published) {
@@ -77,7 +85,9 @@ class TestPublisher(override val instanceItems: InstanceItems, private val repos
 
         doc.allStatements.asSequence().toList().map {
             when (val value = it.value) {
-                is StringValue -> if (value.string == "") throw RuntimeException("We cannot send an empty property for entry $doc")
+                is StringValue ->
+                    if (value.string == "")
+                        throw RuntimeException("We cannot send an empty property for entry $doc")
             }
         }
         val conn = repository?.connection
@@ -91,8 +101,10 @@ class TestPublisher(override val instanceItems: InstanceItems, private val repos
         )
 
         // Serialize simple statements (and nothing else) for all items
-        serializer.tasks = (RdfSerializer.TASK_ITEMS
-                or RdfSerializer.TASK_SIMPLE_STATEMENTS)
+        serializer.tasks = (
+            RdfSerializer.TASK_ITEMS
+                or RdfSerializer.TASK_SIMPLE_STATEMENTS
+            )
 
         // Run serialization
         serializer.open()
@@ -102,7 +114,7 @@ class TestPublisher(override val instanceItems: InstanceItems, private val repos
         conn?.add(Rio.parse(ByteArrayInputStream(stream.toByteArray()), "", RDFFormat.NTRIPLES))
 
         val id = doc.entityId
-        publishable.published(id)
+        publishable.publishedAs(id)
         return id
     }
 }

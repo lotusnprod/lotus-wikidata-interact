@@ -1,11 +1,14 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-/**
+/*
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
  * Copyright (c) 2020 Jonathan Bisson
+ *
  */
 
-package net.nprod.lotus.wdimport
+package net.nprod.lotus.wdimport.processing
 
 import net.nprod.lotus.input.DataTotal
+import net.nprod.lotus.rdf.RepositoryManager
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.sparql.ISparql
 import net.nprod.lotus.wdimport.wd.sparql.InChIKey
@@ -34,14 +37,15 @@ fun buildCompoundCache(
     }
     inchiKeys.chunked(COMPOUNDS_PROCESSING_CHUNK_SIZE) { inchiKeysBlock ->
         repositoryManager?.let {
-            val query = """
+            val query =
+                """
                SELECT ?id ?inchikey WHERE {
                    ?id <${instanceItems.inChIKey.iri}> ?inchikey.
                    VALUES ?inchikey {
                       ${inchiKeysBlock.joinToString(" ") { key -> Rdf.literalOf(key).queryString }}
                    }
                 }
-            """.trimIndent()
+                """.trimIndent()
             logger.info(query)
             wdSparql.query(query) { result ->
                 result.forEach {

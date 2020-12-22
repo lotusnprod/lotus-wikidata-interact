@@ -1,7 +1,11 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-/**
- * Copyright (c) 2020 Jonathan Bisson, Adriano Rutz, Pierre-Marie Allard
+/*
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
+ * Copyright (c) 2020 Jonathan Bisson
+ *
  */
+
+@file:Suppress("KDocMissingDocumentation")
 
 package net.nprod.lotus.wdimport.wd
 
@@ -12,8 +16,20 @@ import org.wikidata.wdtk.datamodel.helpers.Datamodel
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
 import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue
 
+/**
+ * Instance items are the collection of IDs for important subjects and properties from WikiData
+ *
+ * As the test instance does not have the same IDs as the official instance, we needed something like that
+ */
 interface InstanceItems {
+    /**
+     * The wikidata site IRI
+     */
     val siteIri: String
+
+    /**
+     * The wikidata site page IRI
+     */
     val sitePageIri: String
 
     // Basics
@@ -71,31 +87,30 @@ interface InstanceItems {
     fun property(id: String): PropertyIdValue = Datamodel.makePropertyIdValue(id, pURI)
     fun item(id: String): ItemIdValue = Datamodel.makeItemIdValue(id, siteIri)
 
-    val NCBITaxonomy: PropertyIdValue
-    val IRMNGTaxonomy: PropertyIdValue
-    val GBIFTaxonomy: PropertyIdValue
-    val ITISTaxonomy: PropertyIdValue
-    val IPNITaxonomy: PropertyIdValue
-    val uBIOTaxonomy: PropertyIdValue
-    val GRINTaxonomy: PropertyIdValue
-    val EOLTaxonomy: PropertyIdValue
-    val TropicosTaxonomy: PropertyIdValue
-    val iNaturalistTaxonomy: PropertyIdValue
-    val VASCANTaxonomy: PropertyIdValue
-    val EUNISTaxonomy: PropertyIdValue
-    val IndexFungorumTaxonomy: PropertyIdValue
-    val IUCNTaxonomy: PropertyIdValue
-    val WORMSTaxonomy: PropertyIdValue
-    val FISHBaseTaxonomy: PropertyIdValue
-    val ARKIVETaxonomy: PropertyIdValue
-    val MSWTaxonomy: PropertyIdValue
-    val ZoobankTaxonomy: PropertyIdValue
-    val eBirdTaxonomy: PropertyIdValue
-    val birdLifeTaxonomy: PropertyIdValue
-    val amphibiaTaxonomy: PropertyIdValue
-    val phasmidaTaxonomy: PropertyIdValue
+    val idNCBITaxonomy: PropertyIdValue
+    val idIRMNGTaxonomy: PropertyIdValue
+    val idGBIFTaxonomy: PropertyIdValue
+    val idITISTaxonomy: PropertyIdValue
+    val idIPNITaxonomy: PropertyIdValue
+    val idUBIOTaxonomy: PropertyIdValue
+    val idGRINTaxonomy: PropertyIdValue
+    val idEOLTaxonomy: PropertyIdValue
+    val idTropicosTaxonomy: PropertyIdValue
+    val idINaturalistTaxonomy: PropertyIdValue
+    val idVASCANTaxonomy: PropertyIdValue
+    val idEUNISTaxonomy: PropertyIdValue
+    val idIndexFungorumTaxonomy: PropertyIdValue
+    val idIUCNTaxonomy: PropertyIdValue
+    val idWORMSTaxonomy: PropertyIdValue
+    val idFISHBaseTaxonomy: PropertyIdValue
+    val idARKIVETaxonomy: PropertyIdValue
+    val idMSWTaxonomy: PropertyIdValue
+    val idZoobankTaxonomy: PropertyIdValue
+    val idEBirdTaxonomy: PropertyIdValue
+    val idBirdLifeTaxonomy: PropertyIdValue
+    val idAmphibiaTaxonomy: PropertyIdValue
+    val idPhasmidaTaxonomy: PropertyIdValue
 }
-
 
 object TestInstanceItems : InstanceItems {
     override val siteIri: String = "http://test.wikidata.org/entity/"
@@ -104,7 +119,7 @@ object TestInstanceItems : InstanceItems {
     override val wdtURI: String = "http://test.wikidata.org/prop/direct/"
     override val wdURI: String = "http://test.wikidata.org/entity/"
 
-    //override val ENDPOINT = "https://query.wikidata.org/bigdata/namespace/wdq/sparql"
+    // override val ENDPOINT = "https://query.wikidata.org/bigdata/namespace/wdq/sparql"
     override val sparqlEndpoint: String? = null
     override val wdt: Prefix = SparqlBuilder.prefix("wdt", Rdf.iri(wdtURI))
     override val wd: Prefix = SparqlBuilder.prefix("wd", Rdf.iri(wdURI))
@@ -123,29 +138,29 @@ object TestInstanceItems : InstanceItems {
     override val taxonRank: PropertyIdValue = property("P522")
     override val parentTaxon: PropertyIdValue = property("P2105")
 
-    override val NCBITaxonomy: PropertyIdValue = property("P95472")
-    override val IRMNGTaxonomy: PropertyIdValue = property("P95477")
-    override val GBIFTaxonomy: PropertyIdValue = property("P95480")
-    override val ITISTaxonomy: PropertyIdValue = property("P95484")
-    override val IPNITaxonomy: PropertyIdValue = property("P95489")
-    override val uBIOTaxonomy: PropertyIdValue = property("P95492")
-    override val GRINTaxonomy: PropertyIdValue = property("P95494")
-    override val EOLTaxonomy: PropertyIdValue = property("P95497")
-    override val TropicosTaxonomy: PropertyIdValue = property("P95500")
-    override val iNaturalistTaxonomy: PropertyIdValue = property("P95503")
-    override val VASCANTaxonomy: PropertyIdValue = property("P95505")
-    override val EUNISTaxonomy: PropertyIdValue = property("P95508")
-    override val IndexFungorumTaxonomy: PropertyIdValue = property("P95511")
-    override val IUCNTaxonomy: PropertyIdValue = property("P95513")
-    override val WORMSTaxonomy: PropertyIdValue = property("P95517")
-    override val FISHBaseTaxonomy: PropertyIdValue = property("P95519")
-    override val ARKIVETaxonomy: PropertyIdValue = property("P95522")
-    override val MSWTaxonomy: PropertyIdValue = property("P95525")
-    override val ZoobankTaxonomy: PropertyIdValue = property("P95527")
-    override val eBirdTaxonomy: PropertyIdValue = property("P95532")
-    override val birdLifeTaxonomy: PropertyIdValue = property("P95534")
-    override val amphibiaTaxonomy: PropertyIdValue = property("P95537")
-    override val phasmidaTaxonomy: PropertyIdValue = property("P95540")
+    override val idNCBITaxonomy: PropertyIdValue = property("P95472")
+    override val idIRMNGTaxonomy: PropertyIdValue = property("P95477")
+    override val idGBIFTaxonomy: PropertyIdValue = property("P95480")
+    override val idITISTaxonomy: PropertyIdValue = property("P95484")
+    override val idIPNITaxonomy: PropertyIdValue = property("P95489")
+    override val idUBIOTaxonomy: PropertyIdValue = property("P95492")
+    override val idGRINTaxonomy: PropertyIdValue = property("P95494")
+    override val idEOLTaxonomy: PropertyIdValue = property("P95497")
+    override val idTropicosTaxonomy: PropertyIdValue = property("P95500")
+    override val idINaturalistTaxonomy: PropertyIdValue = property("P95503")
+    override val idVASCANTaxonomy: PropertyIdValue = property("P95505")
+    override val idEUNISTaxonomy: PropertyIdValue = property("P95508")
+    override val idIndexFungorumTaxonomy: PropertyIdValue = property("P95511")
+    override val idIUCNTaxonomy: PropertyIdValue = property("P95513")
+    override val idWORMSTaxonomy: PropertyIdValue = property("P95517")
+    override val idFISHBaseTaxonomy: PropertyIdValue = property("P95519")
+    override val idARKIVETaxonomy: PropertyIdValue = property("P95522")
+    override val idMSWTaxonomy: PropertyIdValue = property("P95525")
+    override val idZoobankTaxonomy: PropertyIdValue = property("P95527")
+    override val idEBirdTaxonomy: PropertyIdValue = property("P95532")
+    override val idBirdLifeTaxonomy: PropertyIdValue = property("P95534")
+    override val idAmphibiaTaxonomy: PropertyIdValue = property("P95537")
+    override val idPhasmidaTaxonomy: PropertyIdValue = property("P95540")
 
     override val naturalProductOfTaxon: PropertyIdValue = property("P95470")
     override val foundInTaxon: PropertyIdValue = property("P95646")
@@ -197,29 +212,29 @@ object MainInstanceItems : InstanceItems {
     override val taxonRank: PropertyIdValue = property("P105")
     override val parentTaxon: PropertyIdValue = property("P171")
 
-    override val NCBITaxonomy: PropertyIdValue = property("P685")
-    override val IRMNGTaxonomy: PropertyIdValue = property("P5055")
-    override val GBIFTaxonomy: PropertyIdValue = property("P846")
-    override val ITISTaxonomy: PropertyIdValue = property("P815")
-    override val IPNITaxonomy: PropertyIdValue = property("P961")
-    override val uBIOTaxonomy: PropertyIdValue = property("P4728")
-    override val GRINTaxonomy: PropertyIdValue = property("P1421")
-    override val EOLTaxonomy: PropertyIdValue = property("P830")
-    override val TropicosTaxonomy: PropertyIdValue = property("P960")
-    override val iNaturalistTaxonomy: PropertyIdValue = property("P3151")
-    override val VASCANTaxonomy: PropertyIdValue = property("P1745")
-    override val EUNISTaxonomy: PropertyIdValue = property("P6177")
-    override val IndexFungorumTaxonomy: PropertyIdValue = property("P1391")
-    override val IUCNTaxonomy: PropertyIdValue = property("P627")
-    override val WORMSTaxonomy: PropertyIdValue = property("P850")
-    override val FISHBaseTaxonomy: PropertyIdValue = property("P938")
-    override val ARKIVETaxonomy: PropertyIdValue = property("P2833")
-    override val MSWTaxonomy: PropertyIdValue = property("P959")
-    override val ZoobankTaxonomy: PropertyIdValue = property("P1746")
-    override val eBirdTaxonomy: PropertyIdValue = property("P3444")
-    override val birdLifeTaxonomy: PropertyIdValue = property("P5257")
-    override val amphibiaTaxonomy: PropertyIdValue = property("P5036")
-    override val phasmidaTaxonomy: PropertyIdValue = property("P4855")
+    override val idNCBITaxonomy: PropertyIdValue = property("P685")
+    override val idIRMNGTaxonomy: PropertyIdValue = property("P5055")
+    override val idGBIFTaxonomy: PropertyIdValue = property("P846")
+    override val idITISTaxonomy: PropertyIdValue = property("P815")
+    override val idIPNITaxonomy: PropertyIdValue = property("P961")
+    override val idUBIOTaxonomy: PropertyIdValue = property("P4728")
+    override val idGRINTaxonomy: PropertyIdValue = property("P1421")
+    override val idEOLTaxonomy: PropertyIdValue = property("P830")
+    override val idTropicosTaxonomy: PropertyIdValue = property("P960")
+    override val idINaturalistTaxonomy: PropertyIdValue = property("P3151")
+    override val idVASCANTaxonomy: PropertyIdValue = property("P1745")
+    override val idEUNISTaxonomy: PropertyIdValue = property("P6177")
+    override val idIndexFungorumTaxonomy: PropertyIdValue = property("P1391")
+    override val idIUCNTaxonomy: PropertyIdValue = property("P627")
+    override val idWORMSTaxonomy: PropertyIdValue = property("P850")
+    override val idFISHBaseTaxonomy: PropertyIdValue = property("P938")
+    override val idARKIVETaxonomy: PropertyIdValue = property("P2833")
+    override val idMSWTaxonomy: PropertyIdValue = property("P959")
+    override val idZoobankTaxonomy: PropertyIdValue = property("P1746")
+    override val idEBirdTaxonomy: PropertyIdValue = property("P3444")
+    override val idBirdLifeTaxonomy: PropertyIdValue = property("P5257")
+    override val idAmphibiaTaxonomy: PropertyIdValue = property("P5036")
+    override val idPhasmidaTaxonomy: PropertyIdValue = property("P4855")
 
     override val naturalProductOfTaxon: PropertyIdValue = property("P1582")
     override val foundInTaxon: PropertyIdValue = property("P703")
@@ -228,7 +243,6 @@ object MainInstanceItems : InstanceItems {
     // Article
     override val doi: PropertyIdValue = property("P356")
     override val title: PropertyIdValue = property("P1476")
-
 
     // Things
     override val chemicalCompound: ItemIdValue = item("Q11173")

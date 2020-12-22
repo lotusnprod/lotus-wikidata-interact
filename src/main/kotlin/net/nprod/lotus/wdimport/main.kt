@@ -1,6 +1,8 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-/**
+/*
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
  * Copyright (c) 2020 Jonathan Bisson
+ *
  */
 
 package net.nprod.lotus.wdimport
@@ -11,16 +13,26 @@ import kotlinx.cli.default
 import kotlinx.cli.required
 import net.nprod.lotus.input.DataTotal
 import net.nprod.lotus.input.loadData
-import net.nprod.lotus.wdimport.wd.*
-import net.nprod.lotus.wdimport.wd.interfaces.Publisher
-import net.nprod.lotus.wdimport.wd.mock.NopSparql
-import net.nprod.lotus.wdimport.wd.mock.NopWDKT
-import net.nprod.lotus.wdimport.wd.mock.TestISparql
-import net.nprod.lotus.wdimport.wd.mock.TestPublisher
+import net.nprod.lotus.rdf.RepositoryManager
+import net.nprod.lotus.wdimport.processing.ReferenceProcessor
+import net.nprod.lotus.wdimport.processing.TaxonProcessor
+import net.nprod.lotus.wdimport.processing.buildCompoundCache
+import net.nprod.lotus.wdimport.processing.processCompounds
+import net.nprod.lotus.wdimport.tools.countInLocalRepository
+import net.nprod.lotus.wdimport.wd.InstanceItems
+import net.nprod.lotus.wdimport.wd.MainInstanceItems
+import net.nprod.lotus.wdimport.wd.TestInstanceItems
+import net.nprod.lotus.wdimport.wd.WDFinder
+import net.nprod.lotus.wdimport.wd.publishing.IPublisher
+import net.nprod.lotus.wdimport.wd.publishing.WDPublisher
+import net.nprod.lotus.wdimport.wd.publishing.mock.TestPublisher
 import net.nprod.lotus.wdimport.wd.query.WDKT
+import net.nprod.lotus.wdimport.wd.query.mock.NopWDKT
 import net.nprod.lotus.wdimport.wd.sparql.ISparql
 import net.nprod.lotus.wdimport.wd.sparql.InChIKey
 import net.nprod.lotus.wdimport.wd.sparql.WDSparql
+import net.nprod.lotus.wdimport.wd.sparql.mock.NopSparql
+import net.nprod.lotus.wdimport.wd.sparql.mock.TestISparql
 import org.apache.logging.log4j.LogManager
 
 fun main(args: Array<String>) {
@@ -32,7 +44,11 @@ fun main(args: Array<String>) {
         shortName = "l",
         description = "Limit the import to this number of entries (-1 for all, default 1)"
     ).default(1)
-    val skip by parser.option(ArgType.Int, shortName = "s", description = "Skip this number of entries").default(0)
+    val skip by parser.option(
+        ArgType.Int,
+        shortName = "s",
+        description = "Skip this number of entries"
+    ).default(0)
     val real by parser.option(
         ArgType.Boolean,
         shortName = "r",
@@ -65,20 +81,14 @@ fun main(args: Array<String>) {
     ).default("")
     parser.parse(args)
 
-    WDPublisher.validate()
-
     logger.info("LOTUS Importer")
 
     if (!real) logger.info("We are in test mode")
 
-    logger.info("Loading data")
-
-    val dataTotal: DataTotal = if (limit == -1) loadData(input, skip) else loadData(input, skip, limit)
-
     logger.info("Initializing toolkit")
 
     lateinit var wdSparql: ISparql
-    lateinit var publisher: Publisher
+    lateinit var publisher: IPublisher
 
     if (real && validation) throw IllegalArgumentException("You cannot be in real mode and validation mode")
 
@@ -88,12 +98,13 @@ fun main(args: Array<String>) {
     // Do we need a local repository
     val repositoryManager: RepositoryManager? =
         if (real || realSparql || validation) null else {
-            if (repositoryInputFilename == "") throw IllegalArgumentException("You need to give a repository input file name")
+            if (repositoryInputFilename == "")
+                throw IllegalArgumentException("You need to give a repository input file name")
             RepositoryManager(persistent, repositoryInputFilename)
         }
 
     // What publishing system are we using
-    publisher = if (real) WDPublisher(instanceItems, pause = 0) else TestPublisher(
+    publisher = if (real) WDPublisher(instanceItems, pause = 0L) else TestPublisher(
         instanceItems,
         repositoryManager?.repository
     )
@@ -101,11 +112,11 @@ fun main(args: Array<String>) {
     // Are we using a local instance of sparql?
     wdSparql = if (realSparql || real) {
         WDSparql(instanceItems)
-    } else if (validation) NopSparql()
+    } else if (validation || repositoryManager == null) NopSparql()
     else {
         TestISparql(
             instanceItems,
-            repositoryManager?.repository ?: throw RuntimeException("Repository not initialized")
+            repositoryManager.repository
         )
     }
 
@@ -114,6 +125,10 @@ fun main(args: Array<String>) {
     logger.info("Connecting to the publisher")
 
     publisher.connect()
+
+    logger.info("Loading data")
+
+    val dataTotal: DataTotal = if (limit == -1) loadData(input, skip) else loadData(input, skip, limit)
 
     logger.info("Producing data")
 

@@ -1,22 +1,23 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-/**
+/*
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
  * Copyright (c) 2020 Jonathan Bisson
+ *
  */
 
-package net.nprod.lotus.wdimport
+package net.nprod.lotus.wdimport.processing
 
 import net.nprod.lotus.input.DataTotal
 import net.nprod.lotus.input.Reference
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
-import net.nprod.lotus.wdimport.wd.interfaces.Publisher
 import net.nprod.lotus.wdimport.wd.models.WDArticle
+import net.nprod.lotus.wdimport.wd.publishing.IPublisher
 import org.apache.logging.log4j.LogManager
-
 
 class ReferenceProcessor(
     val dataTotal: DataTotal,
-    val publisher: Publisher,
+    val publisher: IPublisher,
     val wdFinder: WDFinder,
     val instanceItems: InstanceItems
 ) {
@@ -25,7 +26,7 @@ class ReferenceProcessor(
 
     private fun articleFromReference(reference: Reference): WDArticle {
         val article = WDArticle(
-            name = reference.title ?: reference.doi,
+            label = reference.title ?: reference.doi,
             title = reference.title,
             doi = reference.doi.toUpperCase(), // DOIs are always uppercase
         ).tryToFind(wdFinder, instanceItems)

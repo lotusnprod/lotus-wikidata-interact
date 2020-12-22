@@ -1,6 +1,8 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-/**
+/*
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
  * Copyright (c) 2020 Jonathan Bisson
+ *
  */
 
 package net.nprod.lotus.chemistry
@@ -10,7 +12,6 @@ import org.openscience.cdk.smiles.SmiFlavor
 import org.openscience.cdk.smiles.SmilesGenerator
 import org.openscience.cdk.smiles.SmilesParser
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator
-
 
 fun subscriptFormula(formula: String): String = formula
     .replace("0", "₀")

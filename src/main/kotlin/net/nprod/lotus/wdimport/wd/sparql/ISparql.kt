@@ -1,6 +1,8 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-/**
+/*
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
  * Copyright (c) 2020 Jonathan Bisson
+ *
  */
 
 package net.nprod.lotus.wdimport.wd.sparql
@@ -10,7 +12,16 @@ import net.nprod.lotus.wdimport.wd.Resolver
 import org.eclipse.rdf4j.query.TupleQueryResult
 import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
 
+/**
+ * The common interface for SPARQL based resolvers used to find information about entities
+ */
 interface ISparql : Resolver {
+    /**
+     * Run that query and apply a given function to each result
+     *
+     * @param query SPARQL query
+     * @param function the function to be run for each result
+     */
     fun <T> query(query: String, function: (TupleQueryResult) -> T): T
 
     /**
@@ -30,22 +41,26 @@ interface ISparql : Resolver {
         return keys.chunked(chunkSize).flatMap { chunk ->
             val valuesQuoted = chunk.joinToString(" ") { Rdf.literalOf(it).queryString }
 
-            val query = """
+            val query =
+                """
             PREFIX wdt: <${InstanceItems::wdtURI.get(instanceItems)}>
             PREFIX wd: <${InstanceItems::wdURI.get(instanceItems)}>
             SELECT DISTINCT ?id ?value {
               ?id wdt:$property ?value.
               VALUES ?value { $valuesQuoted }
             }
-            """.trimIndent()
+                """.trimIndent()
 
             this.query(query) { result ->
                 result.map { bindingSet ->
                     (bindingSet.getValue("value").stringValue()) to
-                            bindingSet.getValue("id").stringValue().replace(instanceItems.wdURI, "")
+                        bindingSet.getValue("id").stringValue()
+                            .replace(instanceItems.wdURI, "")
                 }
             }.also { chunkFeedBack() }
-        }.groupBy(keySelector = { it.first },
-            valueTransform = { it.second })
+        }.groupBy(
+            keySelector = { it.first },
+            valueTransform = { it.second }
+        )
     }
 }

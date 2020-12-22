@@ -1,17 +1,34 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-/**
+/*
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
  * Copyright (c) 2020 Jonathan Bisson
+ *
  */
 
 package net.nprod.lotus.input
 
 import java.util.concurrent.atomic.AtomicLong
 
+/**
+ * A Generic cache interface with Keys of type T and Values of type U
+ */
 interface Cache<T, U> {
+    /**
+     * The store for the cache
+     */
     val store: MutableMap<T, U>
+
+    /**
+     * Get or add a new entity
+     */
     fun getOrNew(key: T, value: U): U
 }
 
+/**
+ * A cache implementation that can count values
+ *
+ * It is not thread-safe yet!
+ */
 class IndexableCache<T, U : Indexable> : Cache<T, U> {
     override val store: MutableMap<T, U> = mutableMapOf()
 
@@ -25,11 +42,10 @@ class IndexableCache<T, U : Indexable> : Cache<T, U> {
         }
     }
 
+    /**
+     * Generate a value using an extension function
+     */
     fun getOrNew(key: T, generator: () -> U): U {
         return getOrNew(key, generator())
     }
-}
-
-interface Indexable {
-    var id: Long?
 }

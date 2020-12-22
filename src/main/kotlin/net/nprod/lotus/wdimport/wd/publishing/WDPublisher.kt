@@ -1,13 +1,16 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-/**
+/*
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
  * Copyright (c) 2020 Jonathan Bisson
+ *
  */
 
-package net.nprod.lotus.wdimport.wd
+package net.nprod.lotus.wdimport.wd.publishing
 
 import net.nprod.lotus.helpers.tryCount
-import net.nprod.lotus.wdimport.wd.interfaces.Publisher
-import net.nprod.lotus.wdimport.wd.models.Publishable
+import net.nprod.lotus.wdimport.wd.InstanceItems
+import net.nprod.lotus.wdimport.wd.Resolver
+import net.nprod.lotus.wdimport.wd.TestInstanceItems
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.wikidata.wdtk.datamodel.helpers.Datamodel
@@ -29,9 +32,17 @@ class EnvironmentVariableError(message: String) : Exception(message)
 class InternalError(message: String) : Exception(message)
 
 /**
- * Really this does more than Publishing, we should find another name
+ * Type safe unit for milliseconds
  */
-class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0) : Resolver, Publisher {
+typealias Milliseconds = Long
+
+/**
+ * Publish a publishable object on WikiData
+ *
+ * @param instanceItems a reference to the items of that instance
+ * @param pause pause between each publication in milliseconds
+ */
+class WDPublisher(override val instanceItems: InstanceItems, val pause: Milliseconds = 0L) : Resolver, IPublisher {
     private val userAgent = "Wikidata Toolkit EditOnlineDataExample"
     private val logger: Logger = LogManager.getLogger(WDPublisher::class.java)
     private var user: String? = null
@@ -45,13 +56,11 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0)
     private val publishedDocumentsIds: MutableSet<String> = mutableSetOf()
 
     init {
-        validate()
         user = System.getenv("WIKIDATA_USER")
             ?: throw EnvironmentVariableError("Missing environment variable WIKIDATA_USER")
         password = System.getenv("WIKIDATA_PASSWORD")
             ?: throw EnvironmentVariableError("Missing environment variable WIKIDATA_PASSWORD")
     }
-
 
     override fun connect() {
         connection = if (instanceItems == TestInstanceItems) {
@@ -85,7 +94,8 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0)
             return try {
                 val o = editor?.createPropertyDocument(
                     doc,
-                    "Added a new property for ONPDB", listOf()
+                    "Added a new property for ONPDB",
+                    listOf()
                 ) ?: throw Exception("Sorry you can't create a property without connecting first.")
                 o.entityId
             } catch (e: IllegalArgumentException) {
@@ -93,7 +103,6 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0)
                 logger.error("Restarting it…")
                 newProperty(name, description)
             }
-
         } catch (e: MediaWikiApiErrorException) {
             if ("already has label" in e.errorMessage) {
                 logger.error("This property already exists: ${e.errorMessage}")
@@ -101,7 +110,8 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0)
                     e.errorMessage.subSequence(
                         e.errorMessage.indexOf(':') + 1,
                         e.errorMessage.indexOf('|')
-                    ).toString(), ""
+                    ).toString(),
+                    ""
                 )
             } else {
                 throw e
@@ -123,9 +133,9 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0)
                 val newItemDocument: ItemDocument =
                     tryCount<ItemDocument>(
                         listOf(MediaWikiApiErrorException::class, IOException::class),
-                        delaySeconds = 30L,
+                        delayMilliSeconds = 30_000L,
                         maxRetries = 10
-                    ) {  // Sometimes it needs time to let the DB recover
+                    ) { // Sometimes it needs time to let the DB recover
                         editor?.createItemDocument(publishable.document(instanceItems), summary, null)
                             ?: throw InternalError("There is no editor anymore")
                     }
@@ -134,47 +144,37 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Int = 0)
                 publishedDocumentsIds.add(itemId.iri)
                 logger.info("New document ${itemId.id} - Summary: $summary")
                 logger.info("you can access it at ${instanceItems.sitePageIri}${itemId.id}")
-                publishable.published(itemId)
-                if (pause > 0) Thread.sleep(pause * 1000L)
-            } else {  // The publishable is already existing, this means we only have to update the statements
+                publishable.publishedAs(itemId)
+            } else { // The publishable is already existing, this means we only have to update the statements
                 updatedDocuments++
                 logger.info("Updated document ${publishable.id} - Summary: $summary")
 
                 val statements = publishable.listOfStatementsForUpdate(fetcher, instanceItems)
 
                 if (statements.isNotEmpty()) {
-                    tryCount<Unit>( // TODO: Find a way to specify exceptions from a list
+                    tryCount<Unit>(
                         listExceptions = listOf(MediaWikiApiErrorException::class, IOException::class),
-                        delaySeconds = 30L,
+                        delayMilliSeconds = 30_000L,
                         maxRetries = 10
-                    ) {  // Sometimes it needs time to let the DB recover
+                    ) { // Sometimes it needs time to let the DB recover
                         editor?.updateStatements(
-                            publishable.id, statements,
-                            listOf(), "Updating the statements", listOf()
+                            publishable.id,
+                            statements,
+                            listOf(),
+                            "Updating the statements",
+                            listOf()
                         )
                     }
-                    if (pause > 0) Thread.sleep(pause * 1000L)
                 }
                 publishedDocumentsIds.add(publishable.id.iri)
             }
+            if (pause > 0) Thread.sleep(pause)
         } catch (e: Exception) {
-            logger.error("Failed to save the item for the reason, we tried to restart multiple times but it continued to fail")
+            logger.error("Failed to save the item, we tried to restart multiple times but it continued to fail")
             logger.error(" CAUSE: ${e.cause}")
             logger.error(" MESSAGE: ${e.message}")
             throw e
         }
         return publishable.id
-    }
-
-    companion object {
-        /**
-         * Validate the environment
-         */
-        fun validate() {
-            System.getenv("WIKIDATA_USER")
-                ?: throw EnvironmentVariableError("Missing environment variable WIKIDATA_USER")
-            System.getenv("WIKIDATA_PASSWORD")
-                ?: throw EnvironmentVariableError("Missing environment variable WIKIDATA_PASSWORD")
-        }
     }
 }

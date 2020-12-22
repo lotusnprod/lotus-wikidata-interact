@@ -1,6 +1,8 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-/**
- * Copyright (c) 2020 Jonathan Bisson, Adriano Rutz
+/*
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
+ * Copyright (c) 2020 Jonathan Bisson
+ *
  */
 
 package net.nprod.lotus.input
@@ -31,6 +33,8 @@ fun loadData(fileName: String, skip: Int = 0, limit: Int? = null): DataTotal {
         val organismIDs = it.getString("organismCleaned_dbTaxoTaxonIds")
         val organismRanks = it.getString("organismCleaned_dbTaxoTaxonRanks")
         val organismNames = it.getString("organismCleaned_dbTaxoTaxonomy")
+        val unspecifiedCenters = it.getInt("structureCleaned_stereocenters_unspecified")
+        val totalCenters = it.getInt("structureCleaned_stereocenters_total")
 
         val smiles = it.getString("structureCleanedSmiles")
         val doi = it.getString("referenceCleanedDoi")
@@ -52,20 +56,24 @@ fun loadData(fileName: String, skip: Int = 0, limit: Int? = null): DataTotal {
             val compoundObj = dataTotal.compoundCache.getOrNew(smiles) {
                 Compound(
                     name = it.getString("structureCleaned_nameTraditional"),
-                    smiles = smiles, inchi = it.getString("structureCleanedInchi"),
+                    smiles = smiles,
+                    inchi = it.getString("structureCleanedInchi"),
                     inchikey = it.getString("structureCleanedInchikey3D"),
                     iupac = it.getString("structureCleaned_nameIupac"),
                     unspecifiedStereocenters = it.getInt("structureCleaned_stereocenters_unspecified"),
-                    atLeastSomeStereoDefined = it.getInt("structureCleaned_stereocenters_unspecified") != it.getInt("structureCleaned_stereocenters_total")
+                    atLeastSomeStereoDefined = unspecifiedCenters != totalCenters
                 )
             }
 
             val referenceObj = dataTotal.referenceCache.getOrNew(doi) {
                 Reference(
                     doi = doi,
-                    title = it.getString("referenceCleanedTitle").ifEqualReplaceByNull("NA")?.ifEqualReplaceByNull(""),
-                    pmcid = it.getString("referenceCleanedPmcid").ifEqualReplace("NA", ""),
-                    pmid = it.getString("referenceCleanedPmid").ifEqualReplace("NA", "")
+                    title = it.getString("referenceCleanedTitle")
+                        .ifEqualReplace("NA", ""),
+                    pmcid = it.getString("referenceCleanedPmcid")
+                        .ifEqualReplace("NA", ""),
+                    pmid = it.getString("referenceCleanedPmid")
+                        .ifEqualReplace("NA", "")
                 )
             }
 

@@ -1,9 +1,11 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-/**
+/*
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
  * Copyright (c) 2020 Jonathan Bisson
+ *
  */
 
-package net.nprod.lotus.wdimport
+package net.nprod.lotus.rdf
 
 import org.apache.logging.log4j.LogManager
 import org.eclipse.rdf4j.repository.sail.SailRepository

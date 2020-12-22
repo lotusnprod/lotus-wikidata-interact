@@ -1,11 +1,12 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-/**
+/*
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
  * Copyright (c) 2020 Jonathan Bisson
+ *
  */
 
-package net.nprod.lotus.wdimport.wd.interfaces
+package net.nprod.lotus.wdimport.wd.publishing
 
-import net.nprod.lotus.wdimport.wd.models.Publishable
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
 import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue
 
@@ -14,7 +15,7 @@ import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue
  *
  * The purpose is to have a single interface for any kind of document.
  */
-interface Publisher {
+interface IPublisher {
     /**
      * A counter for new Documents made by that publisher
      */
