@@ -11,6 +11,7 @@ import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.TestInstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
 import net.nprod.lotus.wdimport.wd.publishing.Publishable
+import org.wikidata.wdtk.datamodel.helpers.Datamodel
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
 import java.time.OffsetDateTime
 import kotlin.reflect.KProperty1
@@ -43,11 +44,29 @@ data class WDArticle(
 ) : Publishable() {
     override var type: KProperty1<InstanceItems, ItemIdValue> = InstanceItems::scholarlyArticle
 
-    override fun dataStatements(): List<ReferencableValueStatement> =
+    override fun dataStatements(): List<ReferencedValueStatement> =
         listOfNotNull(
-            title?.let { ReferencableValueStatement.monolingualValue(InstanceItems::title, it) },
-            doi?.let { ReferencableValueStatement(InstanceItems::doi, it) }
+            title?.let { ReferencedValueStatement.monolingualValue(InstanceItems::title, it) },
+            doi?.let { ReferencedValueStatement(InstanceItems::doi, it) },
+            publicationDate?.let { ReferencedValueStatement.datetimeValue(InstanceItems::publicationDate, it) },
+            issue?.let { ReferencedValueStatement(InstanceItems::issue, it )},
+            volume?.let { ReferencedValueStatement(InstanceItems::volume, it )},
+            pages?.let { ReferencedValueStatement(InstanceItems::pages, it )},
+            resolvedISSN?.let { ReferencedValueStatement(InstanceItems::issn, it) },
+            *authorsStatements()
         )
+
+    /**
+     * Generate a list of authors statements
+     */
+    private fun authorsStatements(): Array<ReferencedValueStatement> =
+        authors?.flatMapIndexed { index, author ->
+            listOf(
+                ReferencedValueStatement(InstanceItems::authorNameString, author.fullName).also {
+                    it.qualifier(InstanceItems::seriesOrdinal, Datamodel.makeStringValue((index+1).toString()))
+                }
+            )
+        }?.toTypedArray() ?: arrayOf()
 
     /**
      * Try to find an article with that DOI, we always take the smallest ID

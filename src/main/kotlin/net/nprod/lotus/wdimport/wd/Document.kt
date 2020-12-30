@@ -7,8 +7,9 @@
 
 package net.nprod.lotus.wdimport.wd
 
-import net.nprod.lotus.wdimport.wd.models.ReferencableValueStatement
-import net.nprod.lotus.wdimport.wd.models.ReferenceableRemoteItemStatement
+import net.nprod.lotus.wdimport.wd.models.ReferencedRemoteItemStatement
+import net.nprod.lotus.wdimport.wd.models.ReferencedStatement
+import net.nprod.lotus.wdimport.wd.models.ReferencedValueStatement
 import org.wikidata.wdtk.datamodel.helpers.Datamodel
 import org.wikidata.wdtk.datamodel.helpers.ItemDocumentBuilder
 import org.wikidata.wdtk.datamodel.helpers.ReferenceBuilder
@@ -19,6 +20,15 @@ import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue
 import org.wikidata.wdtk.datamodel.interfaces.Reference
 import org.wikidata.wdtk.datamodel.interfaces.Statement
 import org.wikidata.wdtk.datamodel.interfaces.Value
+import kotlin.reflect.KProperty1
+
+/**
+ * A qualifier that can be added to a statement.
+ */
+data class Qualifier(
+    val property: KProperty1<InstanceItems, PropertyIdValue>,
+    val value: Value
+)
 
 /**
  * Type safe builder or DSL
@@ -50,6 +60,9 @@ fun ReferenceBuilder.propertyValue(property: PropertyIdValue, value: Value) {
     )
 }
 
+/**
+ * This is used to create a direct statement
+ */
 fun ItemDocumentBuilder.statement(
     subject: ItemIdValue? = null,
     property: PropertyIdValue,
@@ -60,36 +73,40 @@ fun ItemDocumentBuilder.statement(
 
 fun ItemDocumentBuilder.statement(
     subject: ItemIdValue? = null,
-    referencableStatement: ReferencableValueStatement,
+    referencedStatement: ReferencedValueStatement,
     instanceItems: InstanceItems
 ) {
     val statement = newStatement(
-        referencableStatement.property.get(instanceItems),
+        referencedStatement.property.get(instanceItems),
         subject,
-        referencableStatement.value
+        referencedStatement.value
     ) { statementBuilder ->
-        referencableStatement.preReferences.forEach {
+        referencedStatement.preReferences.forEach {
             statementBuilder.withReference(it.build(instanceItems))
+        }
+        referencedStatement.qualifiers.forEach { (property, value) ->
+            statementBuilder.withQualifierValue(property.get(instanceItems), value)
         }
     }
 
     this.withStatement(statement)
 }
 
+/**
+ * Used to resolve when we have a ReferencedRemoteItemStatement
+ */
 fun ItemDocumentBuilder.statement(
-    subject: ItemIdValue?,
-    referenceableStatement: ReferenceableRemoteItemStatement,
+    subject: ItemIdValue? = null,
+    referencedStatement: ReferencedStatement,
     instanceItems: InstanceItems
-): Unit =
-    this.statement(
-        subject,
-        ReferencableValueStatement(
-            referenceableStatement.property,
-            referenceableStatement.value.get(instanceItems),
-            referenceableStatement.preReferences
-        ),
-        instanceItems
-    )
+) {
+    val resolvedReferenceableStatement = when (referencedStatement) {
+        is ReferencedValueStatement -> referencedStatement
+        is ReferencedRemoteItemStatement -> referencedStatement.resolveToReferencedValueStatetement(instanceItems)
+        else -> throw RuntimeException("Unknown ReferencedStatement type")
+    }
+    statement(subject, resolvedReferenceableStatement, instanceItems)
+}
 
 fun newStatement(
     property: PropertyIdValue,

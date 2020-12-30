@@ -126,6 +126,7 @@ interface InstanceItems {
     val orcid: PropertyIdValue
     val retrieved: PropertyIdValue
     val issn: PropertyIdValue
+    val publicationDate: PropertyIdValue
 }
 
 object TestInstanceItems : InstanceItems {
@@ -188,6 +189,7 @@ object TestInstanceItems : InstanceItems {
     override val arxiv: PropertyIdValue = property("P932")
     override val title: PropertyIdValue = property("P95645")
     override val publishedIn: PropertyIdValue = property("P1433")
+    override val publicationDate: PropertyIdValue = property("P577")
     override val volume: PropertyIdValue = property("P478")
     override val pages: PropertyIdValue = property("P304")
     override val issue: PropertyIdValue = property("P433")
@@ -287,6 +289,7 @@ object MainInstanceItems : InstanceItems {
     override val arxiv: PropertyIdValue = property("P932")
     override val title: PropertyIdValue = property("P1476")
     override val publishedIn: PropertyIdValue = property("P1433")
+    override val publicationDate: PropertyIdValue = property("P577")
     override val volume: PropertyIdValue = property("P478")
     override val pages: PropertyIdValue = property("P304")
     override val issue: PropertyIdValue = property("P433")

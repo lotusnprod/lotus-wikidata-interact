@@ -9,9 +9,9 @@ package net.nprod.lotus.wdimport.wd.publishing
 
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
-import net.nprod.lotus.wdimport.wd.models.ReferencableValueStatement
-import net.nprod.lotus.wdimport.wd.models.ReferenceableRemoteItemStatement
-import net.nprod.lotus.wdimport.wd.models.ReferenceableStatement
+import net.nprod.lotus.wdimport.wd.models.ReferencedValueStatement
+import net.nprod.lotus.wdimport.wd.models.ReferencedRemoteItemStatement
+import net.nprod.lotus.wdimport.wd.models.ReferencedStatement
 import net.nprod.lotus.wdimport.wd.newDocument
 import net.nprod.lotus.wdimport.wd.newStatement
 import net.nprod.lotus.wdimport.wd.statement
@@ -77,7 +77,7 @@ abstract class Publishable {
     /**
      * The statements that are not translated yet
      */
-    val preStatements: MutableSet<ReferenceableStatement> = mutableSetOf()
+    val preStatements: MutableSet<ReferencedStatement> = mutableSetOf()
 
     /**
      * Sets the ID
@@ -92,7 +92,7 @@ abstract class Publishable {
     /**
      * Return a list of all the Referenceable statements of this object
      */
-    abstract fun dataStatements(): List<ReferenceableStatement>
+    abstract fun dataStatements(): List<ReferencedStatement>
 
     /**
      * Generate a document for that entry.
@@ -113,11 +113,8 @@ abstract class Publishable {
             statement(subject ?: _id, instanceItems.instanceOf, type.get(instanceItems))
             logger.info("Creating a new document - Subject: ${subject ?: _id} - type: ${type.get(instanceItems)}")
             // We construct the statements according to this instanceItems value
-            preStatements.forEach { refStat ->
-                when (refStat) {
-                    is ReferencableValueStatement -> statement(subject ?: _id, refStat, instanceItems)
-                    is ReferenceableRemoteItemStatement -> statement(subject ?: _id, refStat, instanceItems)
-                }
+            preStatements.forEach { referenceableStatement ->
+                statement(subject ?: _id, referenceableStatement, instanceItems)
             }
             preStatements.clear()
         }
@@ -150,8 +147,8 @@ abstract class Publishable {
 
         return preStatements.mapNotNull { statement ->
             val value: Value? = when (statement) {
-                is ReferencableValueStatement -> statement.value
-                is ReferenceableRemoteItemStatement -> statement.value.get(instanceItems)
+                is ReferencedValueStatement -> statement.value
+                is ReferencedRemoteItemStatement -> statement.value.get(instanceItems)
                 else -> null // The statement is currently invalid if we do not know how to handle its values
             }
 
@@ -173,7 +170,7 @@ abstract class Publishable {
      *
      */
     private fun constructStatement(
-        statement: ReferenceableStatement,
+        statement: ReferencedStatement,
         newStatementValue: Value,
         instanceItems: InstanceItems,
         existingPropertyValueCoupleToReferences: Map<String, Map<Value, Pair<Statement, List<Reference>>>>
@@ -214,8 +211,8 @@ abstract class Publishable {
      * @param value value for that property
      * @param f function that will be applied on the statement built
      */
-    fun addProperty(remoteProperty: RemoteProperty, value: String, f: ReferencableValueStatement.() -> Unit = {}) {
-        val refStatement = ReferencableValueStatement(remoteProperty, Datamodel.makeStringValue(value)).apply(f)
+    fun addProperty(remoteProperty: RemoteProperty, value: String, f: ReferencedValueStatement.() -> Unit = {}) {
+        val refStatement = ReferencedValueStatement(remoteProperty, Datamodel.makeStringValue(value)).apply(f)
         preStatements.add(refStatement)
     }
 }

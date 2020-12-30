@@ -16,6 +16,7 @@ import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
 import org.wikidata.wdtk.datamodel.implementation.ItemIdValueImpl
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
 import kotlin.reflect.KProperty1
+
 /**
  * This is used to convert the names from LOTUS to WikiData DB names
  */
@@ -62,11 +63,11 @@ data class WDTaxon(
 ) : Publishable() {
     override var type: KProperty1<InstanceItems, ItemIdValue> = InstanceItems::taxon
 
-    override fun dataStatements(): List<ReferenceableStatement> =
+    override fun dataStatements(): List<ReferencedStatement> =
         listOfNotNull(
-            parentTaxon?.let { ReferencableValueStatement(InstanceItems::parentTaxon, it) },
-            taxonName?.let { ReferencableValueStatement(InstanceItems::taxonName, it) },
-            ReferenceableRemoteItemStatement(InstanceItems::taxonRank, taxonRank)
+            parentTaxon?.let { ReferencedValueStatement(InstanceItems::parentTaxon, it) },
+            taxonName?.let { ReferencedValueStatement(InstanceItems::taxonName, it) },
+            ReferencedRemoteItemStatement(InstanceItems::taxonRank, taxonRank)
         )
 
     override fun tryToFind(wdFinder: WDFinder, instanceItems: InstanceItems): WDTaxon {
@@ -78,9 +79,7 @@ data class WDTaxon(
             PREFIX wdt: <${InstanceItems::wdtURI.get(instanceItems)}>
             SELECT DISTINCT ?id {
               ?id wdt:${wdFinder.sparql.resolve(InstanceItems::instanceOf).id} wd:${
-            wdFinder.sparql.resolve(
-                InstanceItems::taxon
-            ).id
+                wdFinder.sparql.resolve(InstanceItems::taxon).id
             };
                   wdt:${wdFinder.sparql.resolve(InstanceItems::taxonRank).id} wd:$resolvedTaxonRank;
                   wdt:${wdFinder.sparql.resolve(InstanceItems::taxonName).id} ${Rdf.literalOf(label).queryString}.

@@ -51,21 +51,21 @@ data class WDCompound(
         apply(f)
     }
 
-    override fun dataStatements(): List<ReferencableValueStatement> =
+    override fun dataStatements(): List<ReferencedValueStatement> =
         listOfNotNull(
-            inChIKey?.let { ReferencableValueStatement(InstanceItems::inChIKey, it) },
-            inChI?.let { ReferencableValueStatement(InstanceItems::inChI, it) },
-            isomericSMILES?.let { ReferencableValueStatement(InstanceItems::isomericSMILES, it) },
-            canonicalSMILES?.let { ReferencableValueStatement(InstanceItems::canonicalSMILES, it) },
+            inChIKey?.let { ReferencedValueStatement(InstanceItems::inChIKey, it) },
+            inChI?.let { ReferencedValueStatement(InstanceItems::inChI, it) },
+            isomericSMILES?.let { ReferencedValueStatement(InstanceItems::isomericSMILES, it) },
+            canonicalSMILES?.let { ReferencedValueStatement(InstanceItems::canonicalSMILES, it) },
             chemicalFormula?.let {
-                ReferencableValueStatement(
+                ReferencedValueStatement(
                     InstanceItems::chemicalFormula,
                     it
                 )
             },
             // For this we need to check the labels first…
             // iupac?.let { ReferencableValueStatement(InstanceItems::iupac, it )},
-            pcId?.let { ReferencableValueStatement(InstanceItems::pcId, it) }
+            pcId?.let { ReferencedValueStatement(InstanceItems::pcId, it) }
         )
 
     override fun tryToFind(wdFinder: WDFinder, instanceItems: InstanceItems): WDCompound =
@@ -116,11 +116,11 @@ data class WDCompound(
     /**
      * Add a `found in taxon` property with the given references
      */
-    fun foundInTaxon(wdTaxon: WDTaxon, f: ReferencableValueStatement.() -> Unit) {
+    fun foundInTaxon(wdTaxon: WDTaxon, f: ReferencedValueStatement.() -> Unit) {
         require(wdTaxon.published) { "Can only add for an already published taxon." }
         // We make it overwritable, meaning we can add duplicates if needed
         val refStatement =
-            ReferencableValueStatement(InstanceItems::foundInTaxon, wdTaxon.id, overwritable = true).apply(f)
+            ReferencedValueStatement(InstanceItems::foundInTaxon, wdTaxon.id, overwritable = true).apply(f)
         preStatements.add(refStatement)
     }
 }

@@ -129,8 +129,7 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
     override fun publish(publishable: Publishable, summary: String): ItemIdValue {
         require(connection != null) { "You need to connect first" }
         require(editor != null) { "The editor should exist, you connection likely failed and we didn't catch that" }
-        WebResourceFetcherImpl
-            .setUserAgent(userAgent)
+        WebResourceFetcherImpl.setUserAgent(userAgent)
 
         // The publishable has not been published yet
 
