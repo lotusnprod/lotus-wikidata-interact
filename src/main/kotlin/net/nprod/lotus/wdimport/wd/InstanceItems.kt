@@ -110,6 +110,21 @@ interface InstanceItems {
     val idBirdLifeTaxonomy: PropertyIdValue
     val idAmphibiaTaxonomy: PropertyIdValue
     val idPhasmidaTaxonomy: PropertyIdValue
+    val pmid: PropertyIdValue
+    val pmcid: PropertyIdValue
+    val arxiv: PropertyIdValue
+    val crossref: ItemIdValue
+    val publication: ItemIdValue
+    val publishedIn: PropertyIdValue
+    val seriesOrdinal: PropertyIdValue
+    val volume: PropertyIdValue
+    val pages: PropertyIdValue
+    val issue: PropertyIdValue
+    val authorNameString: PropertyIdValue
+    val author: PropertyIdValue
+    val referenceURL: PropertyIdValue
+    val orcid: PropertyIdValue
+    val retrieved: PropertyIdValue
 }
 
 object TestInstanceItems : InstanceItems {
@@ -164,15 +179,34 @@ object TestInstanceItems : InstanceItems {
 
     override val naturalProductOfTaxon: PropertyIdValue = property("P95470")
     override val foundInTaxon: PropertyIdValue = property("P95646")
-    override val statedIn: PropertyIdValue = property("P149")
 
     // Article
     override val doi: PropertyIdValue = property("P168")
+    override val pmid: PropertyIdValue = property("P698")
+    override val pmcid: PropertyIdValue = property("P932")
+    override val arxiv: PropertyIdValue = property("P932")
     override val title: PropertyIdValue = property("P95645")
+    override val publishedIn: PropertyIdValue = property("P1433")
+    override val volume: PropertyIdValue = property("P478")
+    override val pages: PropertyIdValue = property("P304")
+    override val issue: PropertyIdValue = property("P433")
+
+    override val authorNameString: PropertyIdValue = property("P2093")
+    override val author: PropertyIdValue = property("P50")
+    override val orcid: PropertyIdValue = property("P496")
+
+    override val referenceURL: PropertyIdValue = property("P854")
+
+    override val crossref: ItemIdValue = item("Q5188229")
+
+    override val scholarlyArticle: ItemIdValue = item("Q212556")
+    override val publication: ItemIdValue = item("Q732577")
 
     // Things
     override val chemicalCompound: ItemIdValue = item("Q212525")
     override val groupOfStereoIsomers: ItemIdValue = item("Q59199015")
+
+    // Taxonomy
     override val taxon: ItemIdValue = item("Q212541")
     override val variety: ItemIdValue = item("Q767728")
     override val species: ItemIdValue = item("Q212542")
@@ -182,7 +216,12 @@ object TestInstanceItems : InstanceItems {
     override val subfamily: ItemIdValue = item("Q164280")
     override val family: ItemIdValue = item("Q212544")
     override val order: ItemIdValue = item("Q36602")
-    override val scholarlyArticle: ItemIdValue = item("Q212556")
+
+    override val seriesOrdinal: PropertyIdValue = property("P1545")
+
+    // Reference
+    override val statedIn: PropertyIdValue = property("P149")
+    override val retrieved: PropertyIdValue = property("P813")
 }
 
 object MainInstanceItems : InstanceItems {
@@ -238,15 +277,34 @@ object MainInstanceItems : InstanceItems {
 
     override val naturalProductOfTaxon: PropertyIdValue = property("P1582")
     override val foundInTaxon: PropertyIdValue = property("P703")
-    override val statedIn: PropertyIdValue = property("P248")
 
     // Article
     override val doi: PropertyIdValue = property("P356")
+    override val pmid: PropertyIdValue = property("P698")
+    override val pmcid: PropertyIdValue = property("P932")
+    override val arxiv: PropertyIdValue = property("P932")
     override val title: PropertyIdValue = property("P1476")
+    override val publishedIn: PropertyIdValue = property("P1433")
+    override val volume: PropertyIdValue = property("P478")
+    override val pages: PropertyIdValue = property("P304")
+    override val issue: PropertyIdValue = property("P433")
+
+    override val authorNameString: PropertyIdValue = property("P2093")
+    override val author: PropertyIdValue = property("P50")
+    override val orcid: PropertyIdValue = property("P496")
+
+    override val referenceURL: PropertyIdValue = property("P854")
+
+    override val crossref: ItemIdValue = item("Q5188229")
+
+    override val scholarlyArticle: ItemIdValue = item("Q13442814")
+    override val publication: ItemIdValue = item("Q732577")
 
     // Things
     override val chemicalCompound: ItemIdValue = item("Q11173")
     override val groupOfStereoIsomers: ItemIdValue = item("Q59199015")
+
+    // Taxonomy
     override val taxon: ItemIdValue = item("Q16521")
     override val variety: ItemIdValue = item("Q767728")
     override val species: ItemIdValue = item("Q7432")
@@ -256,5 +314,10 @@ object MainInstanceItems : InstanceItems {
     override val subfamily: ItemIdValue = item("Q164280")
     override val family: ItemIdValue = item("Q35409")
     override val order: ItemIdValue = item("Q36602")
-    override val scholarlyArticle: ItemIdValue = item("Q13442814")
+
+    override val seriesOrdinal: PropertyIdValue = property("P1545")
+
+    // Reference
+    override val statedIn: PropertyIdValue = property("P248")
+    override val retrieved: PropertyIdValue = property("P813")
 }

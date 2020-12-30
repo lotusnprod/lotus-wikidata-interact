@@ -1,4 +1,12 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.util.Properties
+
+val localPropertiesFile = file("local.properties")
+val localProperties = if (localPropertiesFile.exists()) {
+    val properties = Properties()
+    properties.load(localPropertiesFile.inputStream())
+    properties
+} else null
 
 plugins {
     kotlin("jvm")
@@ -14,12 +22,18 @@ group = "net.nprod.lotus.wdimport"
 version = "0.3-SNAPSHOT"
 
 repositories {
+
     mavenCentral()
     jcenter()
     maven("https://kotlin.bintray.com/kotlinx")
 
     flatDir {
         dirs("./libs")
+    }
+
+    localProperties?.let {
+        val localMaven: String by it
+        maven(uri("file:///$localMaven"))
     }
 }
 
@@ -34,6 +48,7 @@ dependencies {
     val ktorVersion: String by project
     val serializationVersion: String by project
     val kotlinVersion: String by project
+    val konnectorVersion: String by project
 
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-cli:$kotlinxCliVersion")
@@ -55,6 +70,8 @@ dependencies {
     implementation("org.eclipse.rdf4j:rdf4j-core:$rdf4jVersion")
     implementation("org.eclipse.rdf4j:rdf4j-repository-sail:$rdf4jVersion")
     implementation("org.eclipse.rdf4j:rdf4j-sail-memory:$rdf4jVersion")
+
+    implementation("net.nprod:konnector:$konnectorVersion")
 
     implementation("com.univocity:univocity-parsers:$univocityParserVersion")
 
