@@ -7,7 +7,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
-internal class WDReferenceTest {
+internal class WDArticleTest {
     private lateinit var wdSparql: WDSparql
 
     @BeforeEach
@@ -16,7 +16,7 @@ internal class WDReferenceTest {
     }
 
     @Test
-    fun findReferencesByDOI() {
+    fun `Find references by DOI`() {
         val dois = mapOf(
             "10.1021/ACS.JMEDCHEM.5B01009" to listOf("Q26778522"),
             "10.3389/FPLS.2019.01329" to listOf("Q91218352")

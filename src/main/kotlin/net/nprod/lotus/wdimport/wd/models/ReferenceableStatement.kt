@@ -11,9 +11,11 @@ import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.publishing.RemoteItem
 import net.nprod.lotus.wdimport.wd.publishing.RemoteProperty
 import org.joda.time.DateTime
+import org.joda.time.LocalDateTime
 import org.wikidata.wdtk.datamodel.helpers.Datamodel
 import org.wikidata.wdtk.datamodel.interfaces.TimeValue
 import org.wikidata.wdtk.datamodel.interfaces.Value
+import java.time.OffsetDateTime
 
 interface ReferenceableStatement {
     var property: RemoteProperty
@@ -42,12 +44,12 @@ data class ReferencableValueStatement(
         fun monolingualValue(property: RemoteProperty, value: String): ReferencableValueStatement =
             ReferencableValueStatement(property, Datamodel.makeMonolingualTextValue(value, "en"))
 
-        fun datetimeValue(property: RemoteProperty, value: DateTime): ReferencableValueStatement =
+        fun datetimeValue(property: RemoteProperty, value: OffsetDateTime): ReferencableValueStatement =
             ReferencableValueStatement(
                 property,
                 Datamodel.makeTimeValue(
                     value.year.toLong(),
-                    value.monthOfYear.toByte(),
+                    value.monthValue.toByte(),
                     value.dayOfMonth.toByte(),
                     TimeValue.CM_GREGORIAN_PRO
                 )

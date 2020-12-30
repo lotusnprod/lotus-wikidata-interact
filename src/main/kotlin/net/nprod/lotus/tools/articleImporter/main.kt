@@ -12,15 +12,8 @@ import io.ktor.util.KtorExperimentalAPI
 import net.nprod.konnector.crossref.CrossRefConnector
 import net.nprod.konnector.crossref.OfficialCrossRefAPI
 import net.nprod.lotus.wdimport.wd.InstanceItems
-
-data class AuthorInfo(
-    val ORCID: String?,
-    val givenName: String,
-    val familyName: String
-) {
-    val fullName
-        get() = "$givenName $familyName"
-}
+import net.nprod.lotus.wdimport.wd.models.AuthorInfo
+import java.time.OffsetDateTime
 
 @KtorExperimentalAPI
 fun main() {
@@ -53,7 +46,7 @@ fun main() {
         println("Work type: $worktype")
         println("Title: $title")
         println("ISSN: $issn")
-        println("Publication Date: $date")
+        println("Publication Date: ${OffsetDateTime.parse(date)}")
         println("Issue: $issue")
         println("Volume: $volume")
         println("Pages: $page")
