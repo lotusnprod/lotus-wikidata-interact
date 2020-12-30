@@ -10,7 +10,9 @@ package net.nprod.lotus.wdimport.wd.models
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.publishing.RemoteItem
 import net.nprod.lotus.wdimport.wd.publishing.RemoteProperty
+import org.joda.time.DateTime
 import org.wikidata.wdtk.datamodel.helpers.Datamodel
+import org.wikidata.wdtk.datamodel.interfaces.TimeValue
 import org.wikidata.wdtk.datamodel.interfaces.Value
 
 interface ReferenceableStatement {
@@ -39,6 +41,17 @@ data class ReferencableValueStatement(
     companion object {
         fun monolingualValue(property: RemoteProperty, value: String): ReferencableValueStatement =
             ReferencableValueStatement(property, Datamodel.makeMonolingualTextValue(value, "en"))
+
+        fun datetimeValue(property: RemoteProperty, value: DateTime): ReferencableValueStatement =
+            ReferencableValueStatement(
+                property,
+                Datamodel.makeTimeValue(
+                    value.year.toLong(),
+                    value.monthOfYear.toByte(),
+                    value.dayOfMonth.toByte(),
+                    TimeValue.CM_GREGORIAN_PRO
+                )
+            )
     }
 }
 
