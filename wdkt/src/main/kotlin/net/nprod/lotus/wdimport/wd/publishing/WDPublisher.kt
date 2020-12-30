@@ -136,13 +136,15 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
         logger.info("Looking for it. Published status: ${publishable.published}")
         if (!publishable.published) {
             newDocuments++
+            val document = publishable.document(instanceItems)
+
             val newItemDocument: ItemDocument =
                 tryCount<ItemDocument>(
                     listOf(MediaWikiApiErrorException::class, IOException::class),
                     delayMilliSeconds = 30_000L,
                     maxRetries = 10
                 ) { // Sometimes it needs time to let the DB recover
-                    editor?.createItemDocument(publishable.document(instanceItems), summary, null)
+                    editor?.createItemDocument(document, summary, null)
                         ?: throw InternalException("There is no editor anymore")
                 }
 

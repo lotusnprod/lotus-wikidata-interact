@@ -12,10 +12,10 @@ import kotlinx.cli.ArgType
 import kotlinx.cli.default
 import kotlinx.cli.required
 
-class Parameters(args: Array<String>) {
+class Parameters {
     private val parser = ArgParser("lotus_importer")
 
-    init {
+    fun parse(args: Array<String>) {
         parser.parse(args)
     }
 

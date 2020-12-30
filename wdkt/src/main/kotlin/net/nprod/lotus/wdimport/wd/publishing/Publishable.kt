@@ -8,10 +8,11 @@
 package net.nprod.lotus.wdimport.wd.publishing
 
 import net.nprod.lotus.wdimport.wd.InstanceItems
+import net.nprod.lotus.wdimport.wd.ResolvedQualifier
 import net.nprod.lotus.wdimport.wd.WDFinder
-import net.nprod.lotus.wdimport.wd.models.ReferencedValueStatement
 import net.nprod.lotus.wdimport.wd.models.ReferencedRemoteItemStatement
 import net.nprod.lotus.wdimport.wd.models.ReferencedStatement
+import net.nprod.lotus.wdimport.wd.models.ReferencedValueStatement
 import net.nprod.lotus.wdimport.wd.newDocument
 import net.nprod.lotus.wdimport.wd.newStatement
 import net.nprod.lotus.wdimport.wd.statement
@@ -138,11 +139,11 @@ abstract class Publishable {
             } else listOf()
         } ?: listOf()
 
-        val existingPropertyValueCoupleToReferencesIds: Map<String, Map<Value, Pair<Statement, List<Reference>>>> =
+        val existingPropertyValueCoupleToReferencesIds: Map<String, Map<Value, Statement>> =
             existingStatements.map {
                 it.mainSnak.propertyId.id to it
             }.groupBy { it.first }.map {
-                it.key to it.value.map { it.second.value to Pair(it.second, it.second.references) }.toMap()
+                it.key to it.value.map { it.second.value to it.second }.toMap()
             }.toMap()
 
         return preStatements.mapNotNull { statement ->
@@ -173,7 +174,7 @@ abstract class Publishable {
         statement: ReferencedStatement,
         newStatementValue: Value,
         instanceItems: InstanceItems,
-        existingPropertyValueCoupleToReferences: Map<String, Map<Value, Pair<Statement, List<Reference>>>>
+        existingPropertyValueCoupleToReferences: Map<String, Map<Value, Statement>>
     ): Statement? {
 
         val newStatementProperty: PropertyIdValue = statement.property.get(instanceItems)
@@ -181,22 +182,37 @@ abstract class Publishable {
         val builtStatements = statement.preReferences.map { it.build(instanceItems) }
 
         val existingProperty = existingPropertyValueCoupleToReferences[newStatementProperty.id]
-        val (existingStatement, existingReferences) = existingProperty?.let { existingValueToReferences ->
+        val existingStatement = existingProperty?.let { existingValueToReferences ->
             existingValueToReferences[newStatementValue]
-        } ?: Pair(null, null)
+        }
 
         // We do not try to add or modify a non overridable statement
         existingProperty?.let { if (!statement.overwritable) return null }
 
-        val existingSet = existingReferences?.map { it.forceGetStatedInValue() }?.toSet() ?: setOf()
+        val existingSetOfReferences =
+            existingStatement?.references?.map { it.forceGetStatedInValue() }?.toSet() ?: setOf()
+        val existingSetOfQualifiers =
+            existingStatement?.qualifiers?.map { it.property }?.toSet() ?: setOf()
+
 
         // Anything that is not in the existing set should be a new reference
-        val newReferences = builtStatements.filterNot { it.forceGetStatedInValue() in existingSet }
+        val newReferences = builtStatements.filterNot {
+            it.forceGetStatedInValue() in existingSetOfReferences
+        }
+        val newQualifiers = statement.qualifiers.filterNot {
+            it.property.get(instanceItems) in existingSetOfQualifiers
+        }.map { ResolvedQualifier.fromQualifier(it, instanceItems) }
 
         // If we have an existing statement we just add it
         existingStatement?.references?.addAll(newReferences)
 
-        return existingStatement ?: newStatement(newStatementProperty, id, newStatementValue, newReferences)
+        return existingStatement ?: newStatement(
+            newStatementProperty,
+            id,
+            newStatementValue,
+            newReferences,
+            newQualifiers
+        )
     }
 
     /**

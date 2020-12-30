@@ -5,7 +5,7 @@
  *
  */
 
-package net.nprod.lotus.tools.duplicateDOIdetector
+package duplicateDOIdetector
 
 import net.nprod.lotus.helpers.GZIPReader
 import net.nprod.lotus.helpers.parseTSVFile

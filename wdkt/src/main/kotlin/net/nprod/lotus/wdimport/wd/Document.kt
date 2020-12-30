@@ -31,6 +31,19 @@ data class Qualifier(
 )
 
 /**
+ * A qualifier that has been resolved for this instance.
+ */
+data class ResolvedQualifier(
+    val property: PropertyIdValue,
+    val value: Value
+) {
+    companion object {
+        fun fromQualifier(qualifier: Qualifier, instanceItems: InstanceItems): ResolvedQualifier =
+            ResolvedQualifier(qualifier.property.get(instanceItems), qualifier.value)
+    }
+}
+
+/**
  * Type safe builder or DSL
  */
 @Suppress("unused")
@@ -100,12 +113,12 @@ fun ItemDocumentBuilder.statement(
     referencedStatement: ReferencedStatement,
     instanceItems: InstanceItems
 ) {
-    val resolvedReferenceableStatement = when (referencedStatement) {
+    val resolvedReferencedStatement = when (referencedStatement) {
         is ReferencedValueStatement -> referencedStatement
         is ReferencedRemoteItemStatement -> referencedStatement.resolveToReferencedValueStatetement(instanceItems)
         else -> throw RuntimeException("Unknown ReferencedStatement type")
     }
-    statement(subject, resolvedReferenceableStatement, instanceItems)
+    statement(subject, resolvedReferencedStatement, instanceItems)
 }
 
 fun newStatement(
@@ -124,10 +137,13 @@ fun newStatement(
     property: PropertyIdValue,
     subject: ItemIdValue? = null,
     value: Value,
-    references: Collection<Reference>
+    references: Collection<Reference>,
+    qualifiers: Collection<ResolvedQualifier>
 ): Statement {
     val statement = StatementBuilder.forSubjectAndProperty(subject ?: ItemIdValue.NULL, property)
         .withValue(value)
     references.forEach { statement.withReference(it) }
+    qualifiers.forEach { statement.withQualifierValue(it.property, it.value) }
+
     return statement.build()
 }

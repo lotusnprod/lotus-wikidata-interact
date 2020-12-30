@@ -7,6 +7,8 @@
 
 package net.nprod.lotus.wdimport.wd.models
 
+import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
+
 /**
  * Represent an author
  *
@@ -18,7 +20,8 @@ package net.nprod.lotus.wdimport.wd.models
 data class AuthorInfo(
     val ORCID: String?,
     val givenName: String,
-    val familyName: String
+    val familyName: String,
+    var wikidataID: ItemIdValue? = null
 ) {
     val fullName: String
         get() = "$givenName $familyName"

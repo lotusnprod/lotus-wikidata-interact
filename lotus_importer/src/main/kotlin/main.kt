@@ -31,9 +31,10 @@ import org.apache.logging.log4j.LogManager
 
 @Suppress("ComplexMethod")
 fun main(args: Array<String>) {
-    val logger = LogManager.getLogger("net.nprod.lotus.wdimport.main")
+    val logger = LogManager.getLogger("main")
 
-    val parameters = Parameters(args)
+    val parameters = Parameters()
+    parameters.parse(args)
 
     logger.info("LOTUS Importer")
 

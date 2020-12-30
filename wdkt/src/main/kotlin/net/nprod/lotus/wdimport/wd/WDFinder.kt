@@ -7,10 +7,17 @@
 
 package net.nprod.lotus.wdimport.wd
 
+import io.ktor.util.KtorExperimentalAPI
+import net.nprod.konnector.crossref.CrossRefConnector
+import net.nprod.konnector.crossref.OfficialCrossRefAPI
 import net.nprod.lotus.wdimport.wd.query.IWDKT
 import net.nprod.lotus.wdimport.wd.sparql.ISparql
 
 class WDFinder(val wdkt: IWDKT, val sparql: ISparql) {
+    @KtorExperimentalAPI
+    val crossRefConnector: CrossRefConnector by lazy {
+        CrossRefConnector(OfficialCrossRefAPI())
+    }
     fun close() {
         wdkt.close()
     }

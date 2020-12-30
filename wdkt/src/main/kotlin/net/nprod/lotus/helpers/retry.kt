@@ -27,8 +27,9 @@ inline fun <U> tryCount(
         try {
             return f()
         } catch (e: Exception) {
+            retries += 1
             if (listExceptions.any { e::class == it }) {
-                retries += 1
+
                 if (retries != maxRetries) {
                     if (delayMilliSeconds > 0) Thread.sleep(delayMilliSeconds)
                     continue

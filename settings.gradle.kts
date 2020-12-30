@@ -23,4 +23,9 @@ pluginManagement {
     }
 }
 
-rootProject.name = "onpdb_importer"
+
+rootProject.name = "wdkt"
+
+include("wdkt")
+include("lotus_importer")
+include("publication_importer")
