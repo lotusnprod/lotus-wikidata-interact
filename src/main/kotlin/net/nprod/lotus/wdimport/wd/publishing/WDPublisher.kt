@@ -28,8 +28,15 @@ import org.wikidata.wdtk.wikibaseapi.apierrors.MediaWikiApiErrorException
 import java.io.IOException
 import java.net.ConnectException
 
+/**
+ * We have a missing environment variable
+ */
 class EnvironmentVariableError(message: String) : Exception(message)
-class InternalError(message: String) : Exception(message)
+
+/**
+ * Internal error that should not be thrown? A bit dirty isn't it
+ */
+class InternalException(message: String) : Exception(message)
 
 /**
  * Type safe unit for milliseconds
@@ -96,7 +103,7 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
                     doc,
                     "Added a new property for ONPDB",
                     listOf()
-                ) ?: throw Exception("Sorry you can't create a property without connecting first.")
+                ) ?: throw InternalException("Sorry you can't create a property without connecting first.")
                 o.entityId
             } catch (e: IllegalArgumentException) {
                 logger.error("There is a weird bug here, it still creates it, but isn't happy anyway")
@@ -126,55 +133,50 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
             .setUserAgent(userAgent)
 
         // The publishable has not been published yet
-        try {
-            logger.info("Looking for it. Published status: ${publishable.published}")
-            if (!publishable.published) {
-                newDocuments++
-                val newItemDocument: ItemDocument =
-                    tryCount<ItemDocument>(
-                        listOf(MediaWikiApiErrorException::class, IOException::class),
-                        delayMilliSeconds = 30_000L,
-                        maxRetries = 10
-                    ) { // Sometimes it needs time to let the DB recover
-                        editor?.createItemDocument(publishable.document(instanceItems), summary, null)
-                            ?: throw InternalError("There is no editor anymore")
-                    }
 
-                val itemId = newItemDocument.entityId
-                publishedDocumentsIds.add(itemId.iri)
-                logger.info("New document ${itemId.id} - Summary: $summary")
-                logger.info("you can access it at ${instanceItems.sitePageIri}${itemId.id}")
-                publishable.publishedAs(itemId)
-            } else { // The publishable is already existing, this means we only have to update the statements
-                updatedDocuments++
-                logger.info("Updated document ${publishable.id} - Summary: $summary")
-
-                val statements = publishable.listOfStatementsForUpdate(fetcher, instanceItems)
-
-                if (statements.isNotEmpty()) {
-                    tryCount<Unit>(
-                        listExceptions = listOf(MediaWikiApiErrorException::class, IOException::class),
-                        delayMilliSeconds = 30_000L,
-                        maxRetries = 10
-                    ) { // Sometimes it needs time to let the DB recover
-                        editor?.updateStatements(
-                            publishable.id,
-                            statements,
-                            listOf(),
-                            "Updating the statements",
-                            listOf()
-                        )
-                    }
+        logger.info("Looking for it. Published status: ${publishable.published}")
+        if (!publishable.published) {
+            newDocuments++
+            val newItemDocument: ItemDocument =
+                tryCount<ItemDocument>(
+                    listOf(MediaWikiApiErrorException::class, IOException::class),
+                    delayMilliSeconds = 30_000L,
+                    maxRetries = 10
+                ) { // Sometimes it needs time to let the DB recover
+                    editor?.createItemDocument(publishable.document(instanceItems), summary, null)
+                        ?: throw InternalException("There is no editor anymore")
                 }
-                publishedDocumentsIds.add(publishable.id.iri)
+
+            val itemId = newItemDocument.entityId
+            publishedDocumentsIds.add(itemId.iri)
+            logger.info("New document ${itemId.id} - Summary: $summary")
+            logger.info("you can access it at ${instanceItems.sitePageIri}${itemId.id}")
+            publishable.publishedAs(itemId)
+        } else { // The publishable is already existing, this means we only have to update the statements
+            updatedDocuments++
+            logger.info("Updated document ${publishable.id} - Summary: $summary")
+
+            val statements = publishable.listOfStatementsForUpdate(fetcher, instanceItems)
+
+            if (statements.isNotEmpty()) {
+                tryCount<Unit>(
+                    listExceptions = listOf(MediaWikiApiErrorException::class, IOException::class),
+                    delayMilliSeconds = 30_000L,
+                    maxRetries = 10
+                ) { // Sometimes it needs time to let the DB recover
+                    editor?.updateStatements(
+                        publishable.id,
+                        statements,
+                        listOf(),
+                        "Updating the statements",
+                        listOf()
+                    )
+                }
             }
-            if (pause > 0) Thread.sleep(pause)
-        } catch (e: Exception) {
-            logger.error("Failed to save the item, we tried to restart multiple times but it continued to fail")
-            logger.error(" CAUSE: ${e.cause}")
-            logger.error(" MESSAGE: ${e.message}")
-            throw e
+            publishedDocumentsIds.add(publishable.id.iri)
         }
+        if (pause > 0) Thread.sleep(pause)
+
         return publishable.id
     }
 }

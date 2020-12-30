@@ -31,6 +31,11 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 
 /**
+ * Tried to add an empty property
+ */
+class EmptyPropertyNotAllowedException(override val message: String) : RuntimeException()
+
+/**
  * A Test publisher to test the publishing system
  */
 class TestPublisher(override val instanceItems: InstanceItems, private val repository: Repository?) :
@@ -87,7 +92,7 @@ class TestPublisher(override val instanceItems: InstanceItems, private val repos
             when (val value = it.value) {
                 is StringValue ->
                     if (value.string == "")
-                        throw RuntimeException("We cannot send an empty property for entry $doc")
+                        throw EmptyPropertyNotAllowedException("We cannot send an empty property for entry $doc")
             }
         }
         val conn = repository?.connection

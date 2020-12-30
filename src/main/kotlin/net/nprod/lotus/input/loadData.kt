@@ -10,23 +10,25 @@ package net.nprod.lotus.input
 import net.nprod.lotus.helpers.GZIPReader
 import net.nprod.lotus.helpers.parseTSVFile
 import org.apache.logging.log4j.LogManager
+import java.io.BufferedReader
 import java.io.File
+
+fun tryGzipThenNormal(fileName: String): BufferedReader = try {
+    GZIPReader(fileName).bufferedReader
+} catch (e: java.util.zip.ZipException) {
+    File(fileName).bufferedReader()
+}
 
 fun loadData(fileName: String, skip: Int = 0, limit: Int? = null): DataTotal {
     val logger = LogManager.getLogger("net.nprod.lotus.chemistry.net.nprod.lotus.tools.wdpropcreator.main")
     val dataTotal = DataTotal()
 
     logger.info("Started")
-    val fileReader = try {
-        GZIPReader(fileName).bufferedReader
-    } catch (e: java.util.zip.ZipException) {
-        File(fileName).bufferedReader()
+    val file = tryGzipThenNormal(fileName).use {
+        parseTSVFile(it, limit, skip) ?: throw FileSystemException(File(fileName))
     }
-    val file = parseTSVFile(fileReader, limit, skip)
 
-    fileReader.close()
-
-    file?.map {
+    file.map {
         val database = it.getString("database")
         val organismCleaned = it.getString("organismCleaned")
         val organismDb = it.getString("organismCleaned_dbTaxo")
@@ -41,13 +43,9 @@ fun loadData(fileName: String, skip: Int = 0, limit: Int? = null): DataTotal {
 
         if (organismRanks.contains("genus") || organismRanks.contains("species") || organismRanks.contains("family")) {
 
-            val databaseObj = dataTotal.databaseCache.getOrNew(database) {
-                Database(name = database)
-            }
+            val databaseObj = dataTotal.databaseCache.getOrNew(database) { Database(name = database) }
 
-            val organismObj = dataTotal.organismCache.getOrNew(organismCleaned) {
-                Organism(name = organismCleaned)
-            }
+            val organismObj = dataTotal.organismCache.getOrNew(organismCleaned) { Organism(name = organismCleaned) }
 
             organismObj.textIds[organismDb] = organismIDs
             organismObj.textRanks[organismDb] = organismRanks
@@ -78,12 +76,7 @@ fun loadData(fileName: String, skip: Int = 0, limit: Int? = null): DataTotal {
             }
 
             dataTotal.quads.add(
-                Quad(
-                    databaseObj,
-                    organismObj,
-                    compoundObj,
-                    referenceObj
-                )
+                Quad(databaseObj, organismObj, compoundObj, referenceObj)
             )
         } else {
             logger.error("Invalid entry: $it")
@@ -91,12 +84,7 @@ fun loadData(fileName: String, skip: Int = 0, limit: Int? = null): DataTotal {
     }
     logger.info("Done importing")
     logger.info("Resolving the taxo DB")
-    dataTotal.organismCache.store.values.forEach {
-        it.resolve(dataTotal.taxonomyDatabaseCache)
-    }
+    dataTotal.organismCache.store.values.forEach { it.resolve(dataTotal.taxonomyDatabaseCache) }
 
-    logger.info(dataTotal.taxonomyDatabaseCache.store.values)
-    logger.info("Done")
-    fileReader.close()
     return dataTotal
 }

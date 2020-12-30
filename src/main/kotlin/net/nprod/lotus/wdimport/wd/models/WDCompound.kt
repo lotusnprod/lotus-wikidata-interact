@@ -17,7 +17,6 @@ import org.apache.logging.log4j.Logger
 import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
 import org.wikidata.wdtk.datamodel.implementation.ItemIdValueImpl
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
-import kotlin.reflect.KProperty1
 
 /**
  * Wikidata publishable for a compound (chemical entity or group of isomers)

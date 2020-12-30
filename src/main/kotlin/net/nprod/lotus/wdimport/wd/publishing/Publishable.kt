@@ -152,7 +152,7 @@ abstract class Publishable {
             val value: Value? = when (statement) {
                 is ReferencableValueStatement -> statement.value
                 is ReferenceableRemoteItemStatement -> statement.value.get(instanceItems)
-                else -> null  // The statement is currently invalid if we do not know how to handle its values
+                else -> null // The statement is currently invalid if we do not know how to handle its values
             }
 
             value?.let {
@@ -178,7 +178,6 @@ abstract class Publishable {
         instanceItems: InstanceItems,
         existingPropertyValueCoupleToReferences: Map<String, Map<Value, Pair<Statement, List<Reference>>>>
     ): Statement? {
-
 
         val newStatementProperty: PropertyIdValue = statement.property.get(instanceItems)
 

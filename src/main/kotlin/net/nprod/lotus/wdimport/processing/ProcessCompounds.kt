@@ -16,7 +16,7 @@ import net.nprod.lotus.wdimport.wd.WDFinder
 import net.nprod.lotus.wdimport.wd.models.WDCompound
 import net.nprod.lotus.wdimport.wd.publishing.IPublisher
 import net.nprod.lotus.wdimport.wd.sparql.InChIKey
-import org.apache.logging.log4j.Logger
+import org.apache.logging.log4j.LogManager
 
 /** Labels are limited to 250 on WikiData **/
 const val MAXIMUM_COMPOUND_NAME_LENGTH: Int = 250
@@ -29,18 +29,19 @@ const val MAXIMUM_INCHI_LENGTH: Int = 1500
  * It is calling a lot of functions with serious side effects: organismProcessor and referenceProcessor are major
  * they are doing the same thing this function is doing but to create taxa and articles/references
  */
-fun processCompounds(
-    dataTotal: DataTotal,
-    logger: Logger,
+fun DataTotal.processCompounds(
     wdFinder: WDFinder,
     instanceItems: InstanceItems,
     wikidataCompoundCache: MutableMap<InChIKey, String>,
-    taxonProcessor: TaxonProcessor,
-    referenceProcessor: ReferenceProcessor,
     publisher: IPublisher
 ) {
-    val count = dataTotal.compoundCache.store.size
-    dataTotal.compoundCache.store.values.forEachIndexed { idx, compound ->
+    val logger = LogManager.getLogger("net.nprod.lotus.wdimport.processing.processCompounds")
+
+    val taxonProcessor = TaxonProcessor(this, publisher, wdFinder, instanceItems)
+    val referenceProcessor = ReferenceProcessor(this, publisher, wdFinder, instanceItems)
+
+    val count = this.compoundCache.store.size
+    this.compoundCache.store.values.forEachIndexed { idx, compound ->
         logger.info("Compound with name ${compound.name} $idx/$count")
         val compoundName = if (compound.name.length < MAXIMUM_COMPOUND_NAME_LENGTH) compound.name else compound.inchikey
         val isomericSMILES = if (compound.atLeastSomeStereoDefined) compound.smiles else null
@@ -58,7 +59,7 @@ fun processCompounds(
         logger.info(wdcompound)
 
         wdcompound.apply {
-            dataTotal.quads.filter { it.compound == compound }.distinct().forEach { quad ->
+            this@processCompounds.quads.filter { it.compound == compound }.distinct().forEach { quad ->
                 logger.info("Ok lets go for a quad: $quad")
                 val organism = taxonProcessor.get(quad.organism)
                 logger.info(" Found organism $organism")

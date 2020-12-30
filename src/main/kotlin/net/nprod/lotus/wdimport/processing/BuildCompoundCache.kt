@@ -24,15 +24,14 @@ const val COMPOUNDS_PROCESSING_CHUNK_SIZE: Int = 1000
  * Used to build a local cache of the compounds so we are querying only at the beginning of the run and not for each
  * new entry.
  */
-fun buildCompoundCache(
-    dataTotal: DataTotal,
+fun DataTotal.buildCompoundCache(
     repositoryManager: RepositoryManager?,
     instanceItems: InstanceItems,
     logger: Logger,
     wdSparql: ISparql,
     wikidataCompoundCache: MutableMap<InChIKey, String>
 ) {
-    val inchiKeys = dataTotal.compoundCache.store.map { (_, compound) ->
+    val inchiKeys = this.compoundCache.store.map { (_, compound) ->
         compound.inchikey
     }
     inchiKeys.chunked(COMPOUNDS_PROCESSING_CHUNK_SIZE) { inchiKeysBlock ->

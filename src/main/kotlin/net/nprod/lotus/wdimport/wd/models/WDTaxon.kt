@@ -15,7 +15,6 @@ import net.nprod.lotus.wdimport.wd.publishing.RemoteProperty
 import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
 import org.wikidata.wdtk.datamodel.implementation.ItemIdValueImpl
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
-import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue
 import kotlin.reflect.KProperty1
 /**
  * This is used to convert the names from LOTUS to WikiData DB names
@@ -79,11 +78,11 @@ data class WDTaxon(
             PREFIX wdt: <${InstanceItems::wdtURI.get(instanceItems)}>
             SELECT DISTINCT ?id {
               ?id wdt:${wdFinder.sparql.resolve(InstanceItems::instanceOf).id} wd:${
-                wdFinder.sparql.resolve(
-                    InstanceItems::taxon
-                ).id
+            wdFinder.sparql.resolve(
+                InstanceItems::taxon
+            ).id
             };
-                  wdt:${wdFinder.sparql.resolve(InstanceItems::taxonRank).id} wd:${resolvedTaxonRank};
+                  wdt:${wdFinder.sparql.resolve(InstanceItems::taxonRank).id} wd:$resolvedTaxonRank;
                   wdt:${wdFinder.sparql.resolve(InstanceItems::taxonName).id} ${Rdf.literalOf(label).queryString}.
             }
             """.trimIndent()

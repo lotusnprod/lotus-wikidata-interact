@@ -18,12 +18,34 @@ import org.apache.logging.log4j.Logger
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
 import kotlin.reflect.KProperty1
 
+/**
+ * We got a wrong taxon name
+ */
 class InvalidTaxonName : RuntimeException()
+
+/**
+ * We got a wrong taxon name
+ */
+class NotEnoughInfoAboutTaxonException(override val message: String) : RuntimeException()
 
 data class AcceptedTaxonEntry(
     val rank: String,
     val instanceItem: KProperty1<InstanceItems, ItemIdValue>,
     val value: String
+)
+
+/**
+ * These are the taxonomic DBs we are using as references
+ */
+val LIST_OF_ACCEPTED_DBS: Array<String> = arrayOf(
+    "ITIS",
+    "GBIF",
+    "NCBI",
+    "Index Fungorum",
+    "The Interim Register of Marine and Nonmarine Genera",
+    "World Register of Marine Species",
+    "Database of Vascular Plants of Canada (VASCAN)",
+    "GBIF Backbone Taxonomy"
 )
 
 class TaxonProcessor(
@@ -43,16 +65,7 @@ class TaxonProcessor(
         var fullTaxonFound = false
 
         // We are going to go over this list of DBs, by order of trust and check if we have taxon info in them
-        listOf(
-            "ITIS",
-            "GBIF",
-            "NCBI",
-            "Index Fungorum",
-            "The Interim Register of Marine and Nonmarine Genera",
-            "World Register of Marine Species",
-            "Database of Vascular Plants of Canada (VASCAN)",
-            "GBIF Backbone Taxonomy"
-        ).forEach { taxonDbName ->
+        LIST_OF_ACCEPTED_DBS.forEach { taxonDbName ->
             // First we check if we have that db in the current organism
             if (fullTaxonFound) return@forEach
             val taxonDb = organism.rankIds.keys.firstOrNull { it.name == taxonDbName }
@@ -67,7 +80,6 @@ class TaxonProcessor(
                     "species" to InstanceItems::species,
                     "variety" to InstanceItems::variety
                 )
-                var lowerTaxonIdFound = false
 
                 ranks.forEach { (rankName, rankItem) ->
                     val entity =
@@ -75,15 +87,13 @@ class TaxonProcessor(
                     if (!entity.isNullOrEmpty()) {
                         acceptedRanks.add(AcceptedTaxonEntry(rankName, rankItem, entity))
                         if (rankName in listOf("genus", "species", "variety", "family")) {
-                            lowerTaxonIdFound = true
                             fullTaxonFound = true
                         }
                     }
                 }
 
-                if (!lowerTaxonIdFound) {
-                    logger.error("Taxon name empty using the BD: $taxonDbName (null is ok)")
-                    logger.error("${organism.rankIds[taxonDb]}")
+                if (!fullTaxonFound) {
+                    logger.error("Taxon name empty using : $taxonDbName (null is ok): ${organism.rankIds[taxonDb]}")
                     logger.error(organism.prettyPrint())
                     throw InvalidTaxonName()
                 }
@@ -106,14 +116,12 @@ class TaxonProcessor(
         val finalTaxon = taxon
         if (finalTaxon == null) {
             logger.error("This is pretty bad. Here is what I know about an organism that failed: $organism")
-            throw Exception(
+            throw NotEnoughInfoAboutTaxonException(
                 """Sorry we couldn't find any info from the accepted reference taxonomy source,
                 | we only have: ${organism.rankIds.keys.map { it.name }}""".trimMargin()
             )
         } else {
-            organism.textIds.forEach { dbEntry ->
-                finalTaxon.addTaxoDB(dbEntry.key, dbEntry.value.split("|").last())
-            }
+            organism.textIds.forEach { dbEntry -> finalTaxon.addTaxoDB(dbEntry.key, dbEntry.value.split("|").last()) }
 
             if (!finalTaxon.published) publisher.publish(finalTaxon, "Created a missing taxon")
             return finalTaxon
