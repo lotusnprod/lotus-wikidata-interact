@@ -11,7 +11,6 @@ import input.DataTotal
 import input.Reference
 import io.ktor.util.KtorExperimentalAPI
 import net.nprod.lotus.wdimport.wd.InstanceItems
-import net.nprod.lotus.wdimport.wd.MainInstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
 import net.nprod.lotus.wdimport.wd.models.entries.WDArticle
 import net.nprod.lotus.wdimport.wd.publishing.IPublisher

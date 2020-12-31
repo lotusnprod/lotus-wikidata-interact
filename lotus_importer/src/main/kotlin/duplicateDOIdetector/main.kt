@@ -9,6 +9,7 @@ package net.nprod.lotus.wdimport.tools.duplicateDOIdetector
 
 import net.nprod.lotus.helpers.GZIPReader
 import net.nprod.lotus.helpers.parseTSVFile
+import net.nprod.lotus.wdimport.wd.MainInstanceItems
 import net.nprod.lotus.wdimport.wd.query.WDKT
 import java.io.File
 
@@ -33,7 +34,7 @@ fun main() {
     println("We will now search for those with duplicates")
     val wdkt = WDKT()
     val counts = dois.map {
-        it to wdkt.searchDOI(it).query.searchinfo.totalhits
+        it to wdkt.searchForPropertyValue(MainInstanceItems.doi, it).query.searchinfo.totalhits
     }.filter { it.second > 1 }
     println("Here is the list of duplicates")
     println(counts)

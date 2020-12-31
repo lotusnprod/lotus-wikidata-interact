@@ -9,6 +9,7 @@ package net.nprod.lotus.wdimport
 
 import input.DataTotal
 import input.loadData
+import io.ktor.util.KtorExperimentalAPI
 import net.nprod.lotus.rdf.RepositoryManager
 import net.nprod.lotus.wdimport.tools.countInLocalRepository
 import net.nprod.lotus.wdimport.wd.InstanceItems
@@ -29,6 +30,7 @@ import org.apache.logging.log4j.LogManager
 import processing.buildCompoundCache
 import processing.processCompounds
 
+@KtorExperimentalAPI
 @Suppress("ComplexMethod")
 fun main(args: Array<String>) {
     val logger = LogManager.getLogger("main")

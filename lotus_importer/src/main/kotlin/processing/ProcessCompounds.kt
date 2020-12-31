@@ -8,6 +8,7 @@
 package processing
 
 import input.DataTotal
+import io.ktor.util.KtorExperimentalAPI
 import net.nprod.lotus.chemistry.smilesToCanonical
 import net.nprod.lotus.chemistry.smilesToFormula
 import net.nprod.lotus.chemistry.subscriptFormula
@@ -29,6 +30,7 @@ const val MAXIMUM_INCHI_LENGTH: Int = 1500
  * It is calling a lot of functions with serious side effects: organismProcessor and referenceProcessor are major
  * they are doing the same thing this function is doing but to create taxa and articles/references
  */
+@KtorExperimentalAPI
 fun DataTotal.processCompounds(
     wdFinder: WDFinder,
     instanceItems: InstanceItems,
