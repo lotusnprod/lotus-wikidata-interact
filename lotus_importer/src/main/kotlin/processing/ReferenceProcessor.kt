@@ -22,7 +22,7 @@ class ReferenceProcessor(
     val wdFinder: WDFinder,
     val instanceItems: InstanceItems
 ) {
-    private val logger = LogManager.getLogger(ReferenceProcessor::class.qualifiedName)
+    private val logger = LogManager.getLogger(ReferenceProcessor::class)
     private val articlesCache: MutableMap<Reference, WDArticle> = mutableMapOf()
 
     @KtorExperimentalAPI
@@ -30,7 +30,7 @@ class ReferenceProcessor(
         val article = WDArticle(
             label = reference.title ?: reference.doi,
             title = reference.title,
-            doi = reference.doi.toUpperCase(), // DOIs are always uppercased but in reality we see both
+            doi = reference.doi.toUpperCase(), // DOIs are always uppercase but in reality we see both
         ).tryToFind(wdFinder, instanceItems)
         article.populateFromCrossREF(wdFinder, instanceItems)
         publisher.publish(article, "upserting article")
@@ -41,9 +41,5 @@ class ReferenceProcessor(
      * Generate a WikiData article from that reference
      */
     @KtorExperimentalAPI
-    fun get(key: Reference): WDArticle {
-        return articlesCache.getOrPut(key) {
-            articleFromReference(key)
-        }
-    }
+    fun get(key: Reference): WDArticle = articlesCache.getOrPut(key) { articleFromReference(key) }
 }

@@ -32,6 +32,7 @@ internal class RetryRunTest {
         assert(counter == 3)
     }
 
+    @Suppress("VARIABLE_WITH_REDUNDANT_INITIALIZER") // It is important…
     @Test
     fun `we get the output of the function`() {
         var touched = false
