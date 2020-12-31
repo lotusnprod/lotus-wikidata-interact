@@ -45,7 +45,8 @@ val LIST_OF_ACCEPTED_DBS: Array<String> = arrayOf(
     "The Interim Register of Marine and Nonmarine Genera",
     "World Register of Marine Species",
     "Database of Vascular Plants of Canada (VASCAN)",
-    "GBIF Backbone Taxonomy"
+    "GBIF Backbone Taxonomy",
+    "IPNI"
 )
 
 class TaxonProcessor(
@@ -84,7 +85,7 @@ class TaxonProcessor(
                 | we only have: ${organism.rankIds.keys.map { it.name }}""".trimMargin()
             )
         } else {
-            organism.textIds.forEach { dbEntry -> finalTaxon.addTaxoDB(dbEntry.key, dbEntry.value.split("|").last()) }
+            organism.finalIds.forEach { dbEntry -> finalTaxon.addTaxoDB(dbEntry.key, dbEntry.value) }
 
             if (!finalTaxon.published) publisher.publish(finalTaxon, "Created a missing taxon")
             return finalTaxon
@@ -100,8 +101,10 @@ class TaxonProcessor(
         LIST_OF_ACCEPTED_DBS.forEach { taxonDbName ->
             // First we check if we have that db in the current organism
             if (fullTaxonFound) return@forEach
+
             val taxonDb = organism.rankIds.keys.firstOrNull { it.name == taxonDbName }
                 ?: RuntimeException("Taxonomy database not found, but we have a reference to it")
+
             acceptedRanks.clear()
 
             val ranks = listOf(
@@ -114,8 +117,6 @@ class TaxonProcessor(
                 "variety" to InstanceItems::variety
             )
 
-            var lowerTaxonIdFound = false
-
             ranks.forEach { (rankName, rankItem) ->
                 val entity =
                     organism.rankIds[taxonDb]?.firstOrNull { it.first.toLowerCase() == rankName }?.second?.name
@@ -123,7 +124,6 @@ class TaxonProcessor(
                     acceptedRanks.add(AcceptedTaxonEntry(rankName, rankItem, entity))
                     if (rankName in listOf("genus", "subgenus", "subspecies", "species", "variety", "family")) {
                         fullTaxonFound = true
-                        lowerTaxonIdFound = true
                     }
                 }
             }

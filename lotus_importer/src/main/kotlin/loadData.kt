@@ -32,7 +32,7 @@ fun loadData(fileName: String, skip: Int = 0, limit: Int? = null): DataTotal {
         val database = it.getString("database")
         val organismCleaned = it.getString("organismCleaned")
         val organismDb = it.getString("organismCleaned_dbTaxo")
-        val organismIDs = it.getString("organismCleaned_dbTaxoTaxonIds")
+        val organismID = it.getString("organismCleaned_id")
         val organismRanks = it.getString("organismCleaned_dbTaxoTaxonRanks")
         val organismNames = it.getString("organismCleaned_dbTaxoTaxonomy")
         val unspecifiedCenters = it.getInt("structureCleaned_stereocenters_unspecified")
@@ -47,7 +47,7 @@ fun loadData(fileName: String, skip: Int = 0, limit: Int? = null): DataTotal {
 
             val organismObj = dataTotal.organismCache.getOrNew(organismCleaned) { Organism(name = organismCleaned) }
 
-            organismObj.textIds[organismDb] = organismIDs
+            organismObj.finalIds[organismDb] = organismID
             organismObj.textRanks[organismDb] = organismRanks
             organismObj.textNames[organismDb] = organismNames
 

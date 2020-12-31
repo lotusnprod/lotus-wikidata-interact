@@ -13,13 +13,14 @@ data class Database(
 ) : Indexable
 
 data class OrganismTaxInfo(
-    val id: String,
+    // val id: String,
     val name: String
 )
 
 data class Organism(
     override var id: Long? = null,
     val name: String,
+    var finalIds: MutableMap<String, String> = mutableMapOf(),
     val textIds: MutableMap<String, String> = mutableMapOf(),
     val textRanks: MutableMap<String, String> = mutableMapOf(),
     val textNames: MutableMap<String, String> = mutableMapOf(),
@@ -32,15 +33,15 @@ data class Organism(
      */
     fun resolve(cache: IndexableCache<String, TaxonomyDatabase>) {
         rankIds.clear()
-        textIds.keys.forEach {
+        textRanks.keys.forEach {
             val taxDb = cache.getOrNew(it) {
                 TaxonomyDatabase(name = it)
             }
-            val ids = textIds[it]?.split("|") ?: listOf()
+            // val ids = textIds[it]?.split("|") ?: listOf()
             val ranks = textRanks[it]?.split("|") ?: listOf()
             val names = textNames[it]?.split("|") ?: listOf()
             rankIds[taxDb] = ranks.mapIndexed { index, rank ->
-                rank to OrganismTaxInfo(ids[index], names[index])
+                rank to OrganismTaxInfo(names[index])
             }
         }
     }
@@ -56,7 +57,7 @@ data class Organism(
         rankIds.forEach { (k: TaxonomyDatabase, v: List<Pair<String, OrganismTaxInfo>>) ->
             sb.appendLine("  Database: ${k.name}")
             v.forEach {
-                sb.appendLine("    ${it.first} ${it.second.id} ${it.second.name}")
+                sb.appendLine("    ${it.first} ${it.second.name}")
             }
         }
         return sb.toString()
