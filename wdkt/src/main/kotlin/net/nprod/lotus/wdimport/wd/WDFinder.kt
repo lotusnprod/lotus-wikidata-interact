@@ -18,7 +18,6 @@ class WDFinder(val wdkt: IWDKT, val sparql: ISparql) {
     val crossRefConnector: CrossRefConnector by lazy {
         CrossRefConnector(OfficialCrossRefAPI())
     }
-    fun close() {
-        wdkt.close()
-    }
+
+    fun close() = wdkt.close()
 }

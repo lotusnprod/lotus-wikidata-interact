@@ -5,7 +5,7 @@
  *
  */
 
-package net.nprod.lotus.input
+package input
 
 data class Database(
     override var id: Long? = null,

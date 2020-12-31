@@ -5,10 +5,11 @@
  *
  */
 
-package net.nprod.lotus.wdimport.wd.models
+package net.nprod.lotus.wdimport.wd.models.entries
 
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
+import net.nprod.lotus.wdimport.wd.models.statements.ReferencedValueStatement
 import net.nprod.lotus.wdimport.wd.publishing.Publishable
 import net.nprod.lotus.wdimport.wd.publishing.RemoteItem
 import net.nprod.lotus.wdimport.wd.sparql.InChIKey

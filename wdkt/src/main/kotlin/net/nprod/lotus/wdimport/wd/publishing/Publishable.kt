@@ -8,11 +8,11 @@
 package net.nprod.lotus.wdimport.wd.publishing
 
 import net.nprod.lotus.wdimport.wd.InstanceItems
-import net.nprod.lotus.wdimport.wd.ResolvedQualifier
 import net.nprod.lotus.wdimport.wd.WDFinder
-import net.nprod.lotus.wdimport.wd.models.ReferencedRemoteItemStatement
-import net.nprod.lotus.wdimport.wd.models.ReferencedStatement
-import net.nprod.lotus.wdimport.wd.models.ReferencedValueStatement
+import net.nprod.lotus.wdimport.wd.models.WDResolvedQualifier
+import net.nprod.lotus.wdimport.wd.models.statements.IReferencedStatement
+import net.nprod.lotus.wdimport.wd.models.statements.ReferencedRemoteItemStatement
+import net.nprod.lotus.wdimport.wd.models.statements.ReferencedValueStatement
 import net.nprod.lotus.wdimport.wd.newDocument
 import net.nprod.lotus.wdimport.wd.newStatement
 import net.nprod.lotus.wdimport.wd.statement
@@ -33,7 +33,7 @@ import kotlin.reflect.KProperty1
 /**
  * Maximum label length in Wikidata
  */
-const val MAXIMUM_LABEL_LENGTH: Int = 250
+const val MAXIMUM_LABEL_LENGTH: Int = 249
 
 /**
  * Raised when an element should have been published before running that function
@@ -78,7 +78,7 @@ abstract class Publishable {
     /**
      * The statements that are not translated yet
      */
-    val preStatements: MutableSet<ReferencedStatement> = mutableSetOf()
+    val preStatements: MutableSet<IReferencedStatement> = mutableSetOf()
 
     /**
      * Sets the ID
@@ -93,7 +93,7 @@ abstract class Publishable {
     /**
      * Return a list of all the Referenceable statements of this object
      */
-    abstract fun dataStatements(): List<ReferencedStatement>
+    abstract fun dataStatements(): List<IReferencedStatement>
 
     /**
      * Generate a document for that entry.
@@ -171,7 +171,7 @@ abstract class Publishable {
      *
      */
     private fun constructStatement(
-        statement: ReferencedStatement,
+        statement: IReferencedStatement,
         newStatementValue: Value,
         instanceItems: InstanceItems,
         existingPropertyValueCoupleToReferences: Map<String, Map<Value, Statement>>
@@ -194,14 +194,13 @@ abstract class Publishable {
         val existingSetOfQualifiers =
             existingStatement?.qualifiers?.map { it.property }?.toSet() ?: setOf()
 
-
         // Anything that is not in the existing set should be a new reference
         val newReferences = builtStatements.filterNot {
             it.forceGetStatedInValue() in existingSetOfReferences
         }
-        val newQualifiers = statement.qualifiers.filterNot {
+        val newQualifiers = statement.preQualifiers.filterNot {
             it.property.get(instanceItems) in existingSetOfQualifiers
-        }.map { ResolvedQualifier.fromQualifier(it, instanceItems) }
+        }.map { WDResolvedQualifier.fromQualifier(it, instanceItems) }
 
         // If we have an existing statement we just add it
         existingStatement?.references?.addAll(newReferences)

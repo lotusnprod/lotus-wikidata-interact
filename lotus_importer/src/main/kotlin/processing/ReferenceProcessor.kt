@@ -5,13 +5,13 @@
  *
  */
 
-package net.nprod.lotus.wdimport.processing
+package processing
 
-import net.nprod.lotus.input.DataTotal
-import net.nprod.lotus.input.Reference
+import input.DataTotal
+import input.Reference
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
-import net.nprod.lotus.wdimport.wd.models.WDArticle
+import net.nprod.lotus.wdimport.wd.models.entries.WDArticle
 import net.nprod.lotus.wdimport.wd.publishing.IPublisher
 import org.apache.logging.log4j.LogManager
 

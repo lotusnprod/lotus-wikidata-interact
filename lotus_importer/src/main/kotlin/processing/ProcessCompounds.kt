@@ -5,15 +5,15 @@
  *
  */
 
-package net.nprod.lotus.wdimport.processing
+package processing
 
+import input.DataTotal
 import net.nprod.lotus.chemistry.smilesToCanonical
 import net.nprod.lotus.chemistry.smilesToFormula
 import net.nprod.lotus.chemistry.subscriptFormula
-import net.nprod.lotus.input.DataTotal
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
-import net.nprod.lotus.wdimport.wd.models.WDCompound
+import net.nprod.lotus.wdimport.wd.models.entries.WDCompound
 import net.nprod.lotus.wdimport.wd.publishing.IPublisher
 import net.nprod.lotus.wdimport.wd.sparql.InChIKey
 import org.apache.logging.log4j.LogManager

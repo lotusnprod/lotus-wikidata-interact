@@ -6,3 +6,5 @@
 /data/platinum.tsv.gz
 /data/tmp/
 local.properties
+*/build/
+*/*.log

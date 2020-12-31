@@ -20,15 +20,13 @@ import org.eclipse.rdf4j.repository.Repository
  */
 class TestISparql(override val instanceItems: InstanceItems, private val repository: Repository) : ISparql {
     override fun <T> query(query: String, function: (TupleQueryResult) -> T): T {
-        val conn = repository.connection
-        return try {
+        return repository.connection.use { conn ->
             function(conn.prepareTupleQuery(query).evaluate())
-        } finally {
-            conn.close()
         }
     }
 }
 
+@Suppress("EmptyFunctionBlock")
 private class FakeTupleQueryResult : TupleQueryResult {
     override fun hasNext(): Boolean = false
     override fun next(): BindingSet = EmptyBindingSet()

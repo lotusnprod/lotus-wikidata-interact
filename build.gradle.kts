@@ -1,5 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.util.*
+import java.util.Properties
 
 val localPropertiesFile = file("local.properties")
 val localProperties = if (localPropertiesFile.exists()) {
@@ -17,7 +17,6 @@ plugins {
     id("org.jmailen.kotlinter")
     `java-library`
 }
-
 
 allprojects {
     group = "net.nprod.lotus.wdimport"

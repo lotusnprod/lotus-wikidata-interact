@@ -7,11 +7,9 @@
 
 package net.nprod.lotus.wdimport
 
-import net.nprod.lotus.input.DataTotal
-import net.nprod.lotus.input.loadData
+import input.DataTotal
+import input.loadData
 import net.nprod.lotus.rdf.RepositoryManager
-import net.nprod.lotus.wdimport.processing.buildCompoundCache
-import net.nprod.lotus.wdimport.processing.processCompounds
 import net.nprod.lotus.wdimport.tools.countInLocalRepository
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.MainInstanceItems
@@ -28,6 +26,8 @@ import net.nprod.lotus.wdimport.wd.sparql.WDSparql
 import net.nprod.lotus.wdimport.wd.sparql.mock.NopSparql
 import net.nprod.lotus.wdimport.wd.sparql.mock.TestISparql
 import org.apache.logging.log4j.LogManager
+import processing.buildCompoundCache
+import processing.processCompounds
 
 @Suppress("ComplexMethod")
 fun main(args: Array<String>) {

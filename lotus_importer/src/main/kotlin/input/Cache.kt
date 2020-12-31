@@ -5,7 +5,7 @@
  *
  */
 
-package net.nprod.lotus.input
+package input
 
 import java.util.concurrent.atomic.AtomicLong
 

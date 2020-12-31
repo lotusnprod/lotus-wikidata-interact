@@ -12,17 +12,18 @@ import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
 /**
  * Represent an author
  *
- * @param ORCID ORCID of that author
+ * @param orcid ORCID of that author
  * @param givenName First name
  * @param familyName Family name
+ * @property wikidataID set to the Item ID if this author has been found (for now by its ORCID)
  * @property fullName generated from the givenName and the family name
  */
 data class AuthorInfo(
-    val ORCID: String?,
+    val orcid: String?,
     val givenName: String,
-    val familyName: String,
-    var wikidataID: ItemIdValue? = null
+    val familyName: String
 ) {
+    var wikidataID: ItemIdValue? = null
     val fullName: String
         get() = "$givenName $familyName"
 }

@@ -5,13 +5,13 @@
  *
  */
 
-package net.nprod.lotus.wdimport.processing
+package processing
 
-import net.nprod.lotus.input.DataTotal
-import net.nprod.lotus.input.Organism
+import input.DataTotal
+import input.Organism
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
-import net.nprod.lotus.wdimport.wd.models.WDTaxon
+import net.nprod.lotus.wdimport.wd.models.entries.WDTaxon
 import net.nprod.lotus.wdimport.wd.publishing.IPublisher
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -59,48 +59,11 @@ class TaxonProcessor(
     fun taxonFromOrganism(organism: Organism): WDTaxon {
         logger.debug("Organism Ranks and Ids: ${organism.rankIds}")
 
-        var taxon: WDTaxon? = null
-
-        val acceptedRanks = mutableListOf<AcceptedTaxonEntry>()
-        var fullTaxonFound = false
-
         // We are going to go over this list of DBs, by order of trust and check if we have taxon info in them
-        LIST_OF_ACCEPTED_DBS.forEach { taxonDbName ->
-            // First we check if we have that db in the current organism
-            if (fullTaxonFound) return@forEach
-            val taxonDb = organism.rankIds.keys.firstOrNull { it.name == taxonDbName }
-            acceptedRanks.clear()
-            taxonDb?.let {
-                val ranks = listOf(
-                    "family" to InstanceItems::family,
-                    "subfamily" to InstanceItems::subfamily,
-                    "tribe" to InstanceItems::tribe,
-                    "subtribe" to InstanceItems::subtribe,
-                    "genus" to InstanceItems::genus,
-                    "species" to InstanceItems::species,
-                    "variety" to InstanceItems::variety
-                )
-
-                ranks.forEach { (rankName, rankItem) ->
-                    val entity =
-                        organism.rankIds[taxonDb]?.firstOrNull { it.first.toLowerCase() == rankName }?.second?.name
-                    if (!entity.isNullOrEmpty()) {
-                        acceptedRanks.add(AcceptedTaxonEntry(rankName, rankItem, entity))
-                        if (rankName in listOf("genus", "species", "variety", "family")) {
-                            fullTaxonFound = true
-                        }
-                    }
-                }
-
-                if (!fullTaxonFound) {
-                    logger.error("Taxon name empty using : $taxonDbName (null is ok): ${organism.rankIds[taxonDb]}")
-                    logger.error(organism.prettyPrint())
-                    throw InvalidTaxonName()
-                }
-            }
-        }
+        val acceptedRanks = searchForTaxonInfo(organism)
 
         // If we have no entry we would have exited already with a InvalidTaxonName exception
+        var taxon: WDTaxon? = null
 
         acceptedRanks.forEach {
             taxon?.let { if (!it.published) publisher.publish(it, "Created a missing taxon") }
@@ -126,6 +89,52 @@ class TaxonProcessor(
             if (!finalTaxon.published) publisher.publish(finalTaxon, "Created a missing taxon")
             return finalTaxon
         }
+    }
+
+    @Suppress("NestedBlockDepth")
+    private fun searchForTaxonInfo(
+        organism: Organism,
+    ): MutableList<AcceptedTaxonEntry> {
+        val acceptedRanks = mutableListOf<AcceptedTaxonEntry>()
+        var fullTaxonFound = false
+        LIST_OF_ACCEPTED_DBS.forEach { taxonDbName ->
+            // First we check if we have that db in the current organism
+            if (fullTaxonFound) return@forEach
+            val taxonDb = organism.rankIds.keys.firstOrNull { it.name == taxonDbName }
+                ?: RuntimeException("Taxonomy database not found, but we have a reference to it")
+            acceptedRanks.clear()
+
+            val ranks = listOf(
+                "family" to InstanceItems::family,
+                "subfamily" to InstanceItems::subfamily,
+                "tribe" to InstanceItems::tribe,
+                "subtribe" to InstanceItems::subtribe,
+                "genus" to InstanceItems::genus,
+                "species" to InstanceItems::species,
+                "variety" to InstanceItems::variety
+            )
+
+            var lowerTaxonIdFound = false
+
+            ranks.forEach { (rankName, rankItem) ->
+                val entity =
+                    organism.rankIds[taxonDb]?.firstOrNull { it.first.toLowerCase() == rankName }?.second?.name
+                if (!entity.isNullOrEmpty()) {
+                    acceptedRanks.add(AcceptedTaxonEntry(rankName, rankItem, entity))
+                    if (rankName in listOf("genus", "subgenus", "subspecies", "species", "variety", "family")) {
+                        fullTaxonFound = true
+                        lowerTaxonIdFound = true
+                    }
+                }
+            }
+        }
+        if (!fullTaxonFound) {
+            logger.error("Taxon name empty using all of our known DBs: $organism")
+            logger.error(acceptedRanks)
+            logger.error(organism.prettyPrint())
+            throw InvalidTaxonName()
+        }
+        return acceptedRanks
     }
 
     /**

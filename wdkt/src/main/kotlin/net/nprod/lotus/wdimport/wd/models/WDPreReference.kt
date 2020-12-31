@@ -19,8 +19,7 @@ data class PropertyStore(
 )
 
 class WDPreReference {
-    private val referenceBuilder: ReferenceBuilder = ReferenceBuilder
-        .newInstance()
+    private val referenceBuilder: ReferenceBuilder = ReferenceBuilder.newInstance()
 
     private val listOfProperties: MutableList<PropertyStore> = mutableListOf()
 

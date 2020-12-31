@@ -23,7 +23,6 @@ pluginManagement {
     }
 }
 
-
 rootProject.name = "wdkt"
 
 include("wdkt")

@@ -18,6 +18,17 @@ This build use a jar version of wiki-java in libs, make sure you update that fro
 
 ## Run
 
+### Add an article by DOI 
+Replace <<foo>> and <<bar>> by your users and password. Notice the space in front of that command
+to not store them in your shell history.
+
+```console
+ export WIKIDATA_USER=<<foo>>
+ export WIKIDATA_PASSWORD=<<bar>>
+./gradlew :publication_importer:run --args "10.1007/BF00598758"
+```
+
+### Import lotus Data
 Replace <<foo>> and <<bar>> by your users and password. Notice the space in front of that command
 to not store them in your shell history.
 

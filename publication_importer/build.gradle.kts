@@ -4,7 +4,7 @@ plugins {
 }
 
 application {
-    mainClass.set("net.nprod.lotus.tools.articleImporter.MainKt")
+    mainClass.set("net.nprod.lotus.tools.publicationImporter.MainKt")
 }
 
 dependencies {

@@ -7,12 +7,12 @@
 
 package net.nprod.lotus.wdimport.wd
 
-import net.nprod.lotus.wdimport.wd.models.ReferencedRemoteItemStatement
-import net.nprod.lotus.wdimport.wd.models.ReferencedStatement
-import net.nprod.lotus.wdimport.wd.models.ReferencedValueStatement
-import org.wikidata.wdtk.datamodel.helpers.Datamodel
+import net.nprod.lotus.wdimport.wd.exceptions.UnhandledReferencedStatementType
+import net.nprod.lotus.wdimport.wd.models.WDResolvedQualifier
+import net.nprod.lotus.wdimport.wd.models.statements.IReferencedStatement
+import net.nprod.lotus.wdimport.wd.models.statements.ReferencedRemoteItemStatement
+import net.nprod.lotus.wdimport.wd.models.statements.ReferencedValueStatement
 import org.wikidata.wdtk.datamodel.helpers.ItemDocumentBuilder
-import org.wikidata.wdtk.datamodel.helpers.ReferenceBuilder
 import org.wikidata.wdtk.datamodel.helpers.StatementBuilder
 import org.wikidata.wdtk.datamodel.interfaces.ItemDocument
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
@@ -20,38 +20,10 @@ import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue
 import org.wikidata.wdtk.datamodel.interfaces.Reference
 import org.wikidata.wdtk.datamodel.interfaces.Statement
 import org.wikidata.wdtk.datamodel.interfaces.Value
-import kotlin.reflect.KProperty1
-
-/**
- * A qualifier that can be added to a statement.
- */
-data class Qualifier(
-    val property: KProperty1<InstanceItems, PropertyIdValue>,
-    val value: Value
-)
-
-/**
- * A qualifier that has been resolved for this instance.
- */
-data class ResolvedQualifier(
-    val property: PropertyIdValue,
-    val value: Value
-) {
-    companion object {
-        fun fromQualifier(qualifier: Qualifier, instanceItems: InstanceItems): ResolvedQualifier =
-            ResolvedQualifier(qualifier.property.get(instanceItems), qualifier.value)
-    }
-}
 
 /**
  * Type safe builder or DSL
  */
-@Suppress("unused")
-fun newReference(f: (ReferenceBuilder) -> Unit): Reference {
-    val reference = ReferenceBuilder.newInstance()
-    reference.apply(f)
-    return reference.build()
-}
 
 fun newDocument(name: String, id: ItemIdValue? = null, f: ItemDocumentBuilder.() -> Unit): ItemDocument {
     val builder = ItemDocumentBuilder.forItemId(id ?: ItemIdValue.NULL)
@@ -60,17 +32,6 @@ fun newDocument(name: String, id: ItemIdValue? = null, f: ItemDocumentBuilder.()
     builder.apply(f)
 
     return builder.build()
-}
-
-@Suppress("unused")
-fun ReferenceBuilder.propertyValue(property: PropertyIdValue, value: String): Unit =
-    this.propertyValue(property, Datamodel.makeStringValue(value))
-
-fun ReferenceBuilder.propertyValue(property: PropertyIdValue, value: Value) {
-    this.withPropertyValue(
-        property,
-        value
-    )
 }
 
 /**
@@ -97,7 +58,7 @@ fun ItemDocumentBuilder.statement(
         referencedStatement.preReferences.forEach {
             statementBuilder.withReference(it.build(instanceItems))
         }
-        referencedStatement.qualifiers.forEach { (property, value) ->
+        referencedStatement.preQualifiers.forEach { (property, value) ->
             statementBuilder.withQualifierValue(property.get(instanceItems), value)
         }
     }
@@ -110,13 +71,13 @@ fun ItemDocumentBuilder.statement(
  */
 fun ItemDocumentBuilder.statement(
     subject: ItemIdValue? = null,
-    referencedStatement: ReferencedStatement,
+    referencedStatement: IReferencedStatement,
     instanceItems: InstanceItems
 ) {
     val resolvedReferencedStatement = when (referencedStatement) {
         is ReferencedValueStatement -> referencedStatement
         is ReferencedRemoteItemStatement -> referencedStatement.resolveToReferencedValueStatetement(instanceItems)
-        else -> throw RuntimeException("Unknown ReferencedStatement type")
+        else -> throw UnhandledReferencedStatementType("Unknown ReferencedStatement type")
     }
     statement(subject, resolvedReferencedStatement, instanceItems)
 }
@@ -138,7 +99,7 @@ fun newStatement(
     subject: ItemIdValue? = null,
     value: Value,
     references: Collection<Reference>,
-    qualifiers: Collection<ResolvedQualifier>
+    qualifiers: Collection<WDResolvedQualifier>
 ): Statement {
     val statement = StatementBuilder.forSubjectAndProperty(subject ?: ItemIdValue.NULL, property)
         .withValue(value)

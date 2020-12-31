@@ -5,9 +5,9 @@
  *
  */
 
-package net.nprod.lotus.wdimport.processing
+package processing
 
-import net.nprod.lotus.input.DataTotal
+import input.DataTotal
 import net.nprod.lotus.rdf.RepositoryManager
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.sparql.ISparql

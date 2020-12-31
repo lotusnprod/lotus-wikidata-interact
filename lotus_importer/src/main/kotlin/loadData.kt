@@ -5,7 +5,7 @@
  *
  */
 
-package net.nprod.lotus.input
+package input
 
 import net.nprod.lotus.helpers.GZIPReader
 import net.nprod.lotus.helpers.parseTSVFile

@@ -16,6 +16,7 @@ import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue
  * you want to test against an hypothetical empty WikiData instance
  */
 class NopWDKT : IWDKT {
+    @Suppress("EmptyFunctionBlock")
     override fun close() {}
 
     override fun searchDOI(doi: String): QueryActionResponse? = null
