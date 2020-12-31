@@ -19,6 +19,9 @@ fun tryGzipThenNormal(fileName: String): BufferedReader = try {
     File(fileName).bufferedReader()
 }
 
+val TaxonomyDatabaseExclusionList = listOf("IPNI", "IRMNG (old)")
+val RequiredTaxonRanks = listOf("variety", "genus", "subgenus", "species", "subspecies", "family")
+
 fun loadData(fileName: String, skip: Int = 0, limit: Int? = null): DataTotal {
     val logger = LogManager.getLogger("net.nprod.lotus.chemistry.net.nprod.lotus.tools.wdpropcreator.main")
     val dataTotal = DataTotal()
@@ -41,7 +44,9 @@ fun loadData(fileName: String, skip: Int = 0, limit: Int? = null): DataTotal {
         val smiles = it.getString("structureCleanedSmiles")
         val doi = it.getString("referenceCleanedDoi")
 
-        if (organismRanks.contains("genus") || organismRanks.contains("species") || organismRanks.contains("family")) {
+        if (RequiredTaxonRanks.any { organismRanks.contains("it") } ||
+            organismDb !in TaxonomyDatabaseExclusionList
+        ) {
 
             val databaseObj = dataTotal.databaseCache.getOrNew(database) { Database(name = database) }
 
@@ -75,9 +80,7 @@ fun loadData(fileName: String, skip: Int = 0, limit: Int? = null): DataTotal {
                 )
             }
 
-            dataTotal.quads.add(
-                Quad(databaseObj, organismObj, compoundObj, referenceObj)
-            )
+            dataTotal.quads.add(Quad(databaseObj, organismObj, compoundObj, referenceObj))
         } else {
             logger.error("Invalid entry: $it")
         }
