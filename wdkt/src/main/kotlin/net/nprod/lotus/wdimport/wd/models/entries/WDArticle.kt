@@ -77,7 +77,7 @@ data class WDArticle(
      * Generate a list of authors statements
      */
     private fun authorsStatements(): List<IReferencedStatement> =
-        authors?.mapIndexed { index, author ->
+        authors?.filter { it.fullName != "" }?.mapIndexed { index, author ->
             val wikidataID = author.wikidataID
             val statement = if (wikidataID != null)
                 ReferencedValueStatement(InstanceItems::author, wikidataID)
@@ -138,7 +138,6 @@ data class WDArticle(
             logger.error("No data, or no valid data received from CrossREF for DOI $doi")
             return
         }
-
         val entryType = message.type
         type = if (entryType == "journal-article") InstanceItems::scholarlyArticle else InstanceItems::publication
         title = message.title?.first()
@@ -146,9 +145,9 @@ data class WDArticle(
         issn = message.issn?.first()
         if (issn != null) resolveISSN(wdFinder, instanceItems)
         publicationDate = message.created?.datetime?.let { OffsetDateTime.parse(it) }
-        issue = message.issue
-        volume = message.volume
-        pages = message.page
+        if (message.issue != "") issue = message.issue
+        if (message.volume != "") volume = message.volume
+        if (message.page != "") pages = message.page
         val doiRetrieved = message.doi
 
         // Process the authors, if it has an ORCID, we check for that person's entry
