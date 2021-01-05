@@ -18,6 +18,7 @@ import net.nprod.lotus.wdimport.wd.models.entries.WDCompound
 import net.nprod.lotus.wdimport.wd.publishing.IPublisher
 import net.nprod.lotus.wdimport.wd.sparql.InChIKey
 import org.apache.logging.log4j.LogManager
+import kotlin.time.ExperimentalTime
 
 /** Labels are limited to 250 on WikiData **/
 const val MAXIMUM_COMPOUND_NAME_LENGTH: Int = 250
@@ -30,6 +31,7 @@ const val MAXIMUM_INCHI_LENGTH: Int = 1500
  * It is calling a lot of functions with serious side effects: organismProcessor and referenceProcessor are major
  * they are doing the same thing this function is doing but to create taxa and articles/references
  */
+@ExperimentalTime
 @KtorExperimentalAPI
 fun DataTotal.processCompounds(
     wdFinder: WDFinder,
@@ -63,13 +65,17 @@ fun DataTotal.processCompounds(
         wdcompound.apply {
             this@processCompounds.quads.filter { it.compound == compound }.distinct().forEach { quad ->
                 logger.info("Ok lets go for a quad: $quad")
-                val organism = taxonProcessor.get(quad.organism)
-                logger.info(" Found organism $organism")
+                try {
+                    val organism = taxonProcessor.get(quad.organism)
+                    logger.info(" Found organism $organism")
 
-                foundInTaxon(
-                    organism
-                ) {
-                    statedIn(referenceProcessor.get(quad.reference).id)
+                    foundInTaxon(
+                        organism
+                    ) {
+                        statedIn(referenceProcessor.get(quad.reference).id)
+                    }
+                } catch (e: InvalidTaxonName) {
+                    logger.error(" ERROR: Couldn't a good database for the organism: ${quad.organism.name}")
                 }
             }
         }

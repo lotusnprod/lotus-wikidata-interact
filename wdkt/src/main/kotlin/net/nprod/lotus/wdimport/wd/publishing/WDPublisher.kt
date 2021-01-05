@@ -7,6 +7,7 @@
 
 package net.nprod.lotus.wdimport.wd.publishing
 
+import kotlinx.coroutines.TimeoutCancellationException
 import net.nprod.lotus.helpers.tryCount
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.Resolver
@@ -140,7 +141,11 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
 
             val newItemDocument: ItemDocument =
                 tryCount<ItemDocument>(
-                    listOf(MediaWikiApiErrorException::class, IOException::class),
+                    listOf(
+                        MediaWikiApiErrorException::class,
+                        IOException::class,
+                        TimeoutCancellationException::class
+                    ),
                     delayMilliSeconds = 30_000L,
                     maxRetries = 10
                 ) { // Sometimes it needs time to let the DB recover
@@ -157,14 +162,20 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
             updatedDocuments++
             logger.info("Updated document ${publishable.id} - Summary: $summary")
 
-            val statements = publishable.listOfStatementsForUpdate(fetcher, instanceItems)
+            val statements = publishable.listOfResolvedStatements(fetcher, instanceItems)
 
             if (statements.isNotEmpty()) {
                 tryCount<Unit>(
-                    listExceptions = listOf(MediaWikiApiErrorException::class, IOException::class),
+                    listExceptions = listOf(
+                        MediaWikiApiErrorException::class,
+                        IOException::class,
+                        TimeoutCancellationException::class
+                    ),
                     delayMilliSeconds = 30_000L,
                     maxRetries = 10
                 ) { // Sometimes it needs time to let the DB recover
+                    // We update the existing statements
+                    // We send the new statements
                     editor?.updateStatements(
                         publishable.id,
                         statements,

@@ -94,15 +94,20 @@ fun newStatement(
     return statement.build()
 }
 
+@Suppress("LongParameterList")
 fun newStatement(
     property: PropertyIdValue,
     subject: ItemIdValue? = null,
+    existingId: String? = null,
     value: Value,
     references: Collection<Reference>,
     qualifiers: Collection<WDResolvedQualifier>
 ): Statement {
     val statement = StatementBuilder.forSubjectAndProperty(subject ?: ItemIdValue.NULL, property)
-        .withValue(value)
+        .withValue(value).also { statement ->
+            existingId?.let { statement.withId(it) }
+        }
+
     references.forEach { statement.withReference(it) }
     qualifiers.forEach { statement.withQualifierValue(it.property, it.value) }
 

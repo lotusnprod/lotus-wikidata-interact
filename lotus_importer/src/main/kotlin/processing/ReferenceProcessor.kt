@@ -15,6 +15,7 @@ import net.nprod.lotus.wdimport.wd.WDFinder
 import net.nprod.lotus.wdimport.wd.models.entries.WDArticle
 import net.nprod.lotus.wdimport.wd.publishing.IPublisher
 import org.apache.logging.log4j.LogManager
+import kotlin.time.ExperimentalTime
 
 class ReferenceProcessor(
     val dataTotal: DataTotal,
@@ -23,8 +24,10 @@ class ReferenceProcessor(
     val instanceItems: InstanceItems
 ) {
     private val logger = LogManager.getLogger(ReferenceProcessor::class)
+    @ExperimentalTime
     private val articlesCache: MutableMap<Reference, WDArticle> = mutableMapOf()
 
+    @ExperimentalTime
     @KtorExperimentalAPI
     private fun articleFromReference(reference: Reference): WDArticle {
         val article = WDArticle(
@@ -40,6 +43,7 @@ class ReferenceProcessor(
     /**
      * Generate a WikiData article from that reference
      */
+    @ExperimentalTime
     @KtorExperimentalAPI
     fun get(key: Reference): WDArticle = articlesCache.getOrPut(key) { articleFromReference(key) }
 }

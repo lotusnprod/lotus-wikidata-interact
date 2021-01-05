@@ -99,6 +99,7 @@ subprojects {
 
     tasks.withType<KotlinCompile>() {
         kotlinOptions.jvmTarget = "11"
+        kotlinOptions.useIR = true
     }
 
     tasks.withType<Test>().configureEach {
@@ -117,4 +118,8 @@ detekt {
     config = rootProject.files("qc/detekt.yml")
     buildUponDefaultConfig = true
     baseline = rootProject.file("qc/detekt-baseline.xml")
+}
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor(1, "minutes")
 }

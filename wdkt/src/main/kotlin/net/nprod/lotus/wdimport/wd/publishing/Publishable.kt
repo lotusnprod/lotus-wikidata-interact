@@ -44,6 +44,16 @@ typealias RemoteItem = KProperty1<InstanceItems, ItemIdValue>
 typealias RemoteProperty = KProperty1<InstanceItems, PropertyIdValue>
 
 /**
+ * if statement is null, we just use the info for a new statement
+ */
+data class UpdatableStatement(
+    val statement: Statement,
+    val newReferences: List<Reference>,
+    val newQualifiers: List<WDResolvedQualifier>,
+    val updateOnly: Boolean
+)
+
+/**
  * A publishable is a document and its properties.
  * This allows to create documents and update them.
  *
@@ -124,7 +134,10 @@ abstract class Publishable {
     /**
      * Generate statements for updating
      */
-    fun listOfStatementsForUpdate(fetcher: WikibaseDataFetcher?, instanceItems: InstanceItems): List<Statement> {
+    fun listOfResolvedStatements(
+        fetcher: WikibaseDataFetcher?,
+        instanceItems: InstanceItems
+    ): List<Statement> {
         // Add the data statements
         preStatements.addAll(dataStatements())
         // If we have a fetcher, we take a dump of that entry to make sure we are not modifying existing entries
@@ -179,15 +192,12 @@ abstract class Publishable {
 
         val newStatementProperty: PropertyIdValue = statement.property.get(instanceItems)
 
-        val builtStatements = statement.preReferences.map { it.build(instanceItems) }
+        val references = statement.preReferences.map { it.build(instanceItems) }
 
         val existingProperty = existingPropertyValueCoupleToReferences[newStatementProperty.id]
         val existingStatement = existingProperty?.let { existingValueToReferences ->
             existingValueToReferences[newStatementValue]
         }
-
-        // We do not try to add or modify a non overridable statement
-        existingProperty?.let { if (!statement.overwritable) return null }
 
         val existingSetOfReferences =
             existingStatement?.references?.map { it.forceGetStatedInValue() }?.toSet() ?: setOf()
@@ -195,22 +205,36 @@ abstract class Publishable {
             existingStatement?.qualifiers?.map { it.property }?.toSet() ?: setOf()
 
         // Anything that is not in the existing set should be a new reference
-        val newReferences = builtStatements.filterNot {
+        val newReferences = references.filterNot {
             it.forceGetStatedInValue() in existingSetOfReferences
         }
+
+        val existingReferencesToPortOver = (existingStatement?.references ?: listOf()).filterNot { existingRef ->
+            newReferences.any { it.forceGetStatedInValue() == existingRef.forceGetStatedInValue() }
+        }
+
         val newQualifiers = statement.preQualifiers.filterNot {
             it.property.get(instanceItems) in existingSetOfQualifiers
         }.map { WDResolvedQualifier.fromQualifier(it, instanceItems) }
 
-        // If we have an existing statement we just add it
-        existingStatement?.references?.addAll(newReferences)
+        // We do not try to add or modify a non overridable statement
+        existingProperty?.let { if (!statement.overwritable) return null }
 
-        return existingStatement ?: newStatement(
+        /**
+         * We either create a new statement, or use the existing one, that's because the process is different for them
+         */
+
+        val qualifiers = statement.preQualifiers.map {
+            WDResolvedQualifier.fromQualifier(it, instanceItems)
+        }
+
+        return newStatement(
             newStatementProperty,
             id,
+            existingStatement?.statementId,
             newStatementValue,
-            newReferences,
-            newQualifiers
+            existingReferencesToPortOver + newReferences,
+            qualifiers,
         )
     }
 

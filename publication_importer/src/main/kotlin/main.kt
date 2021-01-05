@@ -14,7 +14,9 @@ import net.nprod.lotus.wdimport.wd.models.entries.WDArticle
 import net.nprod.lotus.wdimport.wd.publishing.WDPublisher
 import net.nprod.lotus.wdimport.wd.query.WDKT
 import net.nprod.lotus.wdimport.wd.sparql.WDSparql
+import kotlin.time.ExperimentalTime
 
+@ExperimentalTime
 @KtorExperimentalAPI
 fun main(args: Array<String>) {
     if (args.isEmpty()) throw IllegalArgumentException("Please give this program a DOI")

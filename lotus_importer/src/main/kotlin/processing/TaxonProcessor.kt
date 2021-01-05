@@ -45,7 +45,8 @@ val LIST_OF_ACCEPTED_DBS: Array<String> = arrayOf(
     "The Interim Register of Marine and Nonmarine Genera",
     "World Register of Marine Species",
     "Database of Vascular Plants of Canada (VASCAN)",
-    "GBIF Backbone Taxonomy"
+    "GBIF Backbone Taxonomy",
+    "iNaturalist"
 )
 
 class TaxonProcessor(
@@ -138,6 +139,8 @@ class TaxonProcessor(
 
     /**
      * Get or create a Wikidata taxon entry from an organism
+     *
+     * @throws InvalidTaxonName when the taxon cannot be found in any database
      */
     fun get(key: Organism): WDTaxon = organismCache.getOrPut(key) { taxonFromOrganism(key) }
 }

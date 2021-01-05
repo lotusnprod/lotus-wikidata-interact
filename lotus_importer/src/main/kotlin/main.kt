@@ -29,7 +29,9 @@ import net.nprod.lotus.wdimport.wd.sparql.mock.TestISparql
 import org.apache.logging.log4j.LogManager
 import processing.buildCompoundCache
 import processing.processCompounds
+import kotlin.time.ExperimentalTime
 
+@ExperimentalTime
 @KtorExperimentalAPI
 @Suppress("ComplexMethod")
 fun main(args: Array<String>) {

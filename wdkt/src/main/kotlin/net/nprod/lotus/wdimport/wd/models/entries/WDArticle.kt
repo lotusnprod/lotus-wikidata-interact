@@ -8,6 +8,7 @@
 package net.nprod.lotus.wdimport.wd.models.entries
 
 import io.ktor.util.KtorExperimentalAPI
+import net.nprod.konnector.commons.NonExistent
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.TestInstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
@@ -20,8 +21,10 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.wikidata.wdtk.datamodel.helpers.Datamodel
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
+import java.net.URLEncoder
 import java.time.OffsetDateTime
 import kotlin.reflect.KProperty1
+import kotlin.time.ExperimentalTime
 
 /**
  * Wikidata publishable for a scholarly article
@@ -37,6 +40,8 @@ import kotlin.reflect.KProperty1
  * @param authors List of AuthorInfo authors information
  * @param resolvedISSN the ISSN resolved to a Wikidata journal or so
  */
+@KtorExperimentalAPI
+@ExperimentalTime
 data class WDArticle(
     override var label: String = "",
     var title: String? = null,
@@ -116,15 +121,21 @@ data class WDArticle(
     /**
      * Populate the data for this article from CrossREF
      */
+    @ExperimentalTime
     @KtorExperimentalAPI
     fun populateFromCrossREF(wdFinder: WDFinder, instanceItems: InstanceItems) {
         require(doi != null) { "The DOI cannot be null" }
-        val output = wdFinder.crossRefConnector.workFromDOI(doi)
-        if (output.status != "ok") return
+
+        val output = try {
+            wdFinder.crossRefConnector.workFromDOI(doi)
+        } catch (e: NonExistent) {
+            logger.error("We couldn't find anything about the article with the DOI $doi in CrossREF")
+            return
+        }
 
         val message = output.message
-        if (message == null) {
-            logger.error("No data received from CrossREF for DOI $doi")
+        if (message == null || output.status != "ok") {
+            logger.error("No data, or no valid data received from CrossREF for DOI $doi")
             return
         }
 
@@ -132,17 +143,17 @@ data class WDArticle(
         type = if (entryType == "journal-article") InstanceItems::scholarlyArticle else InstanceItems::publication
         title = message.title?.first()
         label = title?.take(MAXIMUM_LABEL_LENGTH) ?: doi
-        issn = message.ISSN?.first()
+        issn = message.issn?.first()
         if (issn != null) resolveISSN(wdFinder, instanceItems)
         publicationDate = message.created?.datetime?.let { OffsetDateTime.parse(it) }
         issue = message.issue
         volume = message.volume
         pages = message.page
-        val doiRetrieved = message.DOI
+        val doiRetrieved = message.doi
 
         // Process the authors, if it has an ORCID, we check for that person's entry
         authors = message.author?.map {
-            val orcid = it.ORCID?.split("/")?.last()
+            val orcid = it.orcid?.split("/")?.last()
             AuthorInfo(
                 orcid = orcid,
                 givenName = it.given ?: "",
@@ -150,7 +161,7 @@ data class WDArticle(
             ).apply { wikidataID = orcid?.let { findPersonFromORCID(wdFinder, instanceItems, orcid) } }
         } ?: listOf()
 
-        source = "http://api.crossref.org/works/$doiRetrieved"
+        source = "http://api.crossref.org/works/" + URLEncoder.encode(doiRetrieved, "utf-8")
     }
 
     private fun findPersonFromORCID(wdFinder: WDFinder, instanceItems: InstanceItems, orcid: String): ItemIdValue? {
