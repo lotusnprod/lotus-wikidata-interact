@@ -5,11 +5,12 @@
  *
  */
 
-package net.nprod.lotus.wdimport
+package net.nprod.lotus.wdimport.net.nprod.lotus.importer
 
-import input.DataTotal
-import input.loadData
+import net.nprod.lotus.importer.input.DataTotal
+import net.nprod.lotus.importer.loadData
 import io.ktor.util.KtorExperimentalAPI
+import net.nprod.lotus.importer.oldprocessor.Parameters
 import net.nprod.lotus.rdf.RepositoryManager
 import net.nprod.lotus.wdimport.tools.countInLocalRepository
 import net.nprod.lotus.wdimport.wd.InstanceItems
@@ -27,14 +28,14 @@ import net.nprod.lotus.wdimport.wd.sparql.WDSparql
 import net.nprod.lotus.wdimport.wd.sparql.mock.NopSparql
 import net.nprod.lotus.wdimport.wd.sparql.mock.TestISparql
 import org.apache.logging.log4j.LogManager
-import processing.buildCompoundCache
-import processing.processCompounds
+import net.nprod.lotus.importer.processing.buildCompoundCache
+import net.nprod.lotus.importer.processing.processCompounds
 import kotlin.time.ExperimentalTime
 
 @ExperimentalTime
 @KtorExperimentalAPI
 @Suppress("ComplexMethod")
-fun main(args: Array<String>) {
+fun oldmain(args: Array<String>) {
     val logger = LogManager.getLogger("main")
 
     val parameters = Parameters()

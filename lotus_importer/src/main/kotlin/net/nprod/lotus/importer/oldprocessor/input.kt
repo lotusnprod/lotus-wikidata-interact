@@ -7,7 +7,7 @@
 
 @file:Suppress("unused")
 
-package net.nprod.lotus.helpers
+package net.nprod.lotus.importer
 
 import com.univocity.parsers.common.record.Record
 import com.univocity.parsers.tsv.TsvParser

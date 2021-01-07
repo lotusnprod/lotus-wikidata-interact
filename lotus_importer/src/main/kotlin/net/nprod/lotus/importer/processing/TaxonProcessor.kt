@@ -5,10 +5,10 @@
  *
  */
 
-package processing
+package net.nprod.lotus.importer.processing
 
-import input.DataTotal
-import input.Organism
+import net.nprod.lotus.importer.input.DataTotal
+import net.nprod.lotus.importer.input.Organism
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
 import net.nprod.lotus.wdimport.wd.models.entries.WDTaxon

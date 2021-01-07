@@ -1,5 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.util.Properties
+import java.util.*
 
 val localPropertiesFile = file("local.properties")
 val localProperties = if (localPropertiesFile.exists()) {
@@ -15,6 +15,9 @@ plugins {
     id("io.gitlab.arturbosch.detekt")
     id("org.jlleitschuh.gradle.ktlint")
     id("org.jmailen.kotlinter")
+    id("org.springframework.boot") apply false
+    id("io.spring.dependency-management") apply false
+    kotlin("plugin.spring")
     `java-library`
 }
 
@@ -67,7 +70,6 @@ subprojects {
         implementation("io.ktor:ktor-client-cio:$ktorVersion")
         implementation("org.apache.logging.log4j:log4j-api:$log4jVersion")
         implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")
-        implementation("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion")
 
         implementation("org.wikidata.wdtk:wdtk-dumpfiles:$wdtkVersion") {
             exclude("org.slf4j", "slf4j-api")
@@ -105,6 +107,26 @@ subprojects {
 
     tasks.withType<Test>().configureEach {
         useJUnitPlatform()
+    }
+}
+
+project(":lotus_importer") {
+    apply {
+        plugin("org.springframework.boot")
+        plugin("io.spring.dependency-management")
+        plugin("org.jetbrains.kotlin.plugin.spring")
+    }
+
+    dependencies {
+        implementation("org.springframework.boot:spring-boot-starter") {
+                exclude("org.slf4j", "slf4j-api")
+        }
+        implementation("org.springframework.boot:spring-boot-starter-webflux")
+        implementation("org.springframework.boot:spring-boot-starter-websocket")
+        implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+        implementation("org.jetbrains.kotlin:kotlin-reflect")
+        runtimeOnly("com.h2database:h2")
+        testImplementation("org.springframework.boot:spring-boot-starter-test")
     }
 }
 

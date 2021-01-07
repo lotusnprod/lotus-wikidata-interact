@@ -5,7 +5,7 @@
  *
  */
 
-package input
+package net.nprod.lotus.importer.input
 
 /**
  * Interface for objects that have an id

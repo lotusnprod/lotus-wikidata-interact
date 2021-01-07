@@ -5,7 +5,7 @@
  *
  */
 
-package net.nprod.lotus.wdimport
+package net.nprod.lotus.importer.oldprocessor
 
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType

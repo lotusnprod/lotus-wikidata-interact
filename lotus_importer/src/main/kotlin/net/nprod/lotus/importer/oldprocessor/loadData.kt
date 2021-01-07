@@ -5,10 +5,16 @@
  *
  */
 
-package input
+package net.nprod.lotus.importer.oldprocessor
 
+import net.nprod.lotus.importer.input.Compound
+import net.nprod.lotus.importer.input.DataTotal
+import net.nprod.lotus.importer.input.Database
+import net.nprod.lotus.importer.input.Organism
+import net.nprod.lotus.importer.input.Quad
+import net.nprod.lotus.importer.input.Reference
+import net.nprod.lotus.importer.input.ifEqualReplace
 import net.nprod.lotus.helpers.GZIPReader
-import net.nprod.lotus.helpers.parseTSVFile
 import org.apache.logging.log4j.LogManager
 import java.io.BufferedReader
 import java.io.File
@@ -18,6 +24,8 @@ fun tryGzipThenNormal(fileName: String): BufferedReader = try {
 } catch (e: java.util.zip.ZipException) {
     File(fileName).bufferedReader()
 }
+
+class InvalidEntryDataException(override val message: String) : RuntimeException()
 
 val TaxonomyDatabaseExclusionList = listOf("IPNI", "IRMNG (old)")
 val RequiredTaxonRanks = listOf("variety", "genus", "subgenus", "species", "subspecies", "family")
@@ -55,32 +63,38 @@ fun loadData(fileName: String, skip: Int = 0, limit: Int? = null): DataTotal {
             organismObj.finalIds[organismDb] = organismID
             organismObj.textRanks[organismDb] = organismRanks
             organismObj.textNames[organismDb] = organismNames
+            val inchiKey = it.getString("structureCleanedInchikey3D").validateInChIKey()
+            try {
+                val compoundObj = dataTotal.compoundCache.getOrNew(smiles) {
+                    Compound(
+                        name = it.getString("structureCleaned_nameTraditional"),
+                        smiles = smiles,
+                        inchi = it.getString("structureCleanedInchi"),
+                        inchikey = inchiKey,
+                        iupac = it.getString("structureCleaned_nameIupac"),
+                        unspecifiedStereocenters = it.getInt("structureCleaned_stereocenters_unspecified"),
+                        atLeastSomeStereoDefined = unspecifiedCenters != totalCenters
+                    )
+                }
 
-            val compoundObj = dataTotal.compoundCache.getOrNew(smiles) {
-                Compound(
-                    name = it.getString("structureCleaned_nameTraditional"),
-                    smiles = smiles,
-                    inchi = it.getString("structureCleanedInchi"),
-                    inchikey = it.getString("structureCleanedInchikey3D"),
-                    iupac = it.getString("structureCleaned_nameIupac"),
-                    unspecifiedStereocenters = it.getInt("structureCleaned_stereocenters_unspecified"),
-                    atLeastSomeStereoDefined = unspecifiedCenters != totalCenters
-                )
+                val referenceObj = dataTotal.referenceCache.getOrNew(doi) {
+                    Reference(
+                        doi = doi,
+                        title = it.getString("referenceCleanedTitle")
+                            .ifEqualReplace("NA", ""),
+                        pmcid = it.getString("referenceCleanedPmcid")
+                            .ifEqualReplace("NA", ""),
+                        pmid = it.getString("referenceCleanedPmid")
+                            .ifEqualReplace("NA", "")
+                    )
+                }
+
+                dataTotal.quads.add(Quad(databaseObj, organismObj, compoundObj, referenceObj))
+            } catch (e: InvalidEntryDataException) {
+                logger.error(e)
+                throw RuntimeException("It works")
             }
 
-            val referenceObj = dataTotal.referenceCache.getOrNew(doi) {
-                Reference(
-                    doi = doi,
-                    title = it.getString("referenceCleanedTitle")
-                        .ifEqualReplace("NA", ""),
-                    pmcid = it.getString("referenceCleanedPmcid")
-                        .ifEqualReplace("NA", ""),
-                    pmid = it.getString("referenceCleanedPmid")
-                        .ifEqualReplace("NA", "")
-                )
-            }
-
-            dataTotal.quads.add(Quad(databaseObj, organismObj, compoundObj, referenceObj))
         } else {
             logger.error("Invalid entry: $it")
         }
@@ -90,4 +104,10 @@ fun loadData(fileName: String, skip: Int = 0, limit: Int? = null): DataTotal {
     dataTotal.organismCache.store.values.forEach { it.resolve(dataTotal.taxonomyDatabaseCache) }
 
     return dataTotal
+}
+
+val InChIKeyRegexp: Regex = "[A-Z]{14}-[A-Z]{10}-[A-Z]".toRegex()
+private fun String.validateInChIKey(): String {
+    if (!this.matches(InChIKeyRegexp)) throw InvalidEntryDataException("InChIKey $this invalid")
+    return this
 }

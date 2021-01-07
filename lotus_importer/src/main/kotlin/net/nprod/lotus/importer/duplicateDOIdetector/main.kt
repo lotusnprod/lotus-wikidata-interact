@@ -8,7 +8,7 @@
 package net.nprod.lotus.wdimport.tools.duplicateDOIdetector
 
 import net.nprod.lotus.helpers.GZIPReader
-import net.nprod.lotus.helpers.parseTSVFile
+import net.nprod.lotus.importer.parseTSVFile
 import net.nprod.lotus.wdimport.wd.MainInstanceItems
 import net.nprod.lotus.wdimport.wd.query.WDKT
 import java.io.File

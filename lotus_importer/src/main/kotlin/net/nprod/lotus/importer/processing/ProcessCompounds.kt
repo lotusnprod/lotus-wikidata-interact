@@ -5,9 +5,9 @@
  *
  */
 
-package processing
+package net.nprod.lotus.importer.processing
 
-import input.DataTotal
+import net.nprod.lotus.importer.input.DataTotal
 import io.ktor.util.KtorExperimentalAPI
 import net.nprod.lotus.chemistry.smilesToCanonical
 import net.nprod.lotus.chemistry.smilesToFormula

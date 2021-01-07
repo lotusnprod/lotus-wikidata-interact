@@ -7,6 +7,7 @@
 
 package net.nprod.lotus.wdimport.wd.sparql
 
+import kotlinx.coroutines.TimeoutCancellationException
 import net.nprod.lotus.helpers.tryCount
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.Resolver
@@ -32,7 +33,7 @@ class WDSparql(override val instanceItems: InstanceItems) : Resolver, ISparql {
     override fun <T> query(query: String, function: (TupleQueryResult) -> T): T {
         return repository.connection.use {
             tryCount<TupleQueryResult>(
-                listOf(QueryEvaluationException::class),
+                listOf(QueryEvaluationException::class, TimeoutCancellationException::class),
                 delayMilliSeconds = 10_000L
             ) {
                 it.prepareTupleQuery(query).evaluate()
