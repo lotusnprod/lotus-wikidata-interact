@@ -8,9 +8,9 @@
 package net.nprod.lotus.wdimport.net.nprod.lotus.importer
 
 import net.nprod.lotus.importer.input.DataTotal
-import net.nprod.lotus.importer.loadData
 import io.ktor.util.KtorExperimentalAPI
 import net.nprod.lotus.importer.oldprocessor.Parameters
+import net.nprod.lotus.importer.oldprocessor.loadData
 import net.nprod.lotus.rdf.RepositoryManager
 import net.nprod.lotus.wdimport.tools.countInLocalRepository
 import net.nprod.lotus.wdimport.wd.InstanceItems

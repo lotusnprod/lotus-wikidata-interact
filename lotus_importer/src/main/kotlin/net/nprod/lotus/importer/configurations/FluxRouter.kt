@@ -25,9 +25,8 @@ class FluxRouter {
             RequestPredicates.GET("/hello").and(RequestPredicates.accept(MediaType.TEXT_PLAIN)),
             greetingHandler::hello
         ).andRoute(
-                RequestPredicates.GET("/log").and(RequestPredicates.accept(MediaType.APPLICATION_JSON)),
-                logHandler::log
-            )
-
+            RequestPredicates.GET("/log").and(RequestPredicates.accept(MediaType.APPLICATION_JSON)),
+            logHandler::log
+        )
     }
 }

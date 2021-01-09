@@ -15,6 +15,7 @@ import net.nprod.lotus.importer.input.Quad
 import net.nprod.lotus.importer.input.Reference
 import net.nprod.lotus.importer.input.ifEqualReplace
 import net.nprod.lotus.helpers.GZIPReader
+import net.nprod.lotus.importer.parseTSVFile
 import org.apache.logging.log4j.LogManager
 import java.io.BufferedReader
 import java.io.File
