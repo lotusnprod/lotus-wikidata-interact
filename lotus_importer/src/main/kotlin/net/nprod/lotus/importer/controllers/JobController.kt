@@ -8,7 +8,7 @@
 package net.nprod.lotus.importer.controllers
 
 import kotlinx.serialization.Serializable
-import net.nprod.lotus.importer.jobs.ImportJob
+import net.nprod.lotus.importer.jobs.LotusImportJob
 import org.springframework.batch.core.BatchStatus
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.JobExecution
@@ -33,7 +33,7 @@ data class JobData(
         fun fromJobExecution(execution: JobExecution): JobData = JobData(
             execution.jobId.toString(),
             execution.createTime.toString(),
-            execution.endTime?.toString() ?: "",
+            execution.endTime?.toString() ?: "", // It can really be null, don't get fooled
             execution.isRunning,
             execution.status.toString()
         )
@@ -43,7 +43,7 @@ data class JobData(
 
 @Controller
 class JobController(
-    val importJob: ImportJob,
+    val lotusImportJob: LotusImportJob,
     @Qualifier("asyncJobLauncher") val jobLauncher: JobLauncher,
     @Qualifier("newJob") val job: Job
 ) {
