@@ -9,12 +9,11 @@ package net.nprod.lotus.wdimport.tools
 
 import net.nprod.lotus.rdf.RepositoryManager
 import net.nprod.lotus.wdimport.wd.InstanceItems
-import org.apache.logging.log4j.Logger
 
 fun countInLocalRepository(
     repositoryManager: RepositoryManager?,
     instanceItems: InstanceItems,
-    logger: Logger
+    logger: org.slf4j.Logger
 ) {
     repositoryManager?.repository?.let {
         val query =

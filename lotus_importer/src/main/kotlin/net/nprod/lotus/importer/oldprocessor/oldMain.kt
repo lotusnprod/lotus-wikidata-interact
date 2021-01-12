@@ -27,16 +27,16 @@ import net.nprod.lotus.wdimport.wd.sparql.InChIKey
 import net.nprod.lotus.wdimport.wd.sparql.WDSparql
 import net.nprod.lotus.wdimport.wd.sparql.mock.NopSparql
 import net.nprod.lotus.wdimport.wd.sparql.mock.TestISparql
-import org.apache.logging.log4j.LogManager
 import net.nprod.lotus.importer.processing.buildCompoundCache
 import net.nprod.lotus.importer.processing.processCompounds
+import org.slf4j.LoggerFactory
 import kotlin.time.ExperimentalTime
 
 @ExperimentalTime
 @KtorExperimentalAPI
 @Suppress("ComplexMethod")
 fun oldmain(args: Array<String>) {
-    val logger = LogManager.getLogger("main")
+    val logger = LoggerFactory.getLogger("main")
 
     val parameters = Parameters()
     parameters.parse(args)

@@ -12,7 +12,6 @@ import net.nprod.lotus.rdf.RepositoryManager
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.sparql.ISparql
 import net.nprod.lotus.wdimport.wd.sparql.InChIKey
-import org.apache.logging.log4j.Logger
 import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
 
 /**
@@ -27,7 +26,7 @@ const val COMPOUNDS_PROCESSING_CHUNK_SIZE: Int = 1000
 fun DataTotal.buildCompoundCache(
     repositoryManager: RepositoryManager?,
     instanceItems: InstanceItems,
-    logger: Logger,
+    logger: org.slf4j.Logger,
     wdSparql: ISparql,
     wikidataCompoundCache: MutableMap<InChIKey, String>
 ) {

@@ -71,6 +71,8 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
     }
 
     override fun connect() {
+        if (connection?.isLoggedIn == true) return
+
         connection = if (instanceItems == TestInstanceItems) {
             BasicApiConnection.getTestWikidataApiConnection()
         } else {
