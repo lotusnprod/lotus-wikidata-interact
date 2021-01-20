@@ -37,7 +37,7 @@ internal class RetryRunTest {
     fun `we get the output of the function`() {
         var touched = false
 
-        touched = tryCount<Boolean>(listOf(ExpectedError::class)) {
+        touched = tryCount(listOf(ExpectedError::class)) {
             true
         }
 

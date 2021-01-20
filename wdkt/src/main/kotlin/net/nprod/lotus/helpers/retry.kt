@@ -8,6 +8,7 @@
 package net.nprod.lotus.helpers
 
 import net.nprod.lotus.wdimport.wd.publishing.Milliseconds
+import org.apache.logging.log4j.Logger
 import kotlin.reflect.KClass
 
 /**
@@ -23,7 +24,8 @@ inline fun <U> tryCount(
     listExceptions: List<KClass<out Exception>>,
     maxRetries: Int = 3,
     delayMilliSeconds: Milliseconds = 0,
-    f: () -> U
+    logger: Logger? = null,
+    f: () -> U,
 ): U {
     var retries = 0
 
@@ -39,6 +41,7 @@ inline fun <U> tryCount(
                     continue
                 }
             }
+            logger?.error("Retrying ($retries/$maxRetries): ${e.message}")
             throw e
         }
     }
