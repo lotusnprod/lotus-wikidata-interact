@@ -55,7 +55,7 @@ typealias Milliseconds = Long
  */
 class WDPublisher(override val instanceItems: InstanceItems, val pause: Milliseconds = 0L) : Resolver, IPublisher {
     private val userAgent = "Wikidata Toolkit EditOnlineDataExample"
-    private val logger: Logger = LogManager.getLogger(WDPublisher::class.java)
+    private val logger: Logger = LogManager.getLogger(WDPublisher::class)
     private var user: String? = null
     private var password: String? = null
     private var connection: ApiConnection? = null
@@ -149,7 +149,7 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
             val document = publishable.document(instanceItems)
 
             val newItemDocument: ItemDocument =
-                tryCount<ItemDocument>(
+                tryCount(
                     listOf(
                         MediaWikiApiErrorException::class,
                         IOException::class,
@@ -161,6 +161,7 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
                     editor?.createItemDocument(document, summary, null)
                         ?: throw InternalException("There is no editor anymore")
                 }
+
 
             val itemId = newItemDocument.entityId
             publishedDocumentsIds.add(itemId.iri)
