@@ -60,13 +60,13 @@ fun DataTotal.processCompounds(
                 smilesToCanonical(smiles)
             } catch (e: InvalidSmilesException) {
                 logger.error("Invalid smiles exception: ${e.message}")
-                ""
+                return@forEachIndexed
             },
             chemicalFormula = try {
                 subscriptFormula(smilesToFormula(smiles))
             } catch (e: InvalidSmilesException) {
                 logger.error("Invalid smiles exception cannot make a formula: ${e.message}")
-                ""
+                return@forEachIndexed
             },
             iupac = compound.iupac,
             undefinedStereocenters = compound.unspecifiedStereocenters
