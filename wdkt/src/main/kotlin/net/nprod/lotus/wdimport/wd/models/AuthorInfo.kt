@@ -25,5 +25,5 @@ data class AuthorInfo(
 ) {
     var wikidataID: ItemIdValue? = null
     val fullName: String
-        get() = if (givenName != "") "$givenName $familyName" else familyName
+        get() = if (givenName != "") "$givenName $familyName".trim() else familyName.trim()
 }

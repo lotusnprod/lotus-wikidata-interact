@@ -19,6 +19,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
+import kotlin.time.ExperimentalTime
 
 
 @Serializable
@@ -42,7 +43,8 @@ data class JobData(
 
 
 @Controller
-class JobController(
+@ExperimentalTime
+class JobController constructor(
     val lotusImportJob: LotusImportJob,
     @Qualifier("asyncJobLauncher") val jobLauncher: JobLauncher,
     @Qualifier("newJob") val job: Job

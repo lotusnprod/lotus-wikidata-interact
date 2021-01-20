@@ -8,7 +8,12 @@
 package net.nprod.lotus.wdimport.wd.models.entries
 
 import io.ktor.util.KtorExperimentalAPI
+import kotlinx.coroutines.TimeoutCancellationException
 import net.nprod.konnector.commons.NonExistent
+import net.nprod.konnector.commons.UnManagedReturnCode
+import net.nprod.konnector.crossref.WorkResponse
+import net.nprod.lotus.helpers.titleCleaner
+import net.nprod.lotus.helpers.tryCount
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.TestInstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
@@ -21,6 +26,9 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.wikidata.wdtk.datamodel.helpers.Datamodel
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
+import org.wikidata.wdtk.wikibaseapi.apierrors.MaxlagErrorException
+import org.wikidata.wdtk.wikibaseapi.apierrors.MediaWikiApiErrorException
+import java.io.IOException
 import java.net.URLEncoder
 import java.time.OffsetDateTime
 import kotlin.reflect.KProperty1
@@ -58,20 +66,19 @@ data class WDArticle(
 
     override var type: KProperty1<InstanceItems, ItemIdValue> = InstanceItems::scholarlyArticle
 
-    override fun dataStatements(): List<IReferencedStatement> =
-        listOfNotNull(
-            title?.let {
-                ReferencedValueStatement.monolingualValue(InstanceItems::title, it).withReferenceURL(source)
-            },
-            doi?.let { ReferencedValueStatement(InstanceItems::doi, it) },
-            publicationDate?.let {
-                ReferencedValueStatement.datetimeValue(InstanceItems::publicationDate, it).withReferenceURL(source)
-            },
-            issue?.let { ReferencedValueStatement(InstanceItems::issue, it).withReferenceURL(source) },
-            volume?.let { ReferencedValueStatement(InstanceItems::volume, it).withReferenceURL(source) },
-            pages?.let { ReferencedValueStatement(InstanceItems::pages, it).withReferenceURL(source) },
-            resolvedISSN?.let { ReferencedValueStatement(InstanceItems::publishedIn, it).withReferenceURL(source) },
-        ) + authorsStatements()
+    override fun dataStatements(): List<IReferencedStatement> = listOfNotNull(
+        title?.let {
+            ReferencedValueStatement.monolingualValue(InstanceItems::title, it).withReferenceURL(source)
+        },
+        doi?.let { ReferencedValueStatement(InstanceItems::doi, it) },
+        publicationDate?.let {
+            ReferencedValueStatement.datetimeValue(InstanceItems::publicationDate, it).withReferenceURL(source)
+        },
+        issue?.let { ReferencedValueStatement(InstanceItems::issue, it).withReferenceURL(source) },
+        volume?.let { ReferencedValueStatement(InstanceItems::volume, it).withReferenceURL(source) },
+        pages?.let { ReferencedValueStatement(InstanceItems::pages, it).withReferenceURL(source) },
+        resolvedISSN?.let { ReferencedValueStatement(InstanceItems::publishedIn, it).withReferenceURL(source) },
+    ) + authorsStatements()
 
     /**
      * Generate a list of authors statements
@@ -127,7 +134,19 @@ data class WDArticle(
         require(doi != null) { "The DOI cannot be null" }
 
         val output = try {
-            wdFinder.crossRefConnector.workFromDOI(doi)
+            tryCount<WorkResponse>(
+                listExceptions = listOf(
+                    MediaWikiApiErrorException::class,
+                    IOException::class,
+                    TimeoutCancellationException::class,
+                    MaxlagErrorException::class,
+                    UnManagedReturnCode::class
+                ),
+                delayMilliSeconds = 30_000L,
+                maxRetries = 10
+            ) {
+                wdFinder.crossRefConnector.workFromDOI(doi)
+            }
         } catch (e: NonExistent) {
             logger.error("We couldn't find anything about the article with the DOI $doi in CrossREF")
             return
@@ -140,9 +159,10 @@ data class WDArticle(
         }
         val entryType = message.type
         type = if (entryType == "journal-article") InstanceItems::scholarlyArticle else InstanceItems::publication
-        title = message.title?.first()
+        val newTitle = message.title?.firstOrNull()?.titleCleaner()
+        title = newTitle ?: title
         label = title?.take(MAXIMUM_LABEL_LENGTH) ?: doi
-        issn = message.issn?.first()
+        issn = message.issn?.firstOrNull()
         if (issn != null) resolveISSN(wdFinder, instanceItems)
         publicationDate = message.created?.datetime?.let { OffsetDateTime.parse(it) }
         if (message.issue != "") issue = message.issue

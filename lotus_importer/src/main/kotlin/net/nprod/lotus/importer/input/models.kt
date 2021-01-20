@@ -88,11 +88,6 @@ data class Reference(
     val pmid: String
 ) : Indexable
 
-fun String.ifEqualReplace(search: String, replaceBy: String): String {
-    if (this == search) return replaceBy
-    return this
-}
-
 fun String.ifEqualReplaceByNull(search: String): String? {
     if (this == search) return null
     return this

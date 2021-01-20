@@ -7,17 +7,18 @@
 
 package net.nprod.lotus.importer.processing
 
-import net.nprod.lotus.importer.input.DataTotal
 import io.ktor.util.KtorExperimentalAPI
 import net.nprod.lotus.chemistry.smilesToCanonical
 import net.nprod.lotus.chemistry.smilesToFormula
 import net.nprod.lotus.chemistry.subscriptFormula
+import net.nprod.lotus.importer.input.DataTotal
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
 import net.nprod.lotus.wdimport.wd.models.entries.WDCompound
 import net.nprod.lotus.wdimport.wd.publishing.IPublisher
 import net.nprod.lotus.wdimport.wd.sparql.InChIKey
 import org.apache.logging.log4j.LogManager
+import org.openscience.cdk.exception.InvalidSmilesException
 import kotlin.time.ExperimentalTime
 
 /** Labels are limited to 250 on WikiData **/
@@ -49,13 +50,24 @@ fun DataTotal.processCompounds(
         logger.info("Compound with name ${compound.name} $idx/$count")
         val compoundName = if (compound.name.length < MAXIMUM_COMPOUND_NAME_LENGTH) compound.name else compound.inchikey
         val isomericSMILES = if (compound.atLeastSomeStereoDefined) compound.smiles else null
+        val smiles = compound.smiles.replace("\n", "")
         val wdcompound = WDCompound(
             label = compoundName,
             inChIKey = compound.inchikey,
             inChI = if (compound.inchi.length < MAXIMUM_INCHI_LENGTH) compound.inchi else null,
             isomericSMILES = isomericSMILES,
-            canonicalSMILES = smilesToCanonical(compound.smiles),
-            chemicalFormula = subscriptFormula(smilesToFormula(compound.smiles)),
+            canonicalSMILES = try {
+                smilesToCanonical(smiles)
+            } catch (e: InvalidSmilesException) {
+                logger.error("Invalid smiles exception: ${e.message}")
+                ""
+            },
+            chemicalFormula = try {
+                subscriptFormula(smilesToFormula(smiles))
+            } catch (e: InvalidSmilesException) {
+                logger.error("Invalid smiles exception cannot make a formula: ${e.message}")
+                ""
+            },
             iupac = compound.iupac,
             undefinedStereocenters = compound.unspecifiedStereocenters
         ).tryToFind(wdFinder, instanceItems, wikidataCompoundCache)
@@ -82,3 +94,4 @@ fun DataTotal.processCompounds(
         publisher.publish(wdcompound, "upserting compound")
     }
 }
+

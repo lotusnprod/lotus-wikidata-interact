@@ -34,7 +34,7 @@ class WDSparql(override val instanceItems: InstanceItems) : Resolver, ISparql {
         return repository.connection.use {
             tryCount<TupleQueryResult>(
                 listOf(QueryEvaluationException::class, TimeoutCancellationException::class),
-                delayMilliSeconds = 10_000L
+                delayMilliSeconds = 30_000L
             ) {
                 it.prepareTupleQuery(query).evaluate()
             }.use { result ->

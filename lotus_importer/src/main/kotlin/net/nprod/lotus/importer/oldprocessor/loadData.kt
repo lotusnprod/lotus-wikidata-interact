@@ -8,13 +8,13 @@
 package net.nprod.lotus.importer.oldprocessor
 
 import net.nprod.lotus.helpers.GZIPReader
+import net.nprod.lotus.helpers.ifEqualReplace
 import net.nprod.lotus.importer.input.Compound
 import net.nprod.lotus.importer.input.DataTotal
 import net.nprod.lotus.importer.input.Database
 import net.nprod.lotus.importer.input.Organism
 import net.nprod.lotus.importer.input.Quad
 import net.nprod.lotus.importer.input.Reference
-import net.nprod.lotus.importer.input.ifEqualReplace
 import net.nprod.lotus.importer.parseTSVFile
 import org.apache.logging.log4j.LogManager
 import java.io.BufferedReader

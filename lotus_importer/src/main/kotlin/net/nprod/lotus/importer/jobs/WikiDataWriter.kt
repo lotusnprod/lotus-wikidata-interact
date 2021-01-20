@@ -17,9 +17,11 @@ import net.nprod.lotus.wdimport.wd.publishing.WDPublisher
 import net.nprod.lotus.wdimport.wd.query.WDKT
 import net.nprod.lotus.wdimport.wd.sparql.InChIKey
 import net.nprod.lotus.wdimport.wd.sparql.WDSparql
+import org.openscience.cdk.exception.InvalidSmilesException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.batch.item.ItemWriter
+import org.wikidata.wdtk.wikibaseapi.apierrors.TokenErrorException
 import kotlin.time.ExperimentalTime
 
 @ExperimentalTime
@@ -39,9 +41,17 @@ class WikiDataWriter : ItemWriter<DataTotal> {
     }
 
     override fun write(items: MutableList<out DataTotal>) {
-        publisher.connect()
+        publisher.disconnect() // Lets try that to avoid the CSRF errorsdis
+
         items.forEach {
-            process(it)
+            try { // We will retry once if we have a CSRF or a token error
+                publisher.connect()
+                process(it)
+            } catch (e: TokenErrorException) {
+                publisher.disconnect() // Lets try that to avoid the CSRF errorsdis
+                publisher.connect()
+                process(it)
+            }
         }
     }
 }

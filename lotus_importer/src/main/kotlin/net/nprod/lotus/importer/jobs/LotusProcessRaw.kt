@@ -7,13 +7,14 @@
 
 package net.nprod.lotus.importer.jobs
 
+import net.nprod.lotus.helpers.ifEqualReplace
+import net.nprod.lotus.helpers.titleCleaner
 import net.nprod.lotus.importer.input.Compound
 import net.nprod.lotus.importer.input.DataTotal
 import net.nprod.lotus.importer.input.Database
 import net.nprod.lotus.importer.input.Organism
 import net.nprod.lotus.importer.input.Quad
 import net.nprod.lotus.importer.input.Reference
-import net.nprod.lotus.importer.input.ifEqualReplace
 import net.nprod.lotus.importer.oldprocessor.InvalidEntryDataException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -75,9 +76,10 @@ class LotusProcessRaw : ItemProcessor<List<LotusRawTSV>, DataTotal> {
 
                     val referenceObj = with(lotusRaw.reference) {
                         dataTotal.referenceCache.getOrNew(doi) {
+                            val title = title.titleCleaner()
                             Reference(
                                 doi = doi,
-                                title = title.ifEqualReplace("NA", ""),
+                                title = title,
                                 pmcid = pmcid.ifEqualReplace("NA", ""),
                                 pmid = pmid.ifEqualReplace("NA", "")
                             )

@@ -39,7 +39,7 @@ class UnivocityBasedReader<T>(private val f: (com.univocity.parsers.common.recor
         settingsParser.isAutoClosingEnabled = false
         maxItemCount?.let { settingsParser.numberOfRecordsToRead = it }
         settingsParser.isHeaderExtractionEnabled = true
-        bufferedReader = tryGzipThenNormal("data/platinum.tsv.gz")
+        bufferedReader = tryGzipThenNormal("data/sorted_platinum.tsv")
         tsvParser = bufferedReader?.let { reader ->
             TsvParser(settingsParser).also { parser ->
                 parser.beginParsing(reader)

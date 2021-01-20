@@ -25,6 +25,7 @@ import org.wikidata.wdtk.wikibaseapi.ApiConnection
 import org.wikidata.wdtk.wikibaseapi.BasicApiConnection
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataEditor
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher
+import org.wikidata.wdtk.wikibaseapi.apierrors.MaxlagErrorException
 import org.wikidata.wdtk.wikibaseapi.apierrors.MediaWikiApiErrorException
 import java.io.IOException
 import java.net.ConnectException
@@ -49,6 +50,8 @@ typealias Milliseconds = Long
  *
  * @param instanceItems a reference to the items of that instance
  * @param pause pause between each publication in milliseconds
+ *
+ * We need to find a way to reconnect when receiving org.wikidata.wdtk.wikibaseapi.apierrors.TokenErrorException
  */
 class WDPublisher(override val instanceItems: InstanceItems, val pause: Milliseconds = 0L) : Resolver, IPublisher {
     private val userAgent = "Wikidata Toolkit EditOnlineDataExample"
@@ -81,7 +84,11 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
         @Suppress("DEPRECATION")
         connection?.login(user, password) ?: throw ConnectException("Impossible to connect to the WikiData instance.")
         logger.info("Connecting to the editor with siteIri: ${instanceItems.siteIri}")
-        editor = WikibaseDataEditor(connection, instanceItems.siteIri).also { it.setEditAsBot(true) }
+        editor = WikibaseDataEditor(connection, instanceItems.siteIri).also {
+            it.setEditAsBot(true)
+            it.maxLagFirstWaitTime = 10_000
+            it.maxLagBackOffFactor = 2.0
+        }
         logger.info("Connecting to the fetcher")
         fetcher = WikibaseDataFetcher(connection, instanceItems.siteIri).also {
             it.filter.excludeAllProperties()
@@ -171,7 +178,8 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
                     listExceptions = listOf(
                         MediaWikiApiErrorException::class,
                         IOException::class,
-                        TimeoutCancellationException::class
+                        TimeoutCancellationException::class,
+                        MaxlagErrorException::class
                     ),
                     delayMilliSeconds = 30_000L,
                     maxRetries = 10
