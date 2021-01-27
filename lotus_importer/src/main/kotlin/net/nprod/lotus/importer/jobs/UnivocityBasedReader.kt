@@ -7,8 +7,9 @@
 
 package net.nprod.lotus.importer.jobs
 
+import com.univocity.parsers.csv.CsvParser
+import com.univocity.parsers.csv.CsvParserSettings
 import com.univocity.parsers.tsv.TsvParser
-import com.univocity.parsers.tsv.TsvParserSettings
 import net.nprod.lotus.helpers.GZIPReader
 import org.springframework.batch.core.StepExecution
 import org.springframework.batch.core.annotation.BeforeStep
@@ -28,20 +29,22 @@ fun tryGzipThenNormal(fileName: String): BufferedReader = try {
 
 class UnivocityBasedReader<T>(private val f: (com.univocity.parsers.common.record.Record) -> T) :
     ResourceAwareItemReaderItemStream<List<T>>, ItemStreamReader<List<T>> {
-    private var tsvParser: TsvParser? = null
+    private var csvParser: CsvParser? = null
     private var skip: Int? = null
     private var maxItemCount: Long? = null
     private var bufferedReader: BufferedReader? = null
 
     override fun open(executionContext: ExecutionContext) {
-        val settingsParser = TsvParserSettings()
+        val settingsParser = CsvParserSettings()
         settingsParser.format.setLineSeparator("\n")
+        settingsParser.format.setDelimiter("\t")
         settingsParser.isAutoClosingEnabled = false
-        maxItemCount?.let { settingsParser.numberOfRecordsToRead = it }
+        maxItemCount?.let { settingsParser.numberOfRecordsToRead = it + (skip ?: 0) }
         settingsParser.isHeaderExtractionEnabled = true
+
         bufferedReader = tryGzipThenNormal("data/sorted_platinum.tsv")
-        tsvParser = bufferedReader?.let { reader ->
-            TsvParser(settingsParser).also { parser ->
+        csvParser = bufferedReader?.let { reader ->
+            CsvParser(settingsParser).also { parser ->
                 parser.beginParsing(reader)
                 skip?.let { repeat(it) { parser.parseNextRecord() } }
             }
@@ -53,16 +56,16 @@ class UnivocityBasedReader<T>(private val f: (com.univocity.parsers.common.recor
     }
 
     override fun close() {
-        tsvParser?.stopParsing()
+        csvParser?.stopParsing()
         bufferedReader?.close()
     }
 
     override fun read(): List<T>? {
         val list = mutableListOf<T>()
-        if (tsvParser?.context?.isStopped == true) return null
+        if (csvParser?.context?.isStopped == true) return null
         while (true) {
-            if (tsvParser?.context?.isStopped == true) return list
-            val record: com.univocity.parsers.common.record.Record = tsvParser?.parseNextRecord() ?: return list
+            if (csvParser?.context?.isStopped == true) return list
+            val record: com.univocity.parsers.common.record.Record = csvParser?.parseNextRecord() ?: return list
             list.add(f(record))
         }
     }
