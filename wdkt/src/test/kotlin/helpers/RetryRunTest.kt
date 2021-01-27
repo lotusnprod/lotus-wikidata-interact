@@ -12,7 +12,7 @@ internal class RetryRunTest {
     fun `should fail immediately if it is not the checked exception`() {
         var counter = 0
         assertThrows(UnexpectedError::class.java) {
-            tryCount<Unit>(listOf(ExpectedError::class)) {
+            tryCount<Unit>(listOf(ExpectedError::class),) {
                 counter += 1
                 throw UnexpectedError()
             }
@@ -24,7 +24,7 @@ internal class RetryRunTest {
     fun `should fail after 3 runs if it is the checked exception`() {
         var counter = 0
         assertThrows(ExpectedError::class.java) {
-            tryCount<Unit>(listOf(ExpectedError::class)) {
+            tryCount<Unit>(listOf(ExpectedError::class),) {
                 counter += 1
                 throw ExpectedError()
             }
@@ -37,7 +37,7 @@ internal class RetryRunTest {
     fun `we get the output of the function`() {
         var touched = false
 
-        touched = tryCount(listOf(ExpectedError::class)) {
+        touched = tryCount(listOf(ExpectedError::class),) {
             true
         }
 

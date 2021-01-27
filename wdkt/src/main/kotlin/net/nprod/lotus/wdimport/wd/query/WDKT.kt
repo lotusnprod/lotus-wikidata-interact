@@ -54,7 +54,8 @@ class WDKT : IWDKT {
             }
 
         return tryCount(
-            listOf(SerializationException::class),
+            // no choice here, it is internal
+            listNamedExceptions = listOf("kotlinx.serialization.json.internal.JsonDecodingException"),
             maxRetries = 10,
             delayMilliSeconds = 10_000L,
             logger = logger

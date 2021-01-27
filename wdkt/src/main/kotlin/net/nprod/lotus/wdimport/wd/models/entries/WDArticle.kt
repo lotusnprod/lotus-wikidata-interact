@@ -142,8 +142,8 @@ data class WDArticle(
                     MaxlagErrorException::class,
                     UnManagedReturnCode::class
                 ),
-                delayMilliSeconds = 30_000L,
-                maxRetries = 10
+                maxRetries = 10,
+                delayMilliSeconds = 30_000L
             ) {
                 wdFinder.crossRefConnector.workFromDOI(doi)
             }

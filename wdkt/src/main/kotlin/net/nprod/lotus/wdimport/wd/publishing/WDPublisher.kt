@@ -155,8 +155,8 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
                         IOException::class,
                         TimeoutCancellationException::class
                     ),
-                    delayMilliSeconds = 30_000L,
-                    maxRetries = 10
+                    maxRetries = 10,
+                    delayMilliSeconds = 30_000L
                 ) { // Sometimes it needs time to let the DB recover
                     editor?.createItemDocument(document, summary, null)
                         ?: throw InternalException("There is no editor anymore")
@@ -182,8 +182,8 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
                         TimeoutCancellationException::class,
                         MaxlagErrorException::class
                     ),
-                    delayMilliSeconds = 30_000L,
-                    maxRetries = 10
+                    maxRetries = 10,
+                    delayMilliSeconds = 30_000L
                 ) { // Sometimes it needs time to let the DB recover
                     // We update the existing statements
                     // We send the new statements
