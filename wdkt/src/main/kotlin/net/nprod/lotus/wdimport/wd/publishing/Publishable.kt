@@ -169,6 +169,13 @@ abstract class Publishable {
             value?.let {
                 constructStatement(statement, value, instanceItems, existingPropertyValueCoupleToReferencesIds)
             }
+        }.filter { stmt ->
+            stmt.statementId !in existingStatements.map{ it.statementId } || stmt.references.any {
+                val existingReferences =
+                    (existingStatements.firstOrNull { stmt.statementId == it.statementId })?.references?.map { it.hash }
+                        ?: listOf()
+                it.hash !in existingReferences
+            }
         }
     }
 
