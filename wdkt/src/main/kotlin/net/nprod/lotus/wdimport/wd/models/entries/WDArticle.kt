@@ -140,7 +140,8 @@ data class WDArticle(
                     IOException::class,
                     TimeoutCancellationException::class,
                     MaxlagErrorException::class,
-                    UnManagedReturnCode::class
+                    UnManagedReturnCode::class,
+                    io.ktor.network.sockets.ConnectTimeoutException::class
                 ),
                 maxRetries = 10,
                 delayMilliSeconds = 30_000L
