@@ -7,9 +7,9 @@
 
 package net.nprod.lotus.importer.processing
 
+import io.ktor.util.KtorExperimentalAPI
 import net.nprod.lotus.importer.input.DataTotal
 import net.nprod.lotus.importer.input.Reference
-import io.ktor.util.KtorExperimentalAPI
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
 import net.nprod.lotus.wdimport.wd.models.entries.WDArticle
@@ -24,6 +24,7 @@ class ReferenceProcessor(
     val instanceItems: InstanceItems
 ) {
     private val logger = LogManager.getLogger(ReferenceProcessor::class)
+
     @ExperimentalTime
     private val articlesCache: MutableMap<Reference, WDArticle> = mutableMapOf()
 
@@ -35,7 +36,12 @@ class ReferenceProcessor(
             title = reference.title,
             doi = reference.doi.toUpperCase(), // DOIs are always uppercase but in reality we see both
         ).tryToFind(wdFinder, instanceItems)
-        article.populateFromCrossREF(wdFinder, instanceItems)
+
+        // Get the article info on crossref if needed
+        if (article.authors.isNullOrEmpty()) {
+            article.populateFromCrossREF(wdFinder, instanceItems)
+        }
+
         publisher.publish(article, "upserting article")
         return article
     }
