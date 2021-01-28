@@ -38,7 +38,15 @@ class ReferenceProcessor(
         ).tryToFind(wdFinder, instanceItems)
 
         // Get the article info on crossref if needed
-        if (article.authors.isNullOrEmpty()) {
+        val hasAuthorsAlready = wdFinder.sparql.askQuery(
+            """
+                ASK {
+                  <${article.id.iri}> <${instanceItems.author.iri}> ?o.
+                }
+            """.trimIndent()
+        )
+
+        if (!hasAuthorsAlready) {
             article.populateFromCrossREF(wdFinder, instanceItems)
         }
 

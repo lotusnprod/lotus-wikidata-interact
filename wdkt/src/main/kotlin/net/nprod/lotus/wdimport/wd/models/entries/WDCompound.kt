@@ -93,7 +93,7 @@ data class WDCompound(
             }
                 """.trimIndent()
 
-            wdFinder.sparql.query(query) { result ->
+            wdFinder.sparql.selectQuery(query) { result ->
                 result.map { bindingSet ->
                     bindingSet.getValue("id").stringValue().replace(instanceItems.wdURI, "")
                 }

@@ -30,7 +30,7 @@ class WDSparql(override val instanceItems: InstanceItems) : Resolver, ISparql {
         )
     }
 
-    override fun <T> query(query: String, function: (TupleQueryResult) -> T): T {
+    override fun <T> selectQuery(query: String, function: (TupleQueryResult) -> T): T {
         return repository.connection.use {
             tryCount<TupleQueryResult>(
                 listOf(QueryEvaluationException::class, TimeoutCancellationException::class),
@@ -39,6 +39,17 @@ class WDSparql(override val instanceItems: InstanceItems) : Resolver, ISparql {
                 it.prepareTupleQuery(query).evaluate()
             }.use { result ->
                 function(result)
+            }
+        }
+    }
+
+    override fun askQuery(query: String): Boolean {
+        return repository.connection.use {
+            tryCount(
+                listOf(QueryEvaluationException::class, TimeoutCancellationException::class),
+                delayMilliSeconds = 30_000L
+            ) {
+                it.prepareBooleanQuery(query).evaluate()
             }
         }
     }

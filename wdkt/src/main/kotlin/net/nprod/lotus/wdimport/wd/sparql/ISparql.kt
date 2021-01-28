@@ -17,12 +17,19 @@ import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
  */
 interface ISparql : Resolver {
     /**
-     * Run that query and apply a given function to each result
+     * Run that SELECT query and apply a given function to each result
      *
      * @param query SPARQL query
      * @param function the function to be run for each result
      */
-    fun <T> query(query: String, function: (TupleQueryResult) -> T): T
+    fun <T> selectQuery(query: String, function: (TupleQueryResult) -> T): T
+
+    /**
+     * Run that ASK query and get the result back as a Boolean
+     *
+     * @param query SPARQL query
+     */
+    fun askQuery(query: String): Boolean
 
     /**
      * @param property The property in WikiData (e.g. P123)
@@ -51,7 +58,7 @@ interface ISparql : Resolver {
             }
                 """.trimIndent()
 
-            this.query(query) { result ->
+            this.selectQuery(query) { result ->
                 result.map { bindingSet ->
                     (bindingSet.getValue("value").stringValue()) to
                         bindingSet.getValue("id").stringValue()

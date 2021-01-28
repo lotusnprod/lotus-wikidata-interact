@@ -57,7 +57,7 @@ data class WDTaxon(
  }
             """.trimIndent()
 
-        val results = sparql.query(query) { result ->
+        val results = sparql.selectQuery(query) { result ->
             result.map { bindingSet ->
                 bindingSet.getValue("id").stringValue().replace(instanceItems.wdURI, "")
             }

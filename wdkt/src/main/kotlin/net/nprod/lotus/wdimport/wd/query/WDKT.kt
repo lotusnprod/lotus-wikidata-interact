@@ -20,6 +20,7 @@ import net.nprod.lotus.helpers.tryCount
 import net.nprod.lotus.wdimport.wd.MainInstanceItems
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
 import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue
 
 /**
