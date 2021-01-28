@@ -75,21 +75,24 @@ fun DataTotal.processCompounds(
         logger.info(wdcompound)
 
         wdcompound.apply {
-            this@processCompounds.quads.filter { it.compound == compound }.distinct().forEach { quad ->
-                logger.info("Ok lets go for a quad: $quad")
-                try {
-                    val organism = taxonProcessor.get(quad.organism)
-                    logger.info(" Found organism $organism")
-
-                    foundInTaxon(
-                        organism
-                    ) {
-                        statedIn(referenceProcessor.get(quad.reference).id)
+            this@processCompounds.quads.filter { it.compound == compound }.distinct().groupBy { it.organism }
+                .forEach { (organism, quads) ->
+                    try {
+                        val taxon = taxonProcessor.get(organism)
+                        logger.info(" Found taxon $taxon")
+                        taxon?.let {
+                            foundInTaxon(
+                                taxon
+                            ) {
+                                quads.map {
+                                    statedIn(referenceProcessor.get(it.reference).id)
+                                }
+                            }
+                        }
+                    } catch (e: InvalidTaxonName) {
+                        logger.error(" ERROR: Couldn't a good database for the organism: ${organism.name}")
                     }
-                } catch (e: InvalidTaxonName) {
-                    logger.error(" ERROR: Couldn't a good database for the organism: ${quad.organism.name}")
                 }
-            }
         }
         publisher.publish(wdcompound, "upserting compound")
     }
