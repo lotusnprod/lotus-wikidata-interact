@@ -64,6 +64,7 @@ class JobConfiguration {
             factory.afterPropertiesSet()
             return factory.getObject() as JobRepository
         }
+
     private val transactionManager: PlatformTransactionManager = ResourcelessTransactionManager()
 
     @Bean

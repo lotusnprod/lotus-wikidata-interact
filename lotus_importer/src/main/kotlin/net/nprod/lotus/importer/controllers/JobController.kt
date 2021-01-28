@@ -13,6 +13,7 @@ import org.springframework.batch.core.BatchStatus
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.JobExecution
 import org.springframework.batch.core.JobParametersBuilder
+import org.springframework.batch.core.explore.JobExplorer
 import org.springframework.batch.core.launch.JobLauncher
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Controller
@@ -47,9 +48,23 @@ data class JobData(
 class JobController constructor(
     val lotusImportJob: LotusImportJob,
     @Qualifier("asyncJobLauncher") val jobLauncher: JobLauncher,
-    @Qualifier("newJob") val job: Job
+    @Qualifier("newJob") val job: Job,
+    val jobExplorer: JobExplorer
 ) {
     private var lastJob: JobExecution? = null
+
+    @GetMapping("/jobs", produces = ["application/json"])
+    @ResponseBody
+    fun getJobs(): String {
+        val jobNames = jobExplorer.jobNames.toList()
+        return jobNames.flatMap<String?, String> {
+            jobExplorer.getJobInstances(it, 0, 10).flatMap {
+                jobExplorer.getJobExecutions(it).map {
+                    "id: ${it.jobId} create time: ${it.createTime} running: ${it.isRunning} exit Status ${it.exitStatus}"
+                }
+            }
+        }.joinToString("|")
+    }
 
     @GetMapping("/jobs/import/request", produces = ["application/json"])
     @ResponseBody
