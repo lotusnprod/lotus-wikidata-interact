@@ -55,7 +55,7 @@ typealias Milliseconds = Long
  */
 class WDPublisher(override val instanceItems: InstanceItems, val pause: Milliseconds = 0L) : Resolver, IPublisher {
     private val userAgent = "Wikidata Toolkit EditOnlineDataExample"
-    private val logger: Logger = LogManager.getLogger(WDPublisher::class)
+    private val logger: Logger = LogManager.getLogger(WDPublisher::class.java)
     private var user: String? = null
     private var password: String? = null
     private var connection: ApiConnection? = null
