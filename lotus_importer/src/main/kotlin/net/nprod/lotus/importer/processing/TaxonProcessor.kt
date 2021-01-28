@@ -49,15 +49,21 @@ val LIST_OF_ACCEPTED_DBS: Array<String> = arrayOf(
     "iNaturalist"
 )
 
+/**
+ * Process the Taxa, it will take the best database and use this taxon for the given entries.
+ * 
+ * @param createNew set to true if taxa have to be created
+ */
 class TaxonProcessor(
     val dataTotal: DataTotal,
     val publisher: IPublisher,
     val wdFinder: WDFinder,
     val instanceItems: InstanceItems,
+    val createNew: Boolean = false,
 ) {
     val logger: Logger = LogManager.getLogger(TaxonProcessor::class.qualifiedName)
-    val organismCache: MutableMap<Organism, WDTaxon> = mutableMapOf()
-    fun taxonFromOrganism(organism: Organism): WDTaxon {
+    val organismCache: MutableMap<Organism, WDTaxon?> = mutableMapOf()
+    fun taxonFromOrganism(organism: Organism): WDTaxon? {
         logger.debug("Organism Ranks and Ids: ${organism.rankIds}")
 
         // We are going to go over this list of DBs, by order of trust and check if we have taxon info in them
@@ -65,9 +71,8 @@ class TaxonProcessor(
 
         // If we have no entry we would have exited already with a InvalidTaxonName exception
         var taxon: WDTaxon? = null
-
-        acceptedRanks.forEach {
-            taxon?.let { if (!it.published) publisher.publish(it, "Created a missing taxon") }
+        acceptedRanks.reversed().forEach {
+            taxon?.let { return@forEach } // We skip all if we found one
             val tax = WDTaxon(
                 label = it.value,
                 parentTaxon = taxon?.id,
@@ -75,6 +80,16 @@ class TaxonProcessor(
                 taxonRank = it.instanceItem
             ).tryToFind(wdFinder, instanceItems)
             taxon = tax
+        }
+
+        taxon?.let {
+            if (!it.published) {
+                if (createNew) {
+                    publisher.publish(it, "Created a missing taxon")
+                } else {
+                    return null
+                }
+            }
         }
 
         val finalTaxon = taxon
@@ -142,5 +157,5 @@ class TaxonProcessor(
      *
      * @throws InvalidTaxonName when the taxon cannot be found in any database
      */
-    fun get(key: Organism): WDTaxon = organismCache.getOrPut(key) { taxonFromOrganism(key) }
+    fun get(key: Organism): WDTaxon? = organismCache.getOrPut(key) { taxonFromOrganism(key) }
 }
