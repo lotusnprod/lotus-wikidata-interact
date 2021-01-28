@@ -99,6 +99,7 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
     }
 
     override fun disconnect() {
+        connection?.clearCookies() // Clear to avoid CSRF errors
         connection?.logout()
     }
 
@@ -162,7 +163,6 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
                         ?: throw InternalException("There is no editor anymore")
                 }
 
-
             val itemId = newItemDocument.entityId
             publishedDocumentsIds.add(itemId.iri)
             logger.info("New document ${itemId.id} - Summary: $summary")
@@ -170,10 +170,14 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
             publishable.publishedAs(itemId)
         } else { // The publishable is already existing, this means we only have to update the statements
             updatedDocuments++
-            logger.info("Updated document ${publishable.id} - Summary: $summary")
 
             val statements = publishable.listOfResolvedStatements(fetcher, instanceItems)
 
+            logger.info("Updated document ${publishable.id} - Summary: $summary - Statements: ${statements.size}")
+            logger.info("Statements: ")
+            statements.forEach {
+                logger.info("  $it")
+            }
             if (statements.isNotEmpty()) {
                 tryCount<Unit>(
                     listExceptions = listOf(
@@ -194,6 +198,7 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
                         "Updating the statements",
                         listOf()
                     )
+                    //logger.error("We are not publishing something is wrong!")
                 }
             }
             publishedDocumentsIds.add(publishable.id.iri)

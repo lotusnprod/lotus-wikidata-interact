@@ -41,14 +41,14 @@ class WikiDataWriter : ItemWriter<DataTotal> {
     }
 
     override fun write(items: MutableList<out DataTotal>) {
-        publisher.disconnect() // Lets try that to avoid the CSRF errorsdis
+        publisher.disconnect() // Lets try that to avoid the CSRF errors
 
         items.forEach {
             try { // We will retry once if we have a CSRF or a token error
                 publisher.connect()
                 process(it)
             } catch (e: TokenErrorException) {
-                publisher.disconnect() // Lets try that to avoid the CSRF errorsdis
+                publisher.disconnect() // Lets try that to avoid the CSRF errors
                 publisher.connect()
                 process(it)
             }
