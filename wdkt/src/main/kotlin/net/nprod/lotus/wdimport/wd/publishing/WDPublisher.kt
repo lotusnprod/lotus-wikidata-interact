@@ -174,10 +174,7 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
             val statements = publishable.listOfResolvedStatements(fetcher, instanceItems)
 
             logger.info("Updated document ${publishable.id} - Summary: $summary - Statements: ${statements.size}")
-            logger.info("Statements: ")
-            statements.forEach {
-                logger.info("  $it")
-            }
+
             if (statements.isNotEmpty()) {
                 tryCount<Unit>(
                     listExceptions = listOf(
@@ -198,7 +195,6 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
                         "Updating the statements",
                         listOf()
                     )
-                    //logger.error("We are not publishing something is wrong!")
                 }
             }
             publishedDocumentsIds.add(publishable.id.iri)
