@@ -86,7 +86,11 @@ class LotusProcessRaw : ItemProcessor<List<LotusRawTSV>, DataTotal> {
                         }
                     }
 
-                    dataTotal.quads.add(Quad(databaseObj, organismObj, compoundObj, referenceObj))
+                    /**
+                     * We had a bug where we matched all the NA to a single article
+                     */
+                    if (referenceObj.doi != "NA")
+                        dataTotal.quads.add(Quad(databaseObj, organismObj, compoundObj, referenceObj))
                 } catch (e: InvalidEntryDataException) {
                     logger.error(e.toString())
                     throw RuntimeException("It works")

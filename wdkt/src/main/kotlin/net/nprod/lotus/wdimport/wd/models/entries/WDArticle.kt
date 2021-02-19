@@ -132,7 +132,7 @@ data class WDArticle(
     @KtorExperimentalAPI
     fun populateFromCrossREF(wdFinder: WDFinder, instanceItems: InstanceItems) {
         require(doi != null) { "The DOI cannot be null" }
-
+        logger.info("Looking on CrossREF for $doi")
         val output = try {
             tryCount<WorkResponse>(
                 listExceptions = listOf(
