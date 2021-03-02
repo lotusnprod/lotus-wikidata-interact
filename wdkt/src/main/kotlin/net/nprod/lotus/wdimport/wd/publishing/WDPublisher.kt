@@ -59,10 +59,10 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
     private var user: String? = null
     private var password: String? = null
     private var connection: ApiConnection? = null
-    private var editor: WikibaseDataEditor? = null
     override var newDocuments: Int = 0
     override var updatedDocuments: Int = 0
-    private var fetcher: WikibaseDataFetcher? = null
+    var fetcher: WikibaseDataFetcher? = null
+    var editor: WikibaseDataEditor? = null
 
     private val publishedDocumentsIds: MutableSet<String> = mutableSetOf()
 
