@@ -1,0 +1,5 @@
+#!WDDEFAULTIMPORTS
+SELECT ?inchikeys
+{
+    ?compound wdt:P235 ?inchikeys.
+}

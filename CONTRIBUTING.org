@@ -1,0 +1,5 @@
+* To contribute
+
+The easiest is probably to make issues and pull-requests on GitHub.
+
+If you made a change in the code, you will have to update the license of the file to add your name.

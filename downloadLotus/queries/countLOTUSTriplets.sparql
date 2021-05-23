@@ -1,0 +1,16 @@
+#!WDDEFAULTIMPORTS
+SELECT
+   ( COUNT( DISTINCT * ) AS ?HowManyTriples )
+WHERE
+  {
+    {
+      SELECT
+         DISTINCT  ?compound_id ?taxon_id ?reference_id
+        WHERE {
+            VALUES ?type { wd:Q11173 wd:Q43460564 wd:Q59199015 } # chemical entity or group of stereoisomers
+            ?compound_id wdt:P703 ?taxon_id;
+                         wdt:P31 ?type;
+                         p:P703/prov:wasDerivedFrom/pr:P248 ?reference_id.
+        }
+      }
+    }

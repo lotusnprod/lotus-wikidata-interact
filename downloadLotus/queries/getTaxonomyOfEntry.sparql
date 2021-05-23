@@ -1,0 +1,14 @@
+#!WDDEFAULTIMPORTS
+
+SELECT DISTINCT ?taxoid ?name ?rank ?parentrank ?parentname ?parent
+WHERE {
+    VALUES ?taxoid { wd:Q335130 }
+    ?taxoid ?p ?o.
+    ?taxoid wdt:P171* ?parent;
+            wdt:P225 ?name;
+            wdt:P105 ?rank.
+    ?parent wdt:P225 ?parentname;
+            wdt:P105/rdfs:label ?parentrank.
+
+    FILTER (LANG(?parentrank) = "en")
+}

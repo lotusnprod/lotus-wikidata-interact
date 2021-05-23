@@ -1,0 +1,13 @@
+#!WDDEFAULTIMPORTS
+SELECT DISTINCT ?compound ?compound_inchi ?compound_inchikey ?taxon ?taxon_name ?reference ?reference_doi  WHERE {
+  ?compound wdt:P235 ?compound_inchikey;
+             p:P703 [
+               ps:P703 ?taxon ;
+                       prov:wasDerivedFrom / pr:P248 [
+                         wdt:P356 ?reference_doi
+                       ]
+             ] .
+  ?compound wdt:P234 ?compound_inchi.
+  ?taxon wdt:P225 ?taxon_name.
+  ?reference wdt:P356 ?reference_doi.
+}

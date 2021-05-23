@@ -1,0 +1,12 @@
+#!WDDEFAULTIMPORTS
+SELECT ?article ?doi
+{
+    {
+        ?article wdt:P31    wd:Q13442814; # article
+                 wdt:P356   ?doi.
+    } MINUS {
+        ?article wdt:P1433 ?something.
+    } MINUS {
+        ?article wdt:P478 ?something.
+    }
+}

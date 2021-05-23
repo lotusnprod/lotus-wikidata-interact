@@ -1,0 +1,12 @@
+#!WDDEFAULTIMPORTS
+SELECT ?id ?taxo ?canonicalSmiles ?isomericSmiles ?inchi ?inchiKey ?reference
+
+WHERE {
+    ?id   wdt:P31 ?thingy;
+          wdt:P703 ?taxo;
+          wdt:P233 ?canonicalSmiles;
+          wdt:P2017 ?isomericSmiles;
+          wdt:P234 ?inchi;
+          wdt:P235 ?inchiKey;
+          p:P703/prov:wasDerivedFrom/pr:P248 ?reference.
+}

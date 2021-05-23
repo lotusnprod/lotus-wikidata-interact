@@ -11,3 +11,5 @@ local.properties
 /logs/
 /data/*.sqlite
 /data/*.tsv
+/downloadLotus/data/
+/data/

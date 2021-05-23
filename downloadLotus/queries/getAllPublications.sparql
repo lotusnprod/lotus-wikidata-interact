@@ -1,0 +1,6 @@
+#!WDDEFAULTIMPORTS
+SELECT ?publication
+WHERE {
+  ?publication     wdt:P31 ?type.
+  VALUES ?type { wd:Q11173 wd:Q43460564 wd:Q59199015 }
+}
