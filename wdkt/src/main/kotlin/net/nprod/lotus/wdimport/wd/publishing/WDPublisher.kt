@@ -58,7 +58,7 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
     private val logger: Logger = LogManager.getLogger(WDPublisher::class.java)
     private var user: String? = null
     private var password: String? = null
-    private var connection: ApiConnection? = null
+    private var connection: BasicApiConnection? = null
     override var newDocuments: Int = 0
     override var updatedDocuments: Int = 0
     var fetcher: WikibaseDataFetcher? = null

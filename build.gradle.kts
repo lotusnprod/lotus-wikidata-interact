@@ -117,7 +117,7 @@ project(":lotus_importer") {
 
     dependencies {
         implementation("org.springframework.boot:spring-boot-starter") {
-                exclude("org.slf4j", "slf4j-api")
+            exclude("org.slf4j", "slf4j-api")
         }
 
         implementation("org.springframework.boot:spring-boot-starter-batch")

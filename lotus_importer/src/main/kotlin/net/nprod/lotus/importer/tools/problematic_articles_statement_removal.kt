@@ -8,9 +8,7 @@
 package net.nprod.lotus.importer.tools
 
 import net.nprod.lotus.wdimport.wd.MainInstanceItems
-import net.nprod.lotus.wdimport.wd.WDFinder
 import net.nprod.lotus.wdimport.wd.publishing.WDPublisher
-import net.nprod.lotus.wdimport.wd.query.WDKT
 import net.nprod.lotus.wdimport.wd.sparql.WDSparql
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -34,8 +32,7 @@ fun main() {
     val instanceItems = MainInstanceItems
     val publisher = WDPublisher(instanceItems, pause = 0L)
     val wdSparql = WDSparql(instanceItems)
-    val wdFinder = WDFinder(WDKT(), wdSparql)
-    var logger: Logger = LoggerFactory.getLogger("problematic_articles")
+    val logger: Logger = LoggerFactory.getLogger("problematic_articles")
 
     var statements: List<Statement> = listOf()
 
@@ -62,7 +59,7 @@ fun main() {
         }
     }
 
-    println("We have ${statements.size} to go over.")
+    logger.info("We have ${statements.size} to go over.")
 
     publisher.connect()
     statements.groupBy { it.compoundId }.map { (compoundId, listOfqueryStatement) ->
@@ -72,7 +69,9 @@ fun main() {
                 val documentStatements = document.allStatements.iterator().asSequence().toList().filter {
                     it.mainSnak.propertyId.id == "P703"
                 }
-                    .filter { ((it.mainSnak as ValueSnak).value as ItemIdValue).id == queryStatement.taxonId } // filter for the right taxon
+                    .filter {
+                        ((it.mainSnak as ValueSnak).value as ItemIdValue).id == queryStatement.taxonId
+                    } // filter for the right taxon
                     .filter { // filter for the statement that contain our reference
                         it.references.any {
                             it.snakGroups.filter { it.property.id == "P248" }.any {
@@ -82,7 +81,7 @@ fun main() {
                             }
                         }
                     }
-                println("So we have ${documentStatements.size} statements to process for that document")
+                logger.info("So we have ${documentStatements.size} statements to process for that document")
                 // If we have only one ref, we kill the full statement, if not we just kill the ref
                 documentStatements.map {
 
@@ -94,7 +93,7 @@ fun main() {
                             "Cleaning up my mistakes",
                             listOf()
                         ) ?: throw RuntimeException("Editor is not working!")
-                        println(" I deleted this statement")
+                        logger.info(" I deleted this statement")
                     } else {
                         val newRefs = it.references.filter {
                             it.snakGroups.filter { it.property.id == "P248" }.any {
@@ -116,7 +115,7 @@ fun main() {
                             "Cleaning up my mistakes",
                             listOf()
                         ) ?: throw RuntimeException("Editor is not working!")
-                        println(" I delete only the matching ref")
+                        logger.info(" I delete only the matching ref")
                     }
                 }
             }
