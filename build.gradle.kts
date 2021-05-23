@@ -28,8 +28,6 @@ allprojects {
     repositories {
         mavenCentral()
         jcenter()
-        maven("https://kotlin.bintray.com/kotlinx")
-        maven("https://dl.bintray.com/bjonnh/Konnector")
 
         flatDir {
             dirs("./libs")
@@ -121,12 +119,10 @@ project(":lotus_importer") {
         implementation("org.springframework.boot:spring-boot-starter") {
                 exclude("org.slf4j", "slf4j-api")
         }
-        implementation("org.springframework.boot:spring-boot-starter-webflux")
-        implementation("org.springframework.boot:spring-boot-starter-websocket")
+
         implementation("org.springframework.boot:spring-boot-starter-batch")
         implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
         implementation("org.jetbrains.kotlin:kotlin-reflect")
-        runtimeOnly("com.h2database:h2")
         testImplementation("org.springframework.boot:spring-boot-starter-test")
     }
 }
