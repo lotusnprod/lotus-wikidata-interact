@@ -30,8 +30,9 @@ pluginManagement {
     }
 }
 
-rootProject.name = "wdkt"
+rootProject.name = "wikidatainteract"
 
 include("wdkt")
-include("lotus_importer")
-include("publication_importer")
+include("uploadLotus")
+//include("importPublication")
+include("downloadLotus")
