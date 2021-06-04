@@ -177,6 +177,7 @@ project(":uploadLotus") {
         plugin("org.springframework.boot")
         plugin("io.spring.dependency-management")
         plugin("org.jetbrains.kotlin.plugin.spring")
+        plugin("org.jetbrains.kotlin.plugin.serialization")
         plugin("application")
     }
 
@@ -191,8 +192,11 @@ project(":uploadLotus") {
 
         val univocityParserVersion: String by project
         val sqliteJdbcVersion: String by project
+        val serializationVersion: String by project
 
         implementation(project(":wdkt"))
+
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
         implementation("com.univocity:univocity-parsers:$univocityParserVersion")
         implementation("org.xerial:sqlite-jdbc:$sqliteJdbcVersion")
         implementation("org.springframework:spring-jdbc")

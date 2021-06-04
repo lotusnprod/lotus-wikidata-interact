@@ -3,13 +3,17 @@
  *
  * Copyright (c) 2020 Jonathan Bisson
  *
+ * This script is used to clean up entries we added that are listing the wrong article
+ * because it matches an article with a DOI of NA.
  */
 
 package net.nprod.lotus.wikidata.upload.tools.specificArticleRemoval
 
 import net.nprod.lotus.wdimport.wd.MainInstanceItems
+import net.nprod.lotus.wdimport.wd.publishing.InternalException
 import net.nprod.lotus.wdimport.wd.publishing.WDPublisher
 import net.nprod.lotus.wdimport.wd.sparql.WDSparql
+import net.nprod.lotus.wikidata.upload.tools.Statement
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.wikidata.wdtk.datamodel.helpers.StatementBuilder
@@ -17,17 +21,7 @@ import org.wikidata.wdtk.datamodel.interfaces.ItemDocument
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
 import org.wikidata.wdtk.datamodel.interfaces.ValueSnak
 
-/**
- * This script is used to clean up entries we added that are listing the wrong article
- * because it matches an article with a DOI of NA.
- **/
-
-data class Statement(
-    val compoundId: String,
-    val taxonId: String,
-    val referenceId: String
-)
-
+@Suppress("LongMethod")
 fun main() {
     val instanceItems = MainInstanceItems
     val publisher = WDPublisher(instanceItems, pause = 0L)
@@ -92,7 +86,7 @@ fun main() {
                             listOf(it), // deletes
                             "Cleaning up my mistakes",
                             listOf()
-                        ) ?: throw RuntimeException("Editor is not working!")
+                        ) ?: throw InternalException("Editor is not working!")
                         logger.info(" I deleted this statement")
                     } else {
                         val newRefs = it.references.filter {
@@ -114,7 +108,7 @@ fun main() {
                             listOf(), // deletes
                             "Cleaning up my mistakes, deleting a mismatched article",
                             listOf()
-                        ) ?: throw RuntimeException("Editor is not working!")
+                        ) ?: throw InternalException("Editor is not working!")
                         logger.info(" I delete only the matching ref")
                     }
                 }

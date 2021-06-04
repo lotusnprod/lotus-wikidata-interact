@@ -23,6 +23,7 @@ import java.io.File
 fun tryGzipThenNormal(fileName: String): BufferedReader = try {
     GZIPReader(fileName).bufferedReader
 } catch (e: java.util.zip.ZipException) {
+    e.message
     File(fileName).bufferedReader()
 }
 

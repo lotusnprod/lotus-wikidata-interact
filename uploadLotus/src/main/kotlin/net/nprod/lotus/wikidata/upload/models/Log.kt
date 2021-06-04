@@ -7,6 +7,8 @@
 
 package net.nprod.lotus.wikidata.upload.models
 
+import kotlinx.serialization.Serializable
+
 @Serializable
 data class Log(
     val processed: Int,

@@ -90,7 +90,7 @@ fun DataTotal.processCompounds(
                             }
                         }
                     } catch (e: InvalidTaxonName) {
-                        logger.error(" ERROR: Couldn't a good database for the organism: ${organism.name}")
+                        logger.error(" ERROR: Couldn't a good database for the organism: ${organism.name} - ${e.message}")
                     }
                 }
         }

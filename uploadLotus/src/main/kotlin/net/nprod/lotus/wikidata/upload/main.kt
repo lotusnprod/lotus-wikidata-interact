@@ -7,12 +7,9 @@
 
 package net.nprod.lotus.wikidata.upload
 
-import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
-@SpringBootApplication
-class LotusImporter
-
+@Suppress("SpreadOperator")
 fun main(args: Array<String>) {
     runApplication<LotusImporter>(*args)
 }

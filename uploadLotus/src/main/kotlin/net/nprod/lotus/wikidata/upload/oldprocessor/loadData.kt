@@ -23,6 +23,7 @@ import java.io.File
 fun tryGzipThenNormal(fileName: String): BufferedReader = try {
     GZIPReader(fileName).bufferedReader
 } catch (e: java.util.zip.ZipException) {
+    e.message
     File(fileName).bufferedReader()
 }
 
@@ -31,6 +32,7 @@ class InvalidEntryDataException(override val message: String) : RuntimeException
 val TaxonomyDatabaseExclusionList = listOf("IPNI", "IRMNG (old)")
 val RequiredTaxonRanks = listOf("variety", "genus", "subgenus", "species", "subspecies", "family")
 
+@Suppress("LongMethod")
 fun loadData(fileName: String, skip: Int = 0, limit: Int? = null): DataTotal {
     val logger = LogManager.getLogger("net.nprod.lotus.chemistry.net.nprod.lotus.tools.wdpropcreator.main")
     val dataTotal = DataTotal()
@@ -56,8 +58,6 @@ fun loadData(fileName: String, skip: Int = 0, limit: Int? = null): DataTotal {
         if (RequiredTaxonRanks.any { organismRanks.contains("it") } ||
             organismDb !in TaxonomyDatabaseExclusionList
         ) {
-
-            val databaseObj = dataTotal.databaseCache.getOrNew(database) { Database(name = database) }
 
             val organismObj = dataTotal.organismCache.getOrNew(organismCleaned) { Organism(name = organismCleaned) }
 
@@ -90,10 +90,9 @@ fun loadData(fileName: String, skip: Int = 0, limit: Int? = null): DataTotal {
                     )
                 }
 
-                dataTotal.triplets.add(Triplet(databaseObj, organismObj, compoundObj, referenceObj))
+                dataTotal.triplets.add(Triplet(organismObj, compoundObj, referenceObj))
             } catch (e: InvalidEntryDataException) {
-                logger.error(e)
-                throw RuntimeException("It works")
+                logger.error("Invalid Entry Data: ${e.message}")
             }
 
         } else {

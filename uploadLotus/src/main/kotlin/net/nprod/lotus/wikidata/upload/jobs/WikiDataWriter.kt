@@ -30,7 +30,6 @@ class WikiDataWriter : ItemWriter<DataTotal> {
     private val publisher = WDPublisher(instanceItems, pause = 0L)
     private val wdSparql = WDSparql(instanceItems)
     private val wdFinder = WDFinder(WDKT(), wdSparql)
-    private var logger: Logger = LoggerFactory.getLogger(WikiDataWriter::class.java)
     private val wikidataCompoundCache = mutableMapOf<InChIKey, String>()
 
 
@@ -47,10 +46,15 @@ class WikiDataWriter : ItemWriter<DataTotal> {
                 publisher.connect()
                 process(it)
             } catch (e: TokenErrorException) {
+                logger.info("Token Error: ${e.message}")
                 publisher.disconnect() // Lets try that to avoid the CSRF errors
                 publisher.connect()
                 process(it)
             }
         }
+    }
+
+    companion object {
+        private var logger: Logger = LoggerFactory.getLogger(WikiDataWriter::class.java)
     }
 }

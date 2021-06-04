@@ -7,6 +7,7 @@
 
 package net.nprod.lotus.wikidata.upload.controllers
 
+import kotlinx.serialization.Serializable
 import net.nprod.lotus.wikidata.upload.jobs.LotusImportJob
 import org.springframework.batch.core.BatchStatus
 import org.springframework.batch.core.Job
@@ -59,7 +60,8 @@ class JobController constructor(
         return jobNames.flatMap<String?, String> {
             jobExplorer.getJobInstances(it, 0, 10).flatMap {
                 jobExplorer.getJobExecutions(it).map {
-                    "id: ${it.jobId} create time: ${it.createTime} running: ${it.isRunning} exit Status ${it.exitStatus}"
+                    "id: ${it.jobId} create time: ${it.createTime} " +
+                            "running: ${it.isRunning} exit Status ${it.exitStatus}"
                 }
             }
         }.joinToString("|")
@@ -67,6 +69,7 @@ class JobController constructor(
 
     @GetMapping("/jobs/import/request", produces = ["application/json"])
     @ResponseBody
+    @Suppress("TooGenericExceptionCaught", "PrintStackTrace")
     fun newRunjob(
         @RequestParam(name = "max_records") maxRecords: Long? = null,
         @RequestParam(name = "skip") skip: Long? = null
@@ -83,7 +86,8 @@ class JobController constructor(
             try {
                 lastJob = jobLauncher.run(job, parameters.toJobParameters())
             } catch (e: Exception) {
-                e.printStackTrace()
+                lastJob?.status = BatchStatus.FAILED
+                e.printStackTrace()  // We catch everything, we may want to log that properly
             }
         }
         return lastJob?.let { JobData.fromJobExecution(it) }

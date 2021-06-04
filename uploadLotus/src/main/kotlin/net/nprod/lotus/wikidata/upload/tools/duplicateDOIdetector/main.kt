@@ -5,7 +5,7 @@
  *
  */
 
-package net.nprod.lotus.wdimport.tools.duplicateDOIdetector
+package net.nprod.lotus.wikidata.upload.tools.duplicateDOIdetector
 
 import net.nprod.lotus.helpers.GZIPReader
 import net.nprod.lotus.importer.parseTSVFile
@@ -18,6 +18,7 @@ fun main() {
     val fileReader = try {
         GZIPReader(fileName).bufferedReader
     } catch (e: java.util.zip.ZipException) {
+        e.localizedMessage // To say we swallowed it, not an issue here
         File(fileName).bufferedReader()
     }
     val file = parseTSVFile(fileReader)

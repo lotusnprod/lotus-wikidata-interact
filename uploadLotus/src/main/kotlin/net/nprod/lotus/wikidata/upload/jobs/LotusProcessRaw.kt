@@ -39,66 +39,77 @@ class LotusProcessRaw : ItemProcessor<List<LotusRaw>, DataTotal> {
 
     override fun process(items: List<LotusRaw>): DataTotal {
         val dataTotal = DataTotal()
-        items.forEach { lotusRaw ->
-            if (RequiredTaxonRanks.any { lotusRaw.organism.organismRanks.contains("it") } ||
-                lotusRaw.organism.organismDb !in TaxonomyDatabaseExclusionList
-            ) {
-                val organismObj = with(lotusRaw.organism) {
-                    dataTotal.organismCache.getOrNew(organismCleaned) {
-                        Organism(name = organismCleaned)
-                    }.apply {
-                        finalIds[organismDb] = organismID
-                        textRanks[organismDb] = organismRanks
-                        textNames[organismDb] = organismNames
-                    }
+
+        items.filter(::canBeProcessed).forEach { lotusRaw ->
+            logger.error("Invalid entry: $lotusRaw")
+        }
+
+        items.filter(::canBeProcessed).forEach { lotusRaw ->
+
+            val organismObj = with(lotusRaw.organism) {
+                dataTotal.organismCache.getOrNew(organismCleaned) {
+                    Organism(name = organismCleaned)
+                }.apply {
+                    finalIds[organismDb] = organismID
+                    textRanks[organismDb] = organismRanks
+                    textNames[organismDb] = organismNames
                 }
-
-                val inchiKey = lotusRaw.compound.inchiKey.validateInChIKey()
-
-                try {
-                    val compoundObj = with(lotusRaw.compound) {
-                        dataTotal.compoundCache.getOrNew(smiles) {
-                            Compound(
-                                name = compoundName,
-                                smiles = smiles,
-                                inchi = inchi,
-                                inchikey = inchiKey,
-                                iupac = iupacName,
-                                unspecifiedStereocenters = unspecifiedStereocenters,
-                                atLeastSomeStereoDefined = unspecifiedStereocenters != totalCenters
-                            )
-                        }
-                    }
-
-                    val referenceObj = with(lotusRaw.reference) {
-                        dataTotal.referenceCache.getOrNew(doi) {
-                            val title = title.titleCleaner()
-                            Reference(
-                                doi = doi,
-                                title = title,
-                                pmcid = pmcid.ifEqualReplace("NA", ""),
-                                pmid = pmid.ifEqualReplace("NA", "")
-                            )
-                        }
-                    }
-
-                    /**
-                     * We had a bug where we matched all the NA to a single article
-                     */
-                    if (referenceObj.doi != "NA")
-                        dataTotal.triplets.add(Triplet(organismObj, compoundObj, referenceObj))
-                } catch (e: InvalidEntryDataException) {
-                    logger.error(e.toString())
-                    throw RuntimeException("It works")
-                }
-
-            } else {
-                logger.error("Invalid entry: $lotusRaw")
             }
+
+            val inchiKey = lotusRaw.compound.inchiKey.validateInChIKey()
+
+            processEntry(lotusRaw, dataTotal, inchiKey, organismObj)
         }
 
         logger.info("Resolving the taxo DB")
         dataTotal.organismCache.store.values.forEach { it.resolve(dataTotal.taxonomyDatabaseCache) }
         return dataTotal
+    }
+
+    private fun canBeProcessed(lotusRaw: LotusRaw) =
+        RequiredTaxonRanks.any { lotusRaw.organism.organismRanks.contains("it") } ||
+                lotusRaw.organism.organismDb !in TaxonomyDatabaseExclusionList
+
+    private fun processEntry(
+        lotusRaw: LotusRaw,
+        dataTotal: DataTotal,
+        inchiKey: String,
+        organismObj: Organism
+    ) {
+        try {
+            val compoundObj = with(lotusRaw.compound) {
+                dataTotal.compoundCache.getOrNew(smiles) {
+                    Compound(
+                        name = compoundName,
+                        smiles = smiles,
+                        inchi = inchi,
+                        inchikey = inchiKey,
+                        iupac = iupacName,
+                        unspecifiedStereocenters = unspecifiedStereocenters,
+                        atLeastSomeStereoDefined = unspecifiedStereocenters != totalCenters
+                    )
+                }
+            }
+
+            val referenceObj = with(lotusRaw.reference) {
+                dataTotal.referenceCache.getOrNew(doi) {
+                    val title = title.titleCleaner()
+                    Reference(
+                        doi = doi,
+                        title = title,
+                        pmcid = pmcid.ifEqualReplace("NA", ""),
+                        pmid = pmid.ifEqualReplace("NA", "")
+                    )
+                }
+            }
+
+            /**
+             * We had a bug where we matched all the NA to a single article
+             */
+            if (referenceObj.doi != "NA")
+                dataTotal.triplets.add(Triplet(organismObj, compoundObj, referenceObj))
+        } catch (e: InvalidEntryDataException) {
+            logger.error("Invalid Entry Data: ${e.message}")
+        }
     }
 }
