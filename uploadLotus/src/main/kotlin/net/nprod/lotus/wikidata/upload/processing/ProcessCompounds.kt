@@ -11,12 +11,12 @@ import io.ktor.util.KtorExperimentalAPI
 import net.nprod.lotus.chemistry.smilesToCanonical
 import net.nprod.lotus.chemistry.smilesToFormula
 import net.nprod.lotus.chemistry.subscriptFormula
-import net.nprod.lotus.wikidata.upload.input.DataTotal
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
 import net.nprod.lotus.wdimport.wd.models.entries.WDCompound
 import net.nprod.lotus.wdimport.wd.publishing.IPublisher
 import net.nprod.lotus.wdimport.wd.sparql.InChIKey
+import net.nprod.lotus.wikidata.upload.input.DataTotal
 import org.apache.logging.log4j.LogManager
 import org.openscience.cdk.exception.InvalidSmilesException
 import kotlin.time.ExperimentalTime
@@ -90,11 +90,13 @@ fun DataTotal.processCompounds(
                             }
                         }
                     } catch (e: InvalidTaxonName) {
-                        logger.error(" ERROR: Couldn't a good database for the organism: ${organism.name} - ${e.message}")
+                        logger.error(
+                            " ERROR: Couldn't a good database for the organism: ${organism.name} -" +
+                                " ${e.message}"
+                        )
                     }
                 }
         }
         publisher.publish(wdcompound, "upserting compound")
     }
 }
-

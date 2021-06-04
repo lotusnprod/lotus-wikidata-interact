@@ -21,7 +21,6 @@ import org.wikidata.wdtk.datamodel.interfaces.ItemDocument
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
 import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue
 import org.wikidata.wdtk.util.WebResourceFetcherImpl
-import org.wikidata.wdtk.wikibaseapi.ApiConnection
 import org.wikidata.wdtk.wikibaseapi.BasicApiConnection
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataEditor
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher
@@ -29,6 +28,8 @@ import org.wikidata.wdtk.wikibaseapi.apierrors.MaxlagErrorException
 import org.wikidata.wdtk.wikibaseapi.apierrors.MediaWikiApiErrorException
 import java.io.IOException
 import java.net.ConnectException
+
+const val MAX_LAG_FIRST_WAIT_TIME = 10_000
 
 /**
  * We have a missing environment variable
@@ -86,7 +87,7 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
         logger.info("Connecting to the editor with siteIri: ${instanceItems.siteIri}")
         editor = WikibaseDataEditor(connection, instanceItems.siteIri).also {
             it.setEditAsBot(true)
-            it.maxLagFirstWaitTime = 10_000
+            it.maxLagFirstWaitTime = MAX_LAG_FIRST_WAIT_TIME
             it.maxLagBackOffFactor = 2.0
         }
         logger.info("Connecting to the fetcher")

@@ -8,15 +8,15 @@
 package net.nprod.lotus.wikidata.upload.jobs
 
 import io.ktor.util.KtorExperimentalAPI
-import net.nprod.lotus.wikidata.upload.input.DataTotal
-import net.nprod.lotus.wikidata.upload.processing.buildCompoundCache
-import net.nprod.lotus.wikidata.upload.processing.processCompounds
 import net.nprod.lotus.wdimport.wd.MainInstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
 import net.nprod.lotus.wdimport.wd.publishing.WDPublisher
 import net.nprod.lotus.wdimport.wd.query.WDKT
 import net.nprod.lotus.wdimport.wd.sparql.InChIKey
 import net.nprod.lotus.wdimport.wd.sparql.WDSparql
+import net.nprod.lotus.wikidata.upload.input.DataTotal
+import net.nprod.lotus.wikidata.upload.processing.buildCompoundCache
+import net.nprod.lotus.wikidata.upload.processing.processCompounds
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.batch.item.ItemWriter
@@ -31,7 +31,6 @@ class WikiDataWriter : ItemWriter<DataTotal> {
     private val wdSparql = WDSparql(instanceItems)
     private val wdFinder = WDFinder(WDKT(), wdSparql)
     private val wikidataCompoundCache = mutableMapOf<InChIKey, String>()
-
 
     fun process(dataTotal: DataTotal) {
         dataTotal.buildCompoundCache(null, instanceItems, logger, wdSparql, wikidataCompoundCache)

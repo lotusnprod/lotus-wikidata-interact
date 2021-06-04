@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.jetbrains.kotlin.ir.backend.js.compile
 import java.util.Properties
 
 val localPropertiesFile = file("local.properties")
@@ -271,7 +270,6 @@ project("importPublication") {
     dependencies {
         implementation(project(":wdkt"))
     }
-
 }
 
 kotlinter {
@@ -279,12 +277,13 @@ kotlinter {
     experimentalRules = project.hasProperty("lintKotlinExperimental")
 }
 
-detekt {
-    val detektVersion: String by project
-    toolVersion = detektVersion
-    config = rootProject.files("qc/detekt.yml")
-    buildUponDefaultConfig = true
-    baseline = rootProject.file("qc/detekt-baseline.xml")
+allprojects {
+    detekt {
+        val detektVersion: String by project
+        toolVersion = detektVersion
+        config = rootProject.files("qc/detekt.yml")
+        baseline = rootProject.file("qc/detekt-baseline.xml")
+    }
 }
 
 configurations.all {

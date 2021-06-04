@@ -7,12 +7,12 @@
 
 package net.nprod.lotus.wikidata.upload.processing
 
-import net.nprod.lotus.wikidata.upload.input.DataTotal
-import net.nprod.lotus.wikidata.upload.input.Organism
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
 import net.nprod.lotus.wdimport.wd.models.entries.WDTaxon
 import net.nprod.lotus.wdimport.wd.publishing.IPublisher
+import net.nprod.lotus.wikidata.upload.input.DataTotal
+import net.nprod.lotus.wikidata.upload.input.Organism
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
@@ -51,7 +51,7 @@ val LIST_OF_ACCEPTED_DBS: Array<String> = arrayOf(
 
 /**
  * Process the Taxa, it will take the best database and use this taxon for the given entries.
- * 
+ *
  * @param createNew set to true if taxa have to be created
  */
 class TaxonProcessor(

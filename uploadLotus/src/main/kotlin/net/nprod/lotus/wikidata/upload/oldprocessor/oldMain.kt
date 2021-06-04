@@ -7,10 +7,7 @@
 
 package net.nprod.lotus.wdimport.net.nprod.lotus.importer
 
-import net.nprod.lotus.wikidata.upload.input.DataTotal
 import io.ktor.util.KtorExperimentalAPI
-import net.nprod.lotus.wikidata.upload.oldprocessor.Parameters
-import net.nprod.lotus.wikidata.upload.oldprocessor.loadData
 import net.nprod.lotus.rdf.RepositoryManager
 import net.nprod.lotus.wdimport.tools.countInLocalRepository
 import net.nprod.lotus.wdimport.wd.InstanceItems
@@ -27,6 +24,9 @@ import net.nprod.lotus.wdimport.wd.sparql.InChIKey
 import net.nprod.lotus.wdimport.wd.sparql.WDSparql
 import net.nprod.lotus.wdimport.wd.sparql.mock.NopSparql
 import net.nprod.lotus.wdimport.wd.sparql.mock.TestISparql
+import net.nprod.lotus.wikidata.upload.input.DataTotal
+import net.nprod.lotus.wikidata.upload.oldprocessor.Parameters
+import net.nprod.lotus.wikidata.upload.oldprocessor.loadData
 import net.nprod.lotus.wikidata.upload.processing.buildCompoundCache
 import net.nprod.lotus.wikidata.upload.processing.processCompounds
 import org.slf4j.LoggerFactory

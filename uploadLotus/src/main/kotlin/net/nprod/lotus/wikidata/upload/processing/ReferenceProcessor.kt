@@ -8,13 +8,14 @@
 package net.nprod.lotus.wikidata.upload.processing
 
 import io.ktor.util.KtorExperimentalAPI
-import net.nprod.lotus.wikidata.upload.input.DataTotal
-import net.nprod.lotus.wikidata.upload.input.Reference
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
 import net.nprod.lotus.wdimport.wd.models.entries.WDArticle
 import net.nprod.lotus.wdimport.wd.publishing.IPublisher
+import net.nprod.lotus.wikidata.upload.input.DataTotal
+import net.nprod.lotus.wikidata.upload.input.Reference
 import org.apache.logging.log4j.LogManager
+import java.util.Locale
 import kotlin.time.ExperimentalTime
 
 class ReferenceProcessor(
@@ -23,8 +24,6 @@ class ReferenceProcessor(
     val wdFinder: WDFinder,
     val instanceItems: InstanceItems
 ) {
-    private val logger = LogManager.getLogger(ReferenceProcessor::class)
-
     @ExperimentalTime
     private val articlesCache: MutableMap<Reference, WDArticle> = mutableMapOf()
 
@@ -34,11 +33,10 @@ class ReferenceProcessor(
         val article = WDArticle(
             label = reference.title ?: reference.doi,
             title = reference.title,
-            doi = reference.doi.toUpperCase(), // DOIs are always uppercase but in reality we see both
+            doi = reference.doi.uppercase(Locale.getDefault()), // DOIs are always uppercase but in reality we see both
         ).tryToFind(wdFinder, instanceItems)
 
         // Get the article info on crossref if needed
-
 
         val hasAuthorsAlready = if (article.published) {
             wdFinder.sparql.askQuery(
@@ -46,7 +44,7 @@ class ReferenceProcessor(
                 ASK {
                   <${article.id.iri}> <${instanceItems.author.iri}> ?o.
                 }
-            """.trimIndent()
+                """.trimIndent()
             )
         } else {
             false
@@ -56,7 +54,7 @@ class ReferenceProcessor(
             article.populateFromCrossREF(wdFinder, instanceItems)
         }
 
-
+        logger.info("Upserting article")
         publisher.publish(article, "upserting article")
         return article
     }
@@ -67,4 +65,8 @@ class ReferenceProcessor(
     @ExperimentalTime
     @KtorExperimentalAPI
     fun get(key: Reference): WDArticle = articlesCache.getOrPut(key) { articleFromReference(key) }
+
+    companion object {
+        private val logger = LogManager.getLogger(ReferenceProcessor::class)
+    }
 }

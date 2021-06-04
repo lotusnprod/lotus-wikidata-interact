@@ -12,8 +12,8 @@ import net.nprod.lotus.helpers.titleCleaner
 import net.nprod.lotus.wikidata.upload.input.Compound
 import net.nprod.lotus.wikidata.upload.input.DataTotal
 import net.nprod.lotus.wikidata.upload.input.Organism
-import net.nprod.lotus.wikidata.upload.input.Triplet
 import net.nprod.lotus.wikidata.upload.input.Reference
+import net.nprod.lotus.wikidata.upload.input.Triplet
 import net.nprod.lotus.wikidata.upload.oldprocessor.InvalidEntryDataException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -68,7 +68,7 @@ class LotusProcessRaw : ItemProcessor<List<LotusRaw>, DataTotal> {
 
     private fun canBeProcessed(lotusRaw: LotusRaw) =
         RequiredTaxonRanks.any { lotusRaw.organism.organismRanks.contains("it") } ||
-                lotusRaw.organism.organismDb !in TaxonomyDatabaseExclusionList
+            lotusRaw.organism.organismDb !in TaxonomyDatabaseExclusionList
 
     private fun processEntry(
         lotusRaw: LotusRaw,

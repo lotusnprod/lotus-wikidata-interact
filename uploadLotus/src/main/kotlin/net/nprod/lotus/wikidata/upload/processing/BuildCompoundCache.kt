@@ -7,11 +7,11 @@
 
 package net.nprod.lotus.wikidata.upload.processing
 
-import net.nprod.lotus.wikidata.upload.input.DataTotal
 import net.nprod.lotus.rdf.RepositoryManager
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.sparql.ISparql
 import net.nprod.lotus.wdimport.wd.sparql.InChIKey
+import net.nprod.lotus.wikidata.upload.input.DataTotal
 import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
 
 /**

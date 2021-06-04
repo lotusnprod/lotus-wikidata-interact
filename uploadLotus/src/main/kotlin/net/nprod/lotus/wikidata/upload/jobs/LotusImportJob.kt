@@ -35,7 +35,7 @@ class LotusImportJob(val jobs: JobBuilderFactory, val steps: StepBuilderFactory)
     fun itemWriter(): ItemWriter<DataTotal> = WikiDataWriter()
 
     @Bean
-    protected fun step1(itemReader: UnivocityBasedReader<LotusRaw>): Step {
+    fun step1(itemReader: UnivocityBasedReader<LotusRaw>): Step {
         return steps["step1"].chunk<List<LotusRaw>, DataTotal>(1)
             .reader(itemReader).processor(itemProcessor()).writer(itemWriter()).build()
     }

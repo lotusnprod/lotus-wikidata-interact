@@ -9,7 +9,6 @@ package net.nprod.lotus.wdimport.wd.query.mock
 
 import net.nprod.lotus.wdimport.wd.query.IWDKT
 import net.nprod.lotus.wdimport.wd.query.QueryActionResponse
-import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
 import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue
 
 /**

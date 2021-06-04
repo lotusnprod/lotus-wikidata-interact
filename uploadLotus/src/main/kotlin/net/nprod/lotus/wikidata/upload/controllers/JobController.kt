@@ -22,6 +22,10 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
 import kotlin.time.ExperimentalTime
 
+/**
+ * Maximum number of jobs to display
+ */
+const val MAX_NUMBER_JOBS = 10
 
 @Serializable
 data class JobData(
@@ -42,7 +46,6 @@ data class JobData(
     }
 }
 
-
 @Controller
 @ExperimentalTime
 class JobController constructor(
@@ -58,10 +61,10 @@ class JobController constructor(
     fun getJobs(): String {
         val jobNames = jobExplorer.jobNames.toList()
         return jobNames.flatMap<String?, String> {
-            jobExplorer.getJobInstances(it, 0, 10).flatMap {
+            jobExplorer.getJobInstances(it, 0, MAX_NUMBER_JOBS).flatMap {
                 jobExplorer.getJobExecutions(it).map {
                     "id: ${it.jobId} create time: ${it.createTime} " +
-                            "running: ${it.isRunning} exit Status ${it.exitStatus}"
+                        "running: ${it.isRunning} exit Status ${it.exitStatus}"
                 }
             }
         }.joinToString("|")
@@ -87,7 +90,7 @@ class JobController constructor(
                 lastJob = jobLauncher.run(job, parameters.toJobParameters())
             } catch (e: Exception) {
                 lastJob?.status = BatchStatus.FAILED
-                e.printStackTrace()  // We catch everything, we may want to log that properly
+                e.printStackTrace() // We catch everything, we may want to log that properly
             }
         }
         return lastJob?.let { JobData.fromJobExecution(it) }

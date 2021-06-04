@@ -9,13 +9,12 @@ package net.nprod.lotus.wikidata.upload.oldprocessor
 
 import net.nprod.lotus.helpers.GZIPReader
 import net.nprod.lotus.helpers.ifEqualReplace
+import net.nprod.lotus.importer.parseTSVFile
 import net.nprod.lotus.wikidata.upload.input.Compound
 import net.nprod.lotus.wikidata.upload.input.DataTotal
-import net.nprod.lotus.wikidata.upload.input.Database
 import net.nprod.lotus.wikidata.upload.input.Organism
-import net.nprod.lotus.wikidata.upload.input.Triplet
 import net.nprod.lotus.wikidata.upload.input.Reference
-import net.nprod.lotus.importer.parseTSVFile
+import net.nprod.lotus.wikidata.upload.input.Triplet
 import org.apache.logging.log4j.LogManager
 import java.io.BufferedReader
 import java.io.File
@@ -43,7 +42,6 @@ fun loadData(fileName: String, skip: Int = 0, limit: Int? = null): DataTotal {
     }
 
     file.map {
-        val database = it.getString("database")
         val organismCleaned = it.getString("organismCleaned")
         val organismDb = it.getString("organismCleaned_dbTaxo")
         val organismID = it.getString("organismCleaned_id")
@@ -94,7 +92,6 @@ fun loadData(fileName: String, skip: Int = 0, limit: Int? = null): DataTotal {
             } catch (e: InvalidEntryDataException) {
                 logger.error("Invalid Entry Data: ${e.message}")
             }
-
         } else {
             logger.error("Invalid entry: $it")
         }

@@ -33,8 +33,6 @@ data class LotusRaw(
             val pmid = record.getString("referenceCleanedPmid")
             val doi = record.getString("referenceCleanedDoi")
 
-
-
             return LotusRaw(
                 organism = LotusRawOrganism(organismCleaned, organismDb, organismID, organismRanks, organismNames),
                 compound = LotusRawCompound(
@@ -51,4 +49,3 @@ data class LotusRaw(
         }
     }
 }
-

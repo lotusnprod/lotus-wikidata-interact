@@ -13,14 +13,12 @@ import io.ktor.client.engine.cio.endpoint
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.SerializationException
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import net.nprod.lotus.helpers.tryCount
 import net.nprod.lotus.wdimport.wd.MainInstanceItems
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
 import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue
 
 /**

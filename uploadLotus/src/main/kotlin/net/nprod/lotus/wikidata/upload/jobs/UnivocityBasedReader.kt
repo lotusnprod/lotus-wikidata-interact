@@ -19,7 +19,6 @@ import org.springframework.core.io.Resource
 import java.io.BufferedReader
 import java.io.File
 
-
 fun tryGzipThenNormal(fileName: String): BufferedReader = try {
     GZIPReader(fileName).bufferedReader
 } catch (e: java.util.zip.ZipException) {
@@ -52,7 +51,7 @@ class UnivocityBasedReader<T>(private val f: (com.univocity.parsers.common.recor
     }
 
     override fun update(executionContext: ExecutionContext) {
-        //TODO("Not yet implemented update $executionContext")
+        // TODO("Not yet implemented update $executionContext")
     }
 
     override fun close() {
@@ -60,14 +59,13 @@ class UnivocityBasedReader<T>(private val f: (com.univocity.parsers.common.recor
         bufferedReader?.close()
     }
 
-    override fun read(): List<T>? {
+    override fun read(): List<T> {
         val list = mutableListOf<T>()
-        if (csvParser?.context?.isStopped == true) return null
-        while (true) {
-            if (csvParser?.context?.isStopped == true) return list
-            val record: com.univocity.parsers.common.record.Record = csvParser?.parseNextRecord() ?: return list
+        while (csvParser?.context?.isStopped == true) { // this true is here on purpose for null matching
+            val record: com.univocity.parsers.common.record.Record = csvParser?.parseNextRecord() ?: break
             list.add(f(record))
         }
+        return list
     }
 
     @BeforeStep

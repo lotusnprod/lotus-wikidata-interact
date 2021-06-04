@@ -37,8 +37,11 @@ inline fun <U> tryCount(
             return f()
         } catch (e: Exception) {
             retries += 1
-            if (listExceptions.any { kclass -> (e::class == kclass) || (e::class.supertypes.contains(kclass.starProjectedType)) } ||
-                listNamedExceptions.any { e::class.qualifiedName == it }) {
+            if (listExceptions.any { kclass ->
+                (e::class == kclass) ||
+                    (e::class.supertypes.contains(kclass.starProjectedType))
+            } || listNamedExceptions.any { e::class.qualifiedName == it }
+            ) {
                 logger?.error("Retrying ($retries/$maxRetries): ${e.message}")
                 if (retries != maxRetries) {
                     if (delayMilliSeconds > 0) Thread.sleep(delayMilliSeconds)
