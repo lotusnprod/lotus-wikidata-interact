@@ -19,7 +19,8 @@ import kotlin.reflect.full.starProjectedType
 @Suppress(
     "TooGenericExceptionThrown",
     "TooGenericExceptionCaught",
-    "NestedBlockDepth"
+    "NestedBlockDepth",
+    "LongParameterList"
 ) // On purpose we catch and throw it back
 inline fun <U> tryCount(
     listExceptions: List<KClass<out Exception>> = listOf(),

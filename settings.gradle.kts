@@ -34,5 +34,5 @@ rootProject.name = "wikidatainteract"
 
 include("wdkt")
 include("uploadLotus")
-//include("importPublication")
+include("importPublication")
 include("downloadLotus")

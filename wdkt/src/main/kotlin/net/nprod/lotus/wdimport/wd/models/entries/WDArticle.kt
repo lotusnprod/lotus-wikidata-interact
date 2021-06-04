@@ -70,7 +70,7 @@ data class WDArticle(
         title?.let {
             ReferencedValueStatement.monolingualValue(InstanceItems::title, it).withReferenceURL(source)
         },
-        doi?.let { ReferencedValueStatement(InstanceItems::doi, it) },
+        doi?.let { ReferencedValueStatement(InstanceItems::doi, it) }?.withReferenceURL(source),
         publicationDate?.let {
             ReferencedValueStatement.datetimeValue(InstanceItems::publicationDate, it).withReferenceURL(source)
         },

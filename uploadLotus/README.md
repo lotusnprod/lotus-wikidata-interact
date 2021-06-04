@@ -15,8 +15,6 @@ Requires Java >=11
 
 ## Build
 
-This build use a jar version of wiki-java in libs, make sure you update that from time to time.
-
 ## Run
 
 ### Add an article by DOI
