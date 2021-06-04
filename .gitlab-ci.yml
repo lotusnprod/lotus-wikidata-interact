@@ -23,7 +23,7 @@ build:
 
 test:
   stage: test
-  script: gradle check
+  script: gradle check -Dorg.gradle.parallel=false
   cache:
     key: "$CI_COMMIT_REF_NAME"
     policy: pull
