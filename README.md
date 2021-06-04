@@ -1,4 +1,4 @@
-# Lotus_bot
+# Lotus_bot (Archived! The development is now on Gitlab: https://gitlab.com/lotus7/lotus-wikidata-interact)
 
 This is a Bot for [WikiData](https://www.wikidata.org). It is used to import the data for the LOTUS and
 the [WikiData Natural Products Chemistry project](https://www.wikidata.org/wiki/Wikidata:WikiProject_Chemistry/Natural_products)
