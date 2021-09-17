@@ -1,6 +1,7 @@
 # Lotus_bot
 
-This is a Bot for [WikiData](https://www.wikidata.org). It is used to import the data for the LOTUS and the [WikiData Natural Products Chemistry project](https://www.wikidata.org/wiki/Wikidata:WikiProject_Chemistry/Natural_products)
+This is a Bot for [WikiData](https://www.wikidata.org). It is used to import the data for the LOTUS and
+the [WikiData Natural Products Chemistry project](https://www.wikidata.org/wiki/Wikidata:WikiProject_Chemistry/Natural_products)
 
 It is written in [Kotlin](https://www.kotlinlang.org) and uses:
 
@@ -18,9 +19,10 @@ This build use a jar version of wiki-java in libs, make sure you update that fro
 
 ## Run
 
-### Add an article by DOI 
-Replace <<foo>> and <<bar>> by your users and password. Notice the space in front of that command
-to not store them in your shell history.
+### Add an article by DOI
+
+Replace <<foo>> and <<bar>> by your users and password. Notice the space in front of that command to not store them in
+your shell history.
 
 ```console
  export WIKIDATA_USER=<<foo>>
@@ -29,8 +31,9 @@ to not store them in your shell history.
 ```
 
 ### Import lotus Data
-Replace <<foo>> and <<bar>> by your users and password. Notice the space in front of that command
-to not store them in your shell history.
+
+Replace <<foo>> and <<bar>> by your users and password. Notice the space in front of that command to not store them in
+your shell history.
 
 This will run a single entry from the file in test mode:
 
@@ -64,8 +67,8 @@ If you need to produce a jar file (to use on a different machine for example)
 
 The distribution will be available in **build/distributions** (.zip and .tar.gz)
 
-There is work to do to reduce the size of the distribution (use java modules, use only the parts of cdk and rdf4j
-we are really using).
+There is work to do to reduce the size of the distribution (use java modules, use only the parts of cdk and rdf4j we are
+really using).
 
 ## Developers
 
