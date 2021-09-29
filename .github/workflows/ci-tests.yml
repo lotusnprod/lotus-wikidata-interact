@@ -1,0 +1,28 @@
+on:
+  push:
+    branches:
+      - main
+      - feature-ci-*
+  pull_request:
+    branches:
+      - main
+      - feature-ci-*
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt-hotspot'
+          java-version: '16'
+          cache: 'gradle'
+      - name: "Build"
+        run: |
+          gradle --build-cache assemble
+      - name: "Test"
+        run: |
+          gradle check
