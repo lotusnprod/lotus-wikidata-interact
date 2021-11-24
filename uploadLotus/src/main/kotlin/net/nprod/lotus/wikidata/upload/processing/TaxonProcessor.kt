@@ -134,7 +134,7 @@ class TaxonProcessor(
 
             ranks.forEach { (rankName, rankItem) ->
                 val entity =
-                    organism.rankIds[taxonDb]?.firstOrNull { it.first.toLowerCase() == rankName }?.second?.name
+                    organism.rankIds[taxonDb]?.firstOrNull { it.first.lowercase() == rankName }?.second?.name
                 if (!entity.isNullOrEmpty()) {
                     acceptedRanks.add(AcceptedTaxonEntry(rankName, rankItem, entity))
                     if (rankName in listOf("genus", "subgenus", "subspecies", "species", "variety", "family")) {
