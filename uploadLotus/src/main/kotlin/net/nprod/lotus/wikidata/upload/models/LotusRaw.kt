@@ -22,7 +22,7 @@ data class LotusRaw(
 
             val smiles = record.getString("structureCleanedSmiles")
             val inchi = record.getString("structureCleanedInchi")
-            val inchiKey = record.getString("structureCleanedInchikey3D")
+            val inchiKey = record.getString("structureCleanedInchikey")
             val compoundName = record.getString("structureCleaned_nameTraditional")
             val iupacName = record.getString("structureCleaned_nameIupac")
             val unspecifiedStereocenters = record.getInt("structureCleaned_stereocenters_unspecified")

@@ -17,10 +17,11 @@ import net.nprod.lotus.wikidata.upload.input.Triplet
 import net.nprod.lotus.wikidata.upload.oldprocessor.InvalidEntryDataException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.batch.core.JobParameters
-import org.springframework.batch.core.StepExecution
-import org.springframework.batch.core.annotation.BeforeStep
-import org.springframework.batch.item.ItemProcessor
+
+
+val TaxonomyDatabaseExclusionList = listOf("IPNI", "IRMNG (old)")
+val RequiredTaxonRanks = listOf("variety", "genus", "subgenus", "species", "subspecies", "family")
+
 
 val InChIKeyRegexp: Regex = "[A-Z]{14}-[A-Z]{10}-[A-Z]".toRegex()
 private fun String.validateInChIKey(): String {
@@ -28,16 +29,14 @@ private fun String.validateInChIKey(): String {
     return this
 }
 
-class LotusProcessRaw : ItemProcessor<List<LotusRaw>, DataTotal> {
-    private var parameters: JobParameters? = null
+interface ItemProcessor<T, S> {
+    fun process(items: Iterable<T>): S
+}
+
+class LotusProcessRaw : ItemProcessor<LotusRaw, DataTotal> {
     private var logger: Logger = LoggerFactory.getLogger(LotusProcessRaw::class.java)
 
-    @BeforeStep
-    fun beforeStep(stepExecution: StepExecution) {
-        parameters = stepExecution.jobParameters
-    }
-
-    override fun process(items: List<LotusRaw>): DataTotal {
+    override fun process(items: Iterable<LotusRaw>): DataTotal {
         val dataTotal = DataTotal()
 
         items.filter(::canBeProcessed).forEach { lotusRaw ->
@@ -45,7 +44,6 @@ class LotusProcessRaw : ItemProcessor<List<LotusRaw>, DataTotal> {
         }
 
         items.filter(::canBeProcessed).forEach { lotusRaw ->
-
             val organismObj = with(lotusRaw.organism) {
                 dataTotal.organismCache.getOrNew(organismCleaned) {
                     Organism(name = organismCleaned)

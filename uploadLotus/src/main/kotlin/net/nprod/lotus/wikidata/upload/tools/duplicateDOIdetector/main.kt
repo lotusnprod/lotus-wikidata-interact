@@ -14,7 +14,7 @@ import net.nprod.lotus.wdimport.wd.query.WDKT
 import java.io.File
 
 fun main() {
-    val fileName = "data/manuallyValidated.tsv"
+    val fileName = "data/test_2021-11-24.tsv"
     val fileReader = try {
         GZIPReader(fileName).bufferedReader
     } catch (e: java.util.zip.ZipException) {

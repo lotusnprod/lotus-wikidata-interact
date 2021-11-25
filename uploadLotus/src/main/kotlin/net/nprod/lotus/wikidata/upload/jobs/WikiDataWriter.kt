@@ -7,7 +7,6 @@
 
 package net.nprod.lotus.wikidata.upload.jobs
 
-import io.ktor.util.KtorExperimentalAPI
 import net.nprod.lotus.wdimport.wd.MainInstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
 import net.nprod.lotus.wdimport.wd.publishing.WDPublisher
@@ -19,12 +18,14 @@ import net.nprod.lotus.wikidata.upload.processing.buildCompoundCache
 import net.nprod.lotus.wikidata.upload.processing.processCompounds
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.batch.item.ItemWriter
 import org.wikidata.wdtk.wikibaseapi.apierrors.TokenErrorException
 import kotlin.time.ExperimentalTime
 
+interface ItemWriter<T> {
+    fun write(items: Iterable<T>)
+}
+
 @ExperimentalTime
-@KtorExperimentalAPI
 class WikiDataWriter : ItemWriter<DataTotal> {
     private val instanceItems = MainInstanceItems
     private val publisher = WDPublisher(instanceItems, pause = 0L)
@@ -32,12 +33,12 @@ class WikiDataWriter : ItemWriter<DataTotal> {
     private val wdFinder = WDFinder(WDKT(), wdSparql)
     private val wikidataCompoundCache = mutableMapOf<InChIKey, String>()
 
-    fun process(dataTotal: DataTotal) {
+    private fun process(dataTotal: DataTotal) {
         dataTotal.buildCompoundCache(null, instanceItems, logger, wdSparql, wikidataCompoundCache)
         dataTotal.processCompounds(wdFinder, instanceItems, wikidataCompoundCache, publisher)
     }
 
-    override fun write(items: MutableList<out DataTotal>) {
+    override fun write(items: Iterable<DataTotal>) {
         publisher.disconnect() // Lets try that to avoid the CSRF errors
 
         items.forEach {

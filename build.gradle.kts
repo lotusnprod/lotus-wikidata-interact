@@ -173,9 +173,6 @@ project("wdkt") {
 
 project(":uploadLotus") {
     apply {
-        plugin("org.springframework.boot")
-        plugin("io.spring.dependency-management")
-        plugin("org.jetbrains.kotlin.plugin.spring")
         plugin("org.jetbrains.kotlin.plugin.serialization")
         plugin("application")
     }
@@ -185,10 +182,6 @@ project(":uploadLotus") {
     }
 
     dependencies {
-        implementation("org.springframework.boot:spring-boot-starter") {
-            exclude("org.slf4j", "slf4j-api")
-        }
-
         val univocityParserVersion: String by project
         val sqliteJdbcVersion: String by project
         val serializationVersion: String by project
@@ -198,15 +191,7 @@ project(":uploadLotus") {
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
         implementation("com.univocity:univocity-parsers:$univocityParserVersion")
         implementation("org.xerial:sqlite-jdbc:$sqliteJdbcVersion")
-        implementation("org.springframework:spring-jdbc")
-        implementation("org.springframework:spring-oxm")
-        implementation("org.springframework.batch:spring-batch-core")
-        implementation("org.springframework.boot:spring-boot-starter-webflux")
-        implementation("org.springframework.boot:spring-boot-starter-websocket")
-        implementation("org.springframework.boot:spring-boot-starter-batch")
-        implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
         implementation("org.jetbrains.kotlin:kotlin-reflect")
-        testImplementation("org.springframework.boot:spring-boot-starter-test")
     }
 }
 

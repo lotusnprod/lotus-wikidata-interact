@@ -16,6 +16,7 @@ import net.nprod.lotus.wikidata.upload.input.Organism
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
+import java.util.*
 import kotlin.reflect.KProperty1
 
 /**
@@ -134,7 +135,7 @@ class TaxonProcessor(
 
             ranks.forEach { (rankName, rankItem) ->
                 val entity =
-                    organism.rankIds[taxonDb]?.firstOrNull { it.first.toLowerCase() == rankName }?.second?.name
+                    organism.rankIds[taxonDb]?.firstOrNull { it.first.lowercase(Locale.getDefault()) == rankName }?.second?.name
                 if (!entity.isNullOrEmpty()) {
                     acceptedRanks.add(AcceptedTaxonEntry(rankName, rankItem, entity))
                     if (rankName in listOf("genus", "subgenus", "subspecies", "species", "variety", "family")) {

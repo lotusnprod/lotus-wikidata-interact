@@ -7,6 +7,7 @@
 
 package net.nprod.lotus.wdimport.wd.publishing
 
+import io.ktor.client.features.SocketTimeoutException
 import kotlinx.coroutines.TimeoutCancellationException
 import net.nprod.lotus.helpers.tryCount
 import net.nprod.lotus.wdimport.wd.InstanceItems
@@ -28,6 +29,7 @@ import org.wikidata.wdtk.wikibaseapi.apierrors.MaxlagErrorException
 import org.wikidata.wdtk.wikibaseapi.apierrors.MediaWikiApiErrorException
 import java.io.IOException
 import java.net.ConnectException
+import java.net.SocketTimeoutException
 
 const val MAX_LAG_FIRST_WAIT_TIME = 10_000
 
@@ -182,10 +184,11 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
                         MediaWikiApiErrorException::class,
                         IOException::class,
                         TimeoutCancellationException::class,
-                        MaxlagErrorException::class
+                        MaxlagErrorException::class,
+                        SocketTimeoutException::class
                     ),
                     maxRetries = 10,
-                    delayMilliSeconds = 30_000L
+                    delayMilliSeconds = 60_000L
                 ) { // Sometimes it needs time to let the DB recover
                     // We update the existing statements
                     // We send the new statements
