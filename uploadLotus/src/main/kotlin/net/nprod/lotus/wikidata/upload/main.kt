@@ -24,12 +24,15 @@ fun main(args: Array<String>) {
         LotusRaw.fromRecord(it)
     }
 
+    val filePrepath = "../"
+    val fileName = args[1]
+    val filePath = filePrepath + fileName;
     val processor = LotusProcessRaw()
     val wdWriter = WikiDataWriter()
 
     //tsvReader.maximalNumber = 1200
     tsvReader.skip = 0
-    tsvReader.open("../data/test_2021-11-24.tsv")
+    tsvReader.open(filePath)
     val list = tsvReader.read()
     println("Processing ${list.size} entries.")
     val processed = processor.process(list)
