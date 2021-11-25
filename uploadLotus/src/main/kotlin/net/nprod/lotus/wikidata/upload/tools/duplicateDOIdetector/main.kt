@@ -13,8 +13,8 @@ import net.nprod.lotus.wdimport.wd.MainInstanceItems
 import net.nprod.lotus.wdimport.wd.query.WDKT
 import java.io.File
 
-fun main() {
-    val fileName = "data/test_2021-11-24.tsv"
+fun main(args: Array<String>) {
+    val fileName = "args[1]"
     val fileReader = try {
         GZIPReader(fileName).bufferedReader
     } catch (e: java.util.zip.ZipException) {
