@@ -11,6 +11,8 @@ import net.nprod.lotus.wikidata.upload.jobs.LotusProcessRaw
 import net.nprod.lotus.wikidata.upload.jobs.LotusRaw
 import net.nprod.lotus.wikidata.upload.jobs.UnivocityBasedReader
 import net.nprod.lotus.wikidata.upload.jobs.WikiDataWriter
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import kotlin.time.ExperimentalTime
 
 //import org.springframework.boot.runApplication
@@ -18,8 +20,9 @@ import kotlin.time.ExperimentalTime
 //@Suppress("SpreadOperator")
 @OptIn(ExperimentalTime::class)
 fun main(args: Array<String>) {
+    val logger: Logger = LoggerFactory.getLogger("MainThread")
     //runApplication<LotusImporter>(*args)
-    println("Hello!")
+    logger.info("Hello!")
     val tsvReader = UnivocityBasedReader<LotusRaw> {
         LotusRaw.fromRecord(it)
     }
@@ -34,12 +37,12 @@ fun main(args: Array<String>) {
     tsvReader.skip = 0
     tsvReader.open(filePath)
     val list = tsvReader.read()
-    println("Processing ${list.size} entries.")
+    logger.info("Processing ${list.size} entries.")
     val processed = processor.process(list)
 
     wdWriter.write(listOf(processed))
 
-    println("Done!")
+    logger.info("Done!")
 
     tsvReader.close()
 }
