@@ -18,10 +18,8 @@ import net.nprod.lotus.wikidata.upload.oldprocessor.InvalidEntryDataException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-
 val TaxonomyDatabaseExclusionList = listOf("IPNI", "IRMNG (old)")
 val RequiredTaxonRanks = listOf("variety", "genus", "subgenus", "species", "subspecies", "family")
-
 
 val InChIKeyRegexp: Regex = "[A-Z]{14}-[A-Z]{10}-[A-Z]".toRegex()
 private fun String.validateInChIKey(): String {

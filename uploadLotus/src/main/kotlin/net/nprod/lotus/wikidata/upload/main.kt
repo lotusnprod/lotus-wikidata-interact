@@ -15,13 +15,13 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.time.ExperimentalTime
 
-//import org.springframework.boot.runApplication
+// import org.springframework.boot.runApplication
 
-//@Suppress("SpreadOperator")
+// @Suppress("SpreadOperator")
 @OptIn(ExperimentalTime::class)
 fun main(args: Array<String>) {
     val logger: Logger = LoggerFactory.getLogger("MainThread")
-    //runApplication<LotusImporter>(*args)
+    // runApplication<LotusImporter>(*args)
     logger.info("Hello!")
     val tsvReader = UnivocityBasedReader<LotusRaw> {
         LotusRaw.fromRecord(it)
@@ -29,11 +29,11 @@ fun main(args: Array<String>) {
 
     val filePrepath = "../"
     val fileName = args[1]
-    val filePath = filePrepath + fileName;
+    val filePath = filePrepath + fileName
     val processor = LotusProcessRaw()
     val wdWriter = WikiDataWriter()
 
-    //tsvReader.maximalNumber = 1200
+    // tsvReader.maximalNumber = 1200
     tsvReader.skip = 0
     tsvReader.open(filePath)
     val list = tsvReader.read()
