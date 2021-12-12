@@ -69,6 +69,10 @@ subprojects {
             debug.events("PASSED", "FAILED", "SKIPPED", "STANDARD_ERROR", "STANDARD_OUT", "STARTED")
         }
     }
+
+    tasks.withType<JavaExec> {
+        jvmArgs = listOf("-Xms16g", "-Xmx24g")
+    }
 }
 
 project("uploadLotus") {
