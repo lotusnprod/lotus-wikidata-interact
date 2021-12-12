@@ -7,7 +7,6 @@
 
 package net.nprod.lotus.wikidata.upload.processing
 
-import io.ktor.util.KtorExperimentalAPI
 import net.nprod.lotus.chemistry.smilesToCanonical
 import net.nprod.lotus.chemistry.smilesToFormula
 import net.nprod.lotus.chemistry.subscriptFormula
@@ -33,7 +32,6 @@ const val MAXIMUM_INCHI_LENGTH: Int = 1500
  * they are doing the same thing this function is doing but to create taxa and articles/references
  */
 @ExperimentalTime
-@KtorExperimentalAPI
 fun DataTotal.processCompounds(
     wdFinder: WDFinder,
     instanceItems: InstanceItems,
@@ -51,7 +49,7 @@ fun DataTotal.processCompounds(
         val compoundName = if (compound.name.length < MAXIMUM_COMPOUND_NAME_LENGTH) compound.name else compound.inchikey
         val isomericSMILES = if (compound.atLeastSomeStereoDefined) compound.smiles else null
         val smiles = compound.smiles.replace("\n", "")
-        val wdcompound = WDCompound(
+        val wdCompound = WDCompound(
             label = compoundName,
             inChIKey = compound.inchikey,
             inChI = if (compound.inchi.length < MAXIMUM_INCHI_LENGTH) compound.inchi else null,
@@ -72,15 +70,15 @@ fun DataTotal.processCompounds(
             undefinedStereocenters = compound.unspecifiedStereocenters
         ).tryToFind(wdFinder, instanceItems, wikidataCompoundCache)
 
-        logger.info(wdcompound)
+        logger.info(wdCompound)
 
-        wdcompound.apply {
+        wdCompound.apply {
             this@processCompounds.triplets.filter { it.compound == compound }.distinct().groupBy { it.organism }
                 .forEach { (organism, quads) ->
                     try {
                         val taxon = taxonProcessor.get(organism)
-                        logger.info(" Found taxon $taxon")
                         taxon?.let {
+                            logger.info(" Found taxon $taxon")
                             foundInTaxon(
                                 taxon
                             ) {
@@ -88,6 +86,7 @@ fun DataTotal.processCompounds(
                                     statedIn(referenceProcessor.get(it.reference).id)
                                 }
                             }
+                            logger.info("     Properties generated")
                         }
                     } catch (e: InvalidTaxonName) {
                         logger.error(
@@ -97,6 +96,7 @@ fun DataTotal.processCompounds(
                     }
                 }
         }
-        publisher.publish(wdcompound, "upserting compound")
+        logger.info("Compound inserted")
+        publisher.publish(wdCompound, "upserting compound")
     }
 }

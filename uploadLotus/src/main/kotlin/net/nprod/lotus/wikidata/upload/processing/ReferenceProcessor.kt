@@ -63,7 +63,6 @@ class ReferenceProcessor(
      * Generate a WikiData article from that reference
      */
     @ExperimentalTime
-    @KtorExperimentalAPI
     fun get(key: Reference): WDArticle = articlesCache.getOrPut(key) { articleFromReference(key) }
 
     companion object {

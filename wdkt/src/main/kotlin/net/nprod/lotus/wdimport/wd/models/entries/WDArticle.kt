@@ -48,7 +48,6 @@ import kotlin.time.ExperimentalTime
  * @param authors List of AuthorInfo authors information
  * @param resolvedISSN the ISSN resolved to a Wikidata journal or so
  */
-@KtorExperimentalAPI
 @ExperimentalTime
 data class WDArticle(
     override var label: String = "",
@@ -129,7 +128,6 @@ data class WDArticle(
      * Populate the data for this article from CrossREF
      */
     @ExperimentalTime
-    @KtorExperimentalAPI
     fun populateFromCrossREF(wdFinder: WDFinder, instanceItems: InstanceItems) {
         require(doi != null) { "The DOI cannot be null" }
         logger.info("Looking on CrossREF for $doi")
@@ -155,6 +153,7 @@ data class WDArticle(
             logger.error("No data, or no valid data received from CrossREF for DOI $doi")
             return
         }
+        logger.info("Found a response in CrossREF")
         val entryType = message.type
         type = if (entryType == "journal-article") InstanceItems::scholarlyArticle else InstanceItems::publication
         val newTitle = message.title?.firstOrNull()?.titleCleaner()

@@ -16,7 +16,6 @@ import kotlin.time.ExperimentalTime
 
 class WDFinder(val wdkt: IWDKT, val sparql: ISparql) {
     @ExperimentalTime
-    @KtorExperimentalAPI
     val crossRefConnector: CrossRefConnector by lazy {
         CrossRefConnector(OfficialCrossRefAPI())
     }

@@ -7,6 +7,7 @@
 
 package net.nprod.lotus.wikidata.upload.jobs
 
+import io.ktor.util.KtorExperimentalAPI
 import net.nprod.lotus.wdimport.wd.MainInstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
 import net.nprod.lotus.wdimport.wd.publishing.WDPublisher
@@ -35,7 +36,9 @@ class WikiDataWriter : ItemWriter<DataTotal> {
 
     private fun process(dataTotal: DataTotal) {
         dataTotal.buildCompoundCache(null, instanceItems, logger, wdSparql, wikidataCompoundCache)
+        logger.info("Compound cache built")
         dataTotal.processCompounds(wdFinder, instanceItems, wikidataCompoundCache, publisher)
+        logger.info("Finished processing compounds")
     }
 
     override fun write(items: Iterable<DataTotal>) {
