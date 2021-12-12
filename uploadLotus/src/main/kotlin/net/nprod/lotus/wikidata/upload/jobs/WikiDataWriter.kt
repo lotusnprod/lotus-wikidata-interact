@@ -7,7 +7,6 @@
 
 package net.nprod.lotus.wikidata.upload.jobs
 
-import io.ktor.util.KtorExperimentalAPI
 import net.nprod.lotus.wdimport.wd.MainInstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
 import net.nprod.lotus.wdimport.wd.publishing.WDPublisher
