@@ -7,7 +7,6 @@
 
 package net.nprod.lotus.wdimport.wd
 
-import io.ktor.util.KtorExperimentalAPI
 import net.nprod.konnector.crossref.CrossRefConnector
 import net.nprod.konnector.crossref.OfficialCrossRefAPI
 import net.nprod.lotus.wdimport.wd.query.IWDKT
