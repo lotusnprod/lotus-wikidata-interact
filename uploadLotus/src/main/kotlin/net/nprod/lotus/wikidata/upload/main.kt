@@ -30,19 +30,23 @@ fun main(args: Array<String>) {
     //val filePrepath = "../"
     val fileName = args[0]
     val filePath = fileName;
-    val processor = LotusProcessRaw()
+
     val wdWriter = WikiDataWriter()
 
     //tsvReader.maximalNumber = 1200
     tsvReader.skip = 0
     tsvReader.open(filePath)
     val list = tsvReader.read()
-    logger.info("Processing ${list.size} entries.")
-    val processed = processor.process(list)
-
-    wdWriter.write(listOf(processed))
+    tsvReader.close()
+    logger.info("Finished parsing the TSV")
+    // Let's chunk to see if we can avoid OOM errors… Currently it needs more than 32GB
+    // This may be a bit slower as we loose the cache every time
+    list.chunked(100000) { sublist ->
+        logger.info("Processing ${sublist.size} entries.")
+        val processor = LotusProcessRaw()
+        val processed = processor.process(sublist)
+        wdWriter.write(listOf(processed))
+    }
 
     logger.info("Done!")
-
-    tsvReader.close()
 }
