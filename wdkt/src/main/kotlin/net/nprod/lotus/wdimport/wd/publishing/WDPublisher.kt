@@ -7,6 +7,7 @@
 
 package net.nprod.lotus.wdimport.wd.publishing
 
+import com.fasterxml.jackson.core.JsonParseException
 import io.ktor.client.features.SocketTimeoutException
 import kotlinx.coroutines.TimeoutCancellationException
 import net.nprod.lotus.helpers.tryCount
@@ -174,7 +175,20 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
         } else { // The publishable is already existing, this means we only have to update the statements
             updatedDocuments++
 
-            val statements = publishable.listOfResolvedStatements(fetcher, instanceItems)
+            val statements = tryCount(
+                listExceptions = listOf(
+                    MediaWikiApiErrorException::class,
+                    IOException::class,
+                    TimeoutCancellationException::class,
+                    MaxlagErrorException::class,
+                    SocketTimeoutException::class,
+                    JsonParseException::class
+                ),
+                maxRetries = 10,
+                delayMilliSeconds = 60_000L
+            ) {
+                publishable.listOfResolvedStatements(fetcher, instanceItems)
+            }
 
             logger.info("Updated document ${publishable.id} - Summary: $summary - Statements: ${statements.size}")
 
