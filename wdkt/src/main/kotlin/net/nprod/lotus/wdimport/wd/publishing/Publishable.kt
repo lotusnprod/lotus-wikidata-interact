@@ -208,8 +208,8 @@ abstract class Publishable {
 
         val existingSetOfReferences =
             existingStatement?.references?.map { it.forceGetStatedInValue() }?.toSet() ?: setOf()
-        // val existingSetOfQualifiers =
-        //     existingStatement?.qualifiers?.map { it.property }?.toSet() ?: setOf()
+        val existingSetOfQualifiers =
+            existingStatement?.qualifiers?.map { it.property }?.toSet() ?: setOf()
 
         // Anything that is not in the existing set should be a new reference
         val newReferences = references.filterNot {
@@ -220,9 +220,9 @@ abstract class Publishable {
             newReferences.any { it.forceGetStatedInValue() == existingRef.forceGetStatedInValue() }
         }
 
-        // val newQualifiers = statement.preQualifiers.filterNot {
-        //     it.property.get(instanceItems) in existingSetOfQualifiers
-        // }.map { WDResolvedQualifier.fromQualifier(it, instanceItems) }
+        val newQualifiers = statement.preQualifiers.filterNot {
+            it.property.get(instanceItems) in existingSetOfQualifiers
+        }.map { WDResolvedQualifier.fromQualifier(it, instanceItems) }
 
         // We do not try to add or modify a non overridable statement
         existingProperty?.let { if (!statement.overwritable) return null }
