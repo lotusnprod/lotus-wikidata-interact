@@ -36,7 +36,7 @@ This will run a single entry from the file in test mode:
 ```console
  export WIKIDATA_USER=<<foo>>
  export WIKIDATA_PASSWORD=<<bar>>
-./gradlew :uploadLotus:run --args="--input data/manuallyValidated.tsv"
+./gradlew :uploadLotus:run --args="../data/validated_referenced_structure_organism_pairs.tsv"
 ```
 
 This will run the full file in test mode:
@@ -44,7 +44,7 @@ This will run the full file in test mode:
 ```console
  export WIKIDATA_USER=<<foo>>
  export WIKIDATA_PASSWORD=<<bar>>
-./gradlew :uploadLotus:run --args="--input data/manuallyValidated.tsv -l -1"
+./gradlew :uploadLotus:run --args="../data/validated_referenced_structure_organism_pairs.tsv -l -1"
 ```
 
 This will run the first line of the file in real mode (you will likely need bot rights to do that:
@@ -52,7 +52,7 @@ This will run the first line of the file in real mode (you will likely need bot 
 ```console
  export WIKIDATA_USER=<<foo>>
  export WIKIDATA_PASSWORD=<<bar>>
-./gradlew :uploadLotus:run --args="--input data/manuallyValidated.tsv -r"
+./gradlew :uploadLotus:run --args="../data/validated_referenced_structure_organism_pairs.tsv -r"
 ```
 
 If you need to produce a jar file (to use on a different machine for example)
