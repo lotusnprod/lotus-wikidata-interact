@@ -136,7 +136,8 @@ data class WDArticle(
                     MediaWikiApiErrorException::class, IOException::class,
                     TimeoutCancellationException::class, MaxlagErrorException::class,
                     UnManagedReturnCode::class,
-                    io.ktor.network.sockets.ConnectTimeoutException::class
+                    io.ktor.network.sockets.ConnectTimeoutException::class,
+                    io.ktor.utils.io.charsets.MalformedInputException::class
                 ),
                 maxRetries = 10, delayMilliSeconds = 30_000L
             ) {
