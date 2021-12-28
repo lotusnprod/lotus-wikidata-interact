@@ -15,8 +15,8 @@ object WikidataTaxonomy {
         val irmngId = Wikidata.wdt("P5055")
         val gbifId = Wikidata.wdt("P846")
         val ncbiId = Wikidata.wdt("P685")
-        val otlId  = Wikidata.wdt("P9157")
-        val wfoId  = Wikidata.wdt("P7715")
+        val otlId = Wikidata.wdt("P9157")
+        val wfoId = Wikidata.wdt("P7715")
         val wormsId = Wikidata.wdt("P850")
         val parentTaxonChain = "<" + Wikidata.p("P171") + ">/<" + Wikidata.ps("P171") + ">"
     }
