@@ -39,6 +39,7 @@ data class AcceptedTaxonEntry(
  * These are the taxonomic DBs we are using as references
  */
 val LIST_OF_ACCEPTED_DBS: Array<String> = arrayOf(
+    "Open Tree of Life",
     "ITIS",
     "GBIF",
     "NCBI",
@@ -47,7 +48,9 @@ val LIST_OF_ACCEPTED_DBS: Array<String> = arrayOf(
     "World Register of Marine Species",
     "Database of Vascular Plants of Canada (VASCAN)",
     "GBIF Backbone Taxonomy",
-    "iNaturalist"
+    "iNaturalist",
+    "AlgaeBase",
+    "World Flora Online"
 )
 
 /**
