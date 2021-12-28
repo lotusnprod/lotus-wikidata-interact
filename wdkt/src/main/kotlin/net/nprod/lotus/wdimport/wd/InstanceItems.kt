@@ -110,6 +110,9 @@ interface InstanceItems {
     val idBirdLifeTaxonomy: PropertyIdValue
     val idAmphibiaTaxonomy: PropertyIdValue
     val idPhasmidaTaxonomy: PropertyIdValue
+    val idOTLTaxonomy: PropertyIdValue
+    val idAlgaeBaseTaxonomy: PropertyIdValue
+    val idWFOTaxonomy: PropertyIdValue
     val pmid: PropertyIdValue
     val pmcid: PropertyIdValue
     val arxiv: PropertyIdValue
