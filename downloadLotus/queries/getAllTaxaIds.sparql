@@ -1,0 +1,21 @@
+#!WDDEFAULTIMPORTS
+SELECT DISTINCT ?taxon ?taxon_name ?taxon_ncbi ?taxon_gbif ?taxon_inaturalist ?taxon_wfo ?taxon_otl WHERE {
+    ?compound wdt:P235 ?compound_inchikey;
+             p:P703 [
+               ps:P703 ?taxon ;
+                       prov:wasDerivedFrom / pr:P248 [
+                         wdt:P356 ?reference_doi
+                       ]
+             ] .
+  OPTIONAL { ?taxon wdt:P225 ?taxon_name. }
+  OPTIONAL { ?taxon wdt:P685 ?taxon_ncbi. }
+  # OPTIONAL { ?taxon wdt:P830 ?taxon_eol. }
+  OPTIONAL { ?taxon wdt:P846 ?taxon_gbif. }
+  # OPTIONAL { ?taxon wdt:P850 ?taxon_worms. }
+  # OPTIONAL { ?taxon wdt:P1348 ?taxon_algaebase. }
+  # OPTIONAL { ?taxon wdt:P1391 ?taxon_indexfungorum. }
+  OPTIONAL { ?taxon wdt:P3151 ?taxon_inaturalist. }
+  # OPTIONAL { ?taxon wdt:P5055 ?taxon_irmng. }
+  OPTIONAL { ?taxon wdt:P7715 ?taxon_wfo. }
+  OPTIONAL { ?taxon wdt:P9157 ?taxon_otl. }
+}
