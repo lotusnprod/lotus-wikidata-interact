@@ -38,7 +38,7 @@ and a file that contains the triples linking these: /compound_reference_taxon.ts
 This will output a TSV file to the standard output (so your console likely)
 
 ````
-./gradlew -q :downloadLotus:run --args "query $PWD/queries/getAllCompoundsInChIKeys.sparql"
+./gradlew -q :downloadLotus:run --args "query $PWD/downloadLotus/queries/getAllCompoundsInChIKeys.sparql"
 ````
 
 ### Running a query directly on WikiData
@@ -46,7 +46,7 @@ This will output a TSV file to the standard output (so your console likely)
 There is also a way to do the query directly on WikiData
 
 ````
-./gradlew -q :downloadLotus:run --args "query -d $PWD/queries/getAllCompoundsInChIKeys.sparql"
+./gradlew -q :downloadLotus:run --args "query -d $PWD/downloadLotus/queries/getAllCompoundsInChIKeys.sparql"
 ````
 
 
@@ -63,7 +63,7 @@ This will produce several files in *build/distributions*. Uncompress the one you
 ````
 
 ````
-./bin/wikidataLotusExporter query queries/getAllCompoundsInChIKeys.sparql
+./bin/wikidataLotusExporter query downloadLotus/queries/getAllCompoundsInChIKeys.sparql
 ````
 
 ## Format of SPARQL queries
