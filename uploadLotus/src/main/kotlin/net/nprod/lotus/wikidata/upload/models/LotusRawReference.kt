@@ -7,4 +7,4 @@
 
 package net.nprod.lotus.wikidata.upload.jobs
 
-data class LotusRawReference(val title: String, val pmcid: String, val pmid: String, val doi: String)
+data class LotusRawReference(val title: String, val pmcid: String?, val pmid: String, val doi: String)
