@@ -83,7 +83,7 @@ data class Compound(
 data class Reference(
     override var id: Long? = null,
     val doi: String,
-    val pmcid: String,
+    val pmcid: String?,
     val title: String?,
     val pmid: String
 ) : Indexable
