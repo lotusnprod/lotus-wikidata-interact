@@ -85,7 +85,7 @@ data class Reference(
     val doi: String,
     val pmcid: String?,
     val title: String?,
-    val pmid: String
+    val pmid: String?
 ) : Indexable
 
 fun String.ifEqualReplaceByNull(search: String): String? {

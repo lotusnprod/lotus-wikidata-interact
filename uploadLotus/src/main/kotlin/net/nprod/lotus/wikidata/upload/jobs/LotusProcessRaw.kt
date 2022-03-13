@@ -94,7 +94,7 @@ class LotusProcessRaw : ItemProcessor<LotusRaw, DataTotal> {
                         doi = doi,
                         title = title,
                         pmcid = pmcid?.ifEqualReplace("NA", "") ?: "",
-                        pmid = pmid.ifEqualReplace("NA", "")
+                        pmid = pmid?.ifEqualReplace("NA", "") ?: ""
                     )
                 }
             }
