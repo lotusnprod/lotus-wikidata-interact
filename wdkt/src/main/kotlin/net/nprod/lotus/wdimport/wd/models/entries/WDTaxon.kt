@@ -92,6 +92,7 @@ data class WDTaxon(
          * This is used to convert the names from LOTUS to WikiData DB names
          */
         val taxDBToProperty: Map<String, RemoteProperty?> = mapOf(
+            "AlgaeBase" to InstanceItems::idAlgaeBaseTaxonomy,
             "AmphibiaWeb" to InstanceItems::idAmphibiaTaxonomy,
             "ARKive" to InstanceItems::idARKIVETaxonomy,
             "BioLib.cz" to null,
@@ -107,6 +108,7 @@ data class WDTaxon(
             "ITIS" to InstanceItems::idITISTaxonomy,
             "IUCN Red List of Threatened Species" to InstanceItems::idIUCNTaxonomy,
             "NCBI" to InstanceItems::idNCBITaxonomy,
+            "Open Tree of Life" to InstanceItems::idOTLTaxonomy,
             "Phasmida Species File" to InstanceItems::idPhasmidaTaxonomy,
             "The eBird/Clements Checklist of Birds of the World" to InstanceItems::idEBirdTaxonomy,
             "The Interim Register of Marine and Nonmarine Genera" to InstanceItems::idIRMNGTaxonomy,
@@ -115,6 +117,7 @@ data class WDTaxon(
             "Tropicos - Missouri Botanical Garden" to InstanceItems::idTropicosTaxonomy,
             "uBio NameBank" to InstanceItems::idUBIOTaxonomy,
             "USDA NRCS PLANTS Database" to null,
+            "World Flora Online" to InstanceItems::idWFOTaxonomy,
             "World Register of Marine Species" to InstanceItems::idWORMSTaxonomy,
             "ZooBank" to InstanceItems::idZoobankTaxonomy
         )
