@@ -181,9 +181,9 @@ object TestInstanceItems : InstanceItems {
     override val idBirdLifeTaxonomy: PropertyIdValue = property("P95534")
     override val idAmphibiaTaxonomy: PropertyIdValue = property("P95537")
     override val idPhasmidaTaxonomy: PropertyIdValue = property("P95540")
-    override val idOTLTaxonomy: PropertyIdValue = property("P9157")
-    override val idAlgaeBaseTaxonomy: PropertyIdValue = property("P1348")
-    override val idWFOTaxonomy: PropertyIdValue = property("P7715")
+    override val idOTLTaxonomy: PropertyIdValue = property("P95542")
+    override val idAlgaeBaseTaxonomy: PropertyIdValue = property("P95545")
+    override val idWFOTaxonomy: PropertyIdValue = property("P95549")
 
     override val naturalProductOfTaxon: PropertyIdValue = property("P95470")
     override val foundInTaxon: PropertyIdValue = property("P95646")

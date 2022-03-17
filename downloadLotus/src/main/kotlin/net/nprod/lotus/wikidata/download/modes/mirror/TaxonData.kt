@@ -10,10 +10,16 @@ data class TaxonData(
     val name: String,
     val wikidataId: String,
     val algaeId: String?,
+    val birdlifeId: String?,
+    val inaturalistId: String?,
+    val indexFungorumId: String?,
     val irmngId: String?,
+    val itisId: String?,
     val gbifId: String?,
+    val mswId: String?,
     val ncbiId: String?,
     val otlId: String?,
+    val vascanId: String?,
     val wfoId: String?,
     val wormsId: String?
 )
