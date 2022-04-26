@@ -13,6 +13,7 @@ object WikidataTaxonomy {
         val parentTaxon = Wikidata.wdt("P171")
         val algaeId = Wikidata.wdt("P1348")
         val birdlifeId = Wikidata.wdt("P5257")
+        val colId = Wikidata.wdt("P10585")
         val inaturalistId = Wikidata.wdt("P3151")
         val indexFungorumId = Wikidata.wdt("P1391")
         val irmngId = Wikidata.wdt("P5055")

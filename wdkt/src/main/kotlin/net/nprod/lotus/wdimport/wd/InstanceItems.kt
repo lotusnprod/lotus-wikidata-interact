@@ -113,6 +113,7 @@ interface InstanceItems {
     val idOTLTaxonomy: PropertyIdValue
     val idAlgaeBaseTaxonomy: PropertyIdValue
     val idWFOTaxonomy: PropertyIdValue
+    val idCOLTaxonomy: PropertyIdValue
     val pmid: PropertyIdValue
     val pmcid: PropertyIdValue
     val arxiv: PropertyIdValue
@@ -184,6 +185,7 @@ object TestInstanceItems : InstanceItems {
     override val idOTLTaxonomy: PropertyIdValue = property("P95542")
     override val idAlgaeBaseTaxonomy: PropertyIdValue = property("P95545")
     override val idWFOTaxonomy: PropertyIdValue = property("P95549")
+    override val idCOLTaxonomy: PropertyIdValue = property("P95554")
 
     override val naturalProductOfTaxon: PropertyIdValue = property("P95470")
     override val foundInTaxon: PropertyIdValue = property("P95646")
@@ -287,6 +289,7 @@ object MainInstanceItems : InstanceItems {
     override val idOTLTaxonomy: PropertyIdValue = property("P9157")
     override val idAlgaeBaseTaxonomy: PropertyIdValue = property("P1348")
     override val idWFOTaxonomy: PropertyIdValue = property("P7715")
+    override val idCOLTaxonomy: PropertyIdValue = property("P10585")
 
     override val naturalProductOfTaxon: PropertyIdValue = property("P1582")
     override val foundInTaxon: PropertyIdValue = property("P703")

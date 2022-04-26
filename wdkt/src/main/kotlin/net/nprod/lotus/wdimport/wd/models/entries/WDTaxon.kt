@@ -97,6 +97,7 @@ data class WDTaxon(
             "ARKive" to InstanceItems::idARKIVETaxonomy,
             "BioLib.cz" to null,
             "BirdLife International" to InstanceItems::idBirdLifeTaxonomy,
+            "Catalogue of Life" to InstanceItems::idCOLTaxonomy,
             "Encyclopedia of Life" to InstanceItems::idEOLTaxonomy,
             "EUNIS" to InstanceItems::idEUNISTaxonomy,
             "FishBase" to InstanceItems::idFISHBaseTaxonomy,

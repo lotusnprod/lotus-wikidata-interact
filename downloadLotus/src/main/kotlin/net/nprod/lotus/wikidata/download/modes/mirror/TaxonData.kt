@@ -11,6 +11,7 @@ data class TaxonData(
     val wikidataId: String,
     val algaeId: String?,
     val birdlifeId: String?,
+    val colId: String?,
     val inaturalistId: String?,
     val indexFungorumId: String?,
     val irmngId: String?,

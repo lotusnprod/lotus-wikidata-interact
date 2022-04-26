@@ -41,6 +41,7 @@ data class AcceptedTaxonEntry(
 val LIST_OF_ACCEPTED_DBS: Array<String> = arrayOf(
     "AlgaeBase",
     "BirdLife International",
+    "Catalogue of Life",
     "Database of Vascular Plants of Canada (VASCAN)",
     "GBIF",
     "GBIF Backbone Taxonomy",
