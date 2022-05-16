@@ -104,8 +104,10 @@ class TaxonProcessor(
         if (finalTaxon == null) {
             logger.error("This is pretty bad. Here is what I know about an organism that failed: $organism")
             throw NotEnoughInfoAboutTaxonException(
-                """Sorry we couldn't find any info from the accepted reference taxonomy source,
-                | we only have: ${organism.rankIds.keys.map { it.name }}""".trimMargin()
+                """
+                Sorry we couldn't find any info from the accepted reference taxonomy source,
+                | we only have: ${organism.rankIds.keys.map { it.name }}
+                """.trimMargin()
             )
         } else {
             organism.finalIds.forEach { dbEntry -> finalTaxon.addTaxoDB(dbEntry.key, dbEntry.value) }
