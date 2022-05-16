@@ -88,6 +88,9 @@ project("uploadLotus") {
         val serializationVersion: String by project
         val kotlinVersion: String by project
         val konnectorVersion: String by project
+        val detektVersion: String by project
+
+        detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:$detektVersion")
 
         implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
         implementation("org.jetbrains.kotlinx:kotlinx-cli:$kotlinxCliVersion")
@@ -138,6 +141,9 @@ project("wdkt") {
         val serializationVersion: String by project
         val kotlinVersion: String by project
         val konnectorVersion: String by project
+        val detektVersion: String by project
+
+        detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:$detektVersion")
 
         implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
         implementation("org.jetbrains.kotlinx:kotlinx-cli:$kotlinxCliVersion")
@@ -189,6 +195,9 @@ project(":uploadLotus") {
         val univocityParserVersion: String by project
         val sqliteJdbcVersion: String by project
         val serializationVersion: String by project
+        val detektVersion: String by project
+
+        detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:$detektVersion")
 
         implementation(project(":wdkt"))
 
@@ -207,12 +216,15 @@ project(":downloadLotus") {
     val univocityParserVersion: String by project
     val coroutinesVersion: String by project
     val konnectorVersion: String by project
+    val detektVersion: String by project
 
     apply {
         plugin("application")
     }
 
     dependencies {
+        detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:$detektVersion")
+
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
 
         implementation("com.github.ajalt.clikt:clikt:$cliktVersion")
@@ -257,6 +269,10 @@ project("importPublication") {
     }
 
     dependencies {
+        val detektVersion: String by project
+
+        detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:$detektVersion")
+
         implementation(project(":wdkt"))
     }
 }
