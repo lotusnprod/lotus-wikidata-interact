@@ -32,7 +32,6 @@ and a file that contains the triples linking these: /compound_reference_taxon.ts
 ./gradlew -q :downloadLotus:run --args "export -o data/output"
 ````
 
-
 ### Running a query on your new local base
 
 This will output a TSV file to the standard output (so your console likely)
@@ -49,14 +48,14 @@ There is also a way to do the query directly on WikiData
 ./gradlew -q :downloadLotus:run --args "query -d $PWD/downloadLotus/queries/getAllCompoundsInChIKeys.sparql"
 ````
 
-
 ## Installing and deploying on another machine
 
 ````
 ./gradlew :downloadLotus:assembleDist
 ````
 
-This will produce several files in *build/distributions*. Uncompress the one you want somewhere and you can just run it on any machine that has a JDK like that:
+This will produce several files in *build/distributions*. Uncompress the one you want somewhere and you can just run it
+on any machine that has a JDK like that:
 
 ````
 ./bin/wikidataLotusExporter mirror

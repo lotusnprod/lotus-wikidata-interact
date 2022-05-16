@@ -10,6 +10,7 @@ package net.nprod.lotus.wikidata.download.helpers
 import kotlin.reflect.KClass
 
 typealias Milliseconds = Long
+
 /**
  * This is used to retry a block of code a number of times if it files with the given exceptions.
  * Once it reaches the maximum of retries, it will throw the last exception received.

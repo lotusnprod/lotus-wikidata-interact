@@ -1,7 +1,7 @@
-
 # Lotus_bot
 
-This is a Bot for [WikiData](https://www.wikidata.org). It is used to import the data for the LOTUS and the [WikiData Natural Products Chemistry project](https://www.wikidata.org/wiki/Wikidata:WikiProject_Chemistry/Natural_products)
+This is a Bot for [WikiData](https://www.wikidata.org). It is used to import the data for the LOTUS and
+the [WikiData Natural Products Chemistry project](https://www.wikidata.org/wiki/Wikidata:WikiProject_Chemistry/Natural_products)
 
 It is written in [Kotlin](https://www.kotlinlang.org) and uses:
 
@@ -18,6 +18,7 @@ Requires Java >=11
 ## Run
 
 ### Add an article by DOI
+
 Replace <<foo>> and <<bar>> by your users and password. Notice the space in front of that command
 to not store them in your shell history.
 
@@ -28,6 +29,7 @@ to not store them in your shell history.
 ```
 
 ### Import lotus Data
+
 Replace <<foo>> and <<bar>> by your users and password. Notice the space in front of that command
 to not store them in your shell history.
 

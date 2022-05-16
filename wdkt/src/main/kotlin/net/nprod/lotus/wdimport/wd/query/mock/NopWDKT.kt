@@ -17,7 +17,8 @@ import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue
  */
 class NopWDKT : IWDKT {
     @Suppress("EmptyFunctionBlock")
-    override fun close() {}
+    override fun close() {
+    }
 
     override fun searchDOI(doi: String): QueryActionResponse? = null
     override fun searchForPropertyValue(property: PropertyIdValue, value: String): QueryActionResponse? = null
