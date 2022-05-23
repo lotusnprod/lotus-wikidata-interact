@@ -7,6 +7,7 @@
 
 package net.nprod.lotus.wikidata.upload.processing
 
+import net.nprod.lotus.taxa.conversion
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
 import net.nprod.lotus.wdimport.wd.models.entries.WDTaxon
@@ -39,22 +40,22 @@ data class AcceptedTaxonEntry(
  * These are the taxonomic DBs we are using as references
  */
 val LIST_OF_ACCEPTED_DBS: Array<String> = arrayOf(
+    "Open Tree of Life",
+    "ITIS",
+    "GBIF",
+    "NCBI",
+    "Index Fungorum",
+    "The Interim Register of Marine and Nonmarine Genera",
+    "World Register of Marine Species",
+    "Database of Vascular Plants of Canada (VASCAN)",
+    "iNaturalist",
+    "Catalogue of Life",
+    "World Flora Online",
+    "VASCAN",
+    "GBIF Backbone Taxonomy",
     "AlgaeBase",
     "BirdLife International",
-    "Catalogue of Life",
-    "Database of Vascular Plants of Canada (VASCAN)",
-    "GBIF",
-    "GBIF Backbone Taxonomy",
-    "iNaturalist",
-    "Index Fungorum",
-    "ITIS",
-    "Mammal Species of the World",
-    "NCBI",
-    "Open Tree of Life",
-    "The Interim Register of Marine and Nonmarine Genera",
-    "VASCAN",
-    "World Register of Marine Species",
-    "World Flora Online"
+    "Mammal Species of the World"
 )
 
 /**
@@ -67,7 +68,7 @@ class TaxonProcessor(
     val publisher: IPublisher,
     val wdFinder: WDFinder,
     val instanceItems: InstanceItems,
-    val createNew: Boolean = false,
+    val createNew: Boolean = false, //COMMENT AR: @bjo Still not safe to turn it true?
 ) {
     val logger: Logger = LogManager.getLogger(TaxonProcessor::class.qualifiedName)
     val organismCache: MutableMap<Organism, WDTaxon?> = mutableMapOf()
@@ -75,7 +76,7 @@ class TaxonProcessor(
         logger.debug("Organism Ranks and Ids: ${organism.rankIds}")
 
         // We are going to go over this list of DBs, by order of trust and check if we have taxon info in them
-        val acceptedRanks = searchForTaxonInfo(organism)
+        val acceptedRanks = searchForTaxonInfo(fixNothospecies(organism))
 
         // If we have no entry we would have exited already with a InvalidTaxonName exception
         var taxon: WDTaxon? = null
