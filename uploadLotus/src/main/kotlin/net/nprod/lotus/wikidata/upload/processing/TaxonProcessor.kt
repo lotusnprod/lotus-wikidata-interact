@@ -7,7 +7,7 @@
 
 package net.nprod.lotus.wikidata.upload.processing
 
-import net.nprod.lotus.taxa.conversion
+import net.nprod.lotus.taxa.fixNothospecies
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
 import net.nprod.lotus.wdimport.wd.models.entries.WDTaxon
@@ -68,7 +68,7 @@ class TaxonProcessor(
     val publisher: IPublisher,
     val wdFinder: WDFinder,
     val instanceItems: InstanceItems,
-    val createNew: Boolean = false, //COMMENT AR: @bjo Still not safe to turn it true?
+    val createNew: Boolean = false, // COMMENT AR: @bjo Still not safe to turn it true?
 ) {
     val logger: Logger = LogManager.getLogger(TaxonProcessor::class.qualifiedName)
     val organismCache: MutableMap<Organism, WDTaxon?> = mutableMapOf()
@@ -76,16 +76,16 @@ class TaxonProcessor(
         logger.debug("Organism Ranks and Ids: ${organism.rankIds}")
 
         // We are going to go over this list of DBs, by order of trust and check if we have taxon info in them
-        val acceptedRanks = searchForTaxonInfo(fixNothospecies(organism))
+        val acceptedRanks = searchForTaxonInfo(organism)
 
         // If we have no entry we would have exited already with a InvalidTaxonName exception
         var taxon: WDTaxon? = null
         acceptedRanks.reversed().forEach {
             taxon?.let { return@forEach } // We skip all if we found one
             val tax = WDTaxon(
-                label = it.value,
+                label = fixNothospecies(it.value),
                 parentTaxon = taxon?.id,
-                taxonName = it.value,
+                taxonName = fixNothospecies(it.value),
                 taxonRank = it.instanceItem
             ).tryToFind(wdFinder, instanceItems)
             taxon = tax
