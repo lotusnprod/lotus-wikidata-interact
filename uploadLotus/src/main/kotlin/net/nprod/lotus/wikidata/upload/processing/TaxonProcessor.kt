@@ -7,12 +7,11 @@
 
 package net.nprod.lotus.wikidata.upload.processing
 
-import net.nprod.lotus.taxa.fixNothospecies
+import net.nprod.lotus.taxa.fixSpecies
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
 import net.nprod.lotus.wdimport.wd.models.entries.WDTaxon
 import net.nprod.lotus.wdimport.wd.publishing.IPublisher
-import net.nprod.lotus.wikidata.upload.input.DataTotal
 import net.nprod.lotus.wikidata.upload.input.Organism
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -61,16 +60,14 @@ val LIST_OF_ACCEPTED_DBS: Array<String> = arrayOf(
 /**
  * Process the Taxa, it will take the best database and use this taxon for the given entries.
  *
- * @param createNew set to true if taxa have to be created
  */
 class TaxonProcessor(
-    val dataTotal: DataTotal,
     val publisher: IPublisher,
     val wdFinder: WDFinder,
-    val instanceItems: InstanceItems,
-    val createNew: Boolean = false, // COMMENT AR: @bjo Still not safe to turn it true?
+    val instanceItems: InstanceItems
 ) {
     val logger: Logger = LogManager.getLogger(TaxonProcessor::class.qualifiedName)
+    val createNew = System.getenv("CREATE_SPECIES") == "yes_and_I_understand_that_I_will_not_complain_if_things_are_wrong"
     val organismCache: MutableMap<Organism, WDTaxon?> = mutableMapOf()
     fun taxonFromOrganism(organism: Organism): WDTaxon? {
         logger.debug("Organism Ranks and Ids: ${organism.rankIds}")
@@ -82,10 +79,11 @@ class TaxonProcessor(
         var taxon: WDTaxon? = null
         acceptedRanks.reversed().forEach {
             taxon?.let { return@forEach } // We skip all if we found one
+            val name = fixSpecies(it.value)
             val tax = WDTaxon(
-                label = fixNothospecies(it.value),
+                label = name,
                 parentTaxon = taxon?.id,
-                taxonName = fixNothospecies(it.value),
+                taxonName = name,
                 taxonRank = it.instanceItem
             ).tryToFind(wdFinder, instanceItems)
             taxon = tax

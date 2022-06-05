@@ -68,6 +68,13 @@ The distribution will be available in **build/distributions** (.zip and .tar.gz)
 There is work to do to reduce the size of the distribution (use java modules, use only the parts of cdk and rdf4j
 we are really using).
 
+#### Allow the creation of new species
+
+This is only for LOTUS developers, please use with caution as it is not perfect yet
+```console
+export CREATE_SPECIES=yes_and_I_understand_that_I_will_not_complain_if_things_are_wrong
+```
+
 ## Developers
 
 ### If you need to upgrade wiki-java

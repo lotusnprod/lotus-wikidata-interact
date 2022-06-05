@@ -9,3 +9,7 @@ package net.nprod.lotus.taxa
 
 fun fixNothospecies(taxon: String): String = taxon
     .replace("× ", "×")
+
+fun fixSpecies(taxon: String): String {
+    return fixNothospecies(taxon)
+}

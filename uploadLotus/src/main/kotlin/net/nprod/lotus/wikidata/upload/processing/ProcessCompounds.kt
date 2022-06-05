@@ -40,7 +40,7 @@ fun DataTotal.processCompounds(
 ) {
     val logger = LogManager.getLogger("net.nprod.lotus.wdimport.processing.processCompounds")
 
-    val taxonProcessor = TaxonProcessor(this, publisher, wdFinder, instanceItems)
+    val taxonProcessor = TaxonProcessor(publisher, wdFinder, instanceItems)
     val referenceProcessor = ReferenceProcessor(this, publisher, wdFinder, instanceItems)
 
     val count = this.compoundCache.store.size
