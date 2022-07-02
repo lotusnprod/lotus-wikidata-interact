@@ -47,16 +47,12 @@ subprojects {
     }
 
     tasks.withType<KotlinCompile> {
-        sourceCompatibility = "15"
-        targetCompatibility = "15"
         kotlinOptions {
             freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
         }
     }
 
     tasks.withType<JavaCompile> {
-        sourceCompatibility = "15"
-        targetCompatibility = "15"
         options.encoding = "UTF-8"
     }
 
