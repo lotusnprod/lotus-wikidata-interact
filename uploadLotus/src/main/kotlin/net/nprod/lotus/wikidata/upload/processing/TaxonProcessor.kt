@@ -7,11 +7,11 @@
 
 package net.nprod.lotus.wikidata.upload.processing
 
+import net.nprod.lotus.taxa.fixSpecies
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
 import net.nprod.lotus.wdimport.wd.models.entries.WDTaxon
 import net.nprod.lotus.wdimport.wd.publishing.IPublisher
-import net.nprod.lotus.wikidata.upload.input.DataTotal
 import net.nprod.lotus.wikidata.upload.input.Organism
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -39,37 +39,35 @@ data class AcceptedTaxonEntry(
  * These are the taxonomic DBs we are using as references
  */
 val LIST_OF_ACCEPTED_DBS: Array<String> = arrayOf(
+    "Open Tree of Life",
+    "ITIS",
+    "GBIF",
+    "NCBI",
+    "Index Fungorum",
+    "The Interim Register of Marine and Nonmarine Genera",
+    "World Register of Marine Species",
+    "Database of Vascular Plants of Canada (VASCAN)",
+    "iNaturalist",
+    "Catalogue of Life",
+    "World Flora Online",
+    "VASCAN",
+    "GBIF Backbone Taxonomy",
     "AlgaeBase",
     "BirdLife International",
-    "Catalogue of Life",
-    "Database of Vascular Plants of Canada (VASCAN)",
-    "GBIF",
-    "GBIF Backbone Taxonomy",
-    "iNaturalist",
-    "Index Fungorum",
-    "ITIS",
-    "Mammal Species of the World",
-    "NCBI",
-    "Open Tree of Life",
-    "The Interim Register of Marine and Nonmarine Genera",
-    "VASCAN",
-    "World Register of Marine Species",
-    "World Flora Online"
+    "Mammal Species of the World"
 )
 
 /**
  * Process the Taxa, it will take the best database and use this taxon for the given entries.
  *
- * @param createNew set to true if taxa have to be created
  */
 class TaxonProcessor(
-    val dataTotal: DataTotal,
     val publisher: IPublisher,
     val wdFinder: WDFinder,
-    val instanceItems: InstanceItems,
-    val createNew: Boolean = false,
+    val instanceItems: InstanceItems
 ) {
     val logger: Logger = LogManager.getLogger(TaxonProcessor::class.qualifiedName)
+    val createNew = System.getenv("CREATE_SPECIES") == "yes_and_I_understand_that_I_will_not_complain_if_things_are_wrong"
     val organismCache: MutableMap<Organism, WDTaxon?> = mutableMapOf()
     fun taxonFromOrganism(organism: Organism): WDTaxon? {
         logger.debug("Organism Ranks and Ids: ${organism.rankIds}")
@@ -81,10 +79,11 @@ class TaxonProcessor(
         var taxon: WDTaxon? = null
         acceptedRanks.reversed().forEach {
             taxon?.let { return@forEach } // We skip all if we found one
+            val name = fixSpecies(it.value)
             val tax = WDTaxon(
-                label = it.value,
+                label = name,
                 parentTaxon = taxon?.id,
-                taxonName = it.value,
+                taxonName = name,
                 taxonRank = it.instanceItem
             ).tryToFind(wdFinder, instanceItems)
             taxon = tax
