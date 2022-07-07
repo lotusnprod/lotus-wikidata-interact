@@ -56,7 +56,6 @@ fun loadData(fileName: String, skip: Int = 0, limit: Int? = null): DataTotal {
         if (RequiredTaxonRanks.any { organismRanks.contains("it") } ||
             organismDb !in TaxonomyDatabaseExclusionList
         ) {
-
             val organismObj = dataTotal.organismCache.getOrNew(organismCleaned) { Organism(name = organismCleaned) }
 
             organismObj.finalIds[organismDb] = organismID

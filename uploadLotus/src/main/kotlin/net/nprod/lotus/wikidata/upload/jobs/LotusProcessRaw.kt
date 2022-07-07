@@ -102,8 +102,9 @@ class LotusProcessRaw : ItemProcessor<LotusRaw, DataTotal> {
             /**
              * We had a bug where we matched all the NA to a single article
              */
-            if (referenceObj.doi != "NA")
+            if (referenceObj.doi != "NA") {
                 dataTotal.triplets.add(Triplet(organismObj, compoundObj, referenceObj))
+            }
         } catch (e: InvalidEntryDataException) {
             logger.error("Invalid Entry Data: ${e.message}")
         }

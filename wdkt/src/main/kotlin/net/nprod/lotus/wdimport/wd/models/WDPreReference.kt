@@ -15,7 +15,7 @@ import org.wikidata.wdtk.datamodel.interfaces.Value
 
 data class PropertyStore(
     val property: RemoteProperty,
-    val value: Value,
+    val value: Value
 )
 
 class WDPreReference {

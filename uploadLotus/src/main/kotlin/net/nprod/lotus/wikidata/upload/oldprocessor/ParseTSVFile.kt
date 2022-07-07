@@ -20,7 +20,6 @@ import java.io.Reader
  */
 
 fun parseTSVFile(file: Reader, lines: Int? = null, skip: Int = 0): List<Record>? {
-
     val settingsParser = TsvParserSettings()
     settingsParser.format.setLineSeparator("\n")
     settingsParser.isHeaderExtractionEnabled = true

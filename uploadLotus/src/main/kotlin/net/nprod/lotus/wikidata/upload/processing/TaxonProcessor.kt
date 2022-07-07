@@ -118,7 +118,7 @@ class TaxonProcessor(
 
     @Suppress("NestedBlockDepth")
     private fun searchForTaxonInfo(
-        organism: Organism,
+        organism: Organism
     ): MutableList<AcceptedTaxonEntry> {
         val acceptedRanks = mutableListOf<AcceptedTaxonEntry>()
         var fullTaxonFound = false

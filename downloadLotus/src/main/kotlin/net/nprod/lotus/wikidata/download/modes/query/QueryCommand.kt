@@ -33,11 +33,13 @@ class QueryCommand : CliktCommand(help = "Run a SPARQL SELECT query on the local
         val queryFile = File(queryFilename)
         val outputFile = outputFilename?.let { File(it) }
 
-        if (!storeFile.isDirectory && !direct)
+        if (!storeFile.isDirectory && !direct) {
             throw FileNotFoundException("Impossible to open the repository, did you run mirror?")
+        }
 
-        if (!queryFile.exists())
+        if (!queryFile.exists()) {
             throw FileNotFoundException("Impossible to open the query!")
+        }
 
         query(storeFile, queryFile, outputFile, direct = direct)
     }

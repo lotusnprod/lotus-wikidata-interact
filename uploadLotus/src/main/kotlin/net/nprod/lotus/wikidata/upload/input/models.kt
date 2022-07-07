@@ -25,7 +25,7 @@ data class Organism(
     val textRanks: MutableMap<String, String> = mutableMapOf(),
     val textNames: MutableMap<String, String> = mutableMapOf(),
     // We are not using a map for the organismTaxInfo as we want to keep the order
-    val rankIds: MutableMap<TaxonomyDatabase, List<Pair<String, OrganismTaxInfo>>> = mutableMapOf(),
+    val rankIds: MutableMap<TaxonomyDatabase, List<Pair<String, OrganismTaxInfo>>> = mutableMapOf()
 
 ) : Indexable {
     /**

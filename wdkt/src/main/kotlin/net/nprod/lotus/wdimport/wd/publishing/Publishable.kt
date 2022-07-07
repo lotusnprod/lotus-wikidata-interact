@@ -196,7 +196,6 @@ abstract class Publishable {
         instanceItems: InstanceItems,
         existingPropertyValueCoupleToReferences: Map<String, Map<Value, Statement>>
     ): Statement? {
-
         val newStatementProperty: PropertyIdValue = statement.property.get(instanceItems)
 
         val references = statement.preReferences.map { it.build(instanceItems) }
@@ -241,7 +240,7 @@ abstract class Publishable {
             existingStatement?.statementId,
             newStatementValue,
             existingReferencesToPortOver + newReferences,
-            qualifiers,
+            qualifiers
         )
     }
 

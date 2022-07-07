@@ -75,7 +75,7 @@ data class WDArticle(
         issue?.let { ReferencedValueStatement(InstanceItems::issue, it).withReferenceURL(source) },
         volume?.let { ReferencedValueStatement(InstanceItems::volume, it).withReferenceURL(source) },
         pages?.let { ReferencedValueStatement(InstanceItems::pages, it).withReferenceURL(source) },
-        resolvedISSN?.let { ReferencedValueStatement(InstanceItems::publishedIn, it).withReferenceURL(source) },
+        resolvedISSN?.let { ReferencedValueStatement(InstanceItems::publishedIn, it).withReferenceURL(source) }
     ) + authorsStatements()
 
     /**
@@ -84,9 +84,9 @@ data class WDArticle(
     private fun authorsStatements(): List<IReferencedStatement> =
         authors?.filter { it.fullName != "" }?.mapIndexed { index, author ->
             val wikidataID = author.wikidataID
-            val statement = if (wikidataID != null)
+            val statement = if (wikidataID != null) {
                 ReferencedValueStatement(InstanceItems::author, wikidataID)
-            else ReferencedValueStatement(InstanceItems::authorNameString, author.fullName)
+            } else { ReferencedValueStatement(InstanceItems::authorNameString, author.fullName) }
 
             statement.withReferenceURL(source).apply {
                 this.qualifier(InstanceItems::seriesOrdinal, Datamodel.makeStringValue((index + 1).toString()))
@@ -133,13 +133,16 @@ data class WDArticle(
         val output = try {
             tryCount<WorkResponse>(
                 listExceptions = listOf(
-                    MediaWikiApiErrorException::class, IOException::class,
-                    TimeoutCancellationException::class, MaxlagErrorException::class,
+                    MediaWikiApiErrorException::class,
+                    IOException::class,
+                    TimeoutCancellationException::class,
+                    MaxlagErrorException::class,
                     UnManagedReturnCode::class,
                     io.ktor.network.sockets.ConnectTimeoutException::class,
                     io.ktor.utils.io.charsets.MalformedInputException::class
                 ),
-                maxRetries = 10, delayMilliSeconds = 30_000L
+                maxRetries = 10,
+                delayMilliSeconds = 30_000L
             ) {
                 wdFinder.crossRefConnector.workFromDOI(doi)
             }

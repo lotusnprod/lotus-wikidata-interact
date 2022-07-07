@@ -33,7 +33,7 @@ class ReferenceProcessor(
         val article = WDArticle(
             label = reference.title ?: reference.doi,
             title = reference.title,
-            doi = reference.doi.uppercase(Locale.getDefault()), // DOIs are always uppercase but in reality we see both
+            doi = reference.doi.uppercase(Locale.getDefault()) // DOIs are always uppercase but in reality we see both
         ).tryToFind(wdFinder, instanceItems)
 
         // Get the article info on crossref if needed

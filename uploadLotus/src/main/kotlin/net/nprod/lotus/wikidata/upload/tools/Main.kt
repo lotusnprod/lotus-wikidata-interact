@@ -5,15 +5,15 @@
  *
  * This script is used to clean up entries we added that are listing the wrong article
  * because it matches an article with a DOI of NA.
+ *
  */
 
-package net.nprod.lotus.wikidata.upload.tools.specificArticleRemoval
+package net.nprod.lotus.wikidata.upload.tools
 
 import net.nprod.lotus.wdimport.wd.MainInstanceItems
 import net.nprod.lotus.wdimport.wd.publishing.InternalException
 import net.nprod.lotus.wdimport.wd.publishing.WDPublisher
 import net.nprod.lotus.wdimport.wd.sparql.WDSparql
-import net.nprod.lotus.wikidata.upload.tools.Statement
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.wikidata.wdtk.datamodel.helpers.StatementBuilder
@@ -40,15 +40,15 @@ fun main() {
             ?pp703       prov:wasDerivedFrom ?derived;
                          ps:P703 ?taxo.
             ?derived     pr:P248 ?reference.
-            VALUES ?reference { <http://www.wikidata.org/entity/Q104415021> }
-        } 
+            ?reference   wdt:P356 "NA".
+        }
         """.trimIndent()
     ) { result ->
         statements = result.map { bindingSet ->
             Statement(
                 bindingSet.getValue("id").stringValue().replace("http://www.wikidata.org/entity/", ""),
                 bindingSet.getValue("taxo").stringValue().replace("http://www.wikidata.org/entity/", ""),
-                bindingSet.getValue("reference").stringValue().replace("http://www.wikidata.org/entity/", ""),
+                bindingSet.getValue("reference").stringValue().replace("http://www.wikidata.org/entity/", "")
             )
         }
     }
@@ -78,7 +78,6 @@ fun main() {
                 logger.info("So we have ${documentStatements.size} statements to process for that document")
                 // If we have only one ref, we kill the full statement, if not we just kill the ref
                 documentStatements.map {
-
                     if (it.references.size == 1) {
                         publisher.editor?.updateStatements(
                             document.entityId,
@@ -98,15 +97,17 @@ fun main() {
                         }
 
                         val newStatement = StatementBuilder.forSubjectAndProperty(
-                            ItemIdValue.NULL, instanceItems.foundInTaxon
-                        ).withId(it.statementId)
+                            ItemIdValue.NULL,
+                            instanceItems.foundInTaxon
+                        )
+                            .withId(it.statementId)
                             .withValue(it.value)
                             .withReferences(newRefs).build()
                         publisher.editor?.updateStatements(
                             document.entityId,
                             listOf(newStatement), // adds (we are overwriting it, no need to delete!)
                             listOf(), // deletes
-                            "Cleaning up my mistakes, deleting a mismatched article",
+                            "Cleaning up my mistakes",
                             listOf()
                         ) ?: throw InternalException("Editor is not working!")
                         logger.info(" I delete only the matching ref")
