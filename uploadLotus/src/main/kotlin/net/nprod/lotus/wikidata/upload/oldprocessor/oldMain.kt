@@ -50,8 +50,9 @@ fun oldmain(args: Array<String>) {
     lateinit var wdSparql: ISparql
     lateinit var publisher: IPublisher
 
-    if (parameters.real && parameters.validation)
+    if (parameters.real && parameters.validation) {
         throw IllegalArgumentException("You cannot be in real mode and validation mode")
+    }
 
     // Are we using test-wikidata properties and classes or the main instance ones
     val instanceItems: InstanceItems =
@@ -59,9 +60,10 @@ fun oldmain(args: Array<String>) {
 
     // Do we need a local repository
     val repositoryManager: RepositoryManager? =
-        if (parameters.real || parameters.realSparql || parameters.validation) null else {
-            if (parameters.repositoryInputFilename == "")
+        if (parameters.real || parameters.realSparql || parameters.validation) { null } else {
+            if (parameters.repositoryInputFilename == "") {
                 throw IllegalArgumentException("You need to give a repository input file name")
+            }
             RepositoryManager(parameters.persistent, parameters.repositoryInputFilename)
         }
 
@@ -113,14 +115,15 @@ fun oldmain(args: Array<String>) {
 
     // Counting
 
-    if (!parameters.real && !parameters.validation)
+    if (!parameters.real && !parameters.validation) {
         countInLocalRepository(repositoryManager, instanceItems, logger)
+    }
 
     logger.info("Publisher has made ${publisher.newDocuments} new documents and updated ${publisher.updatedDocuments}")
 
     // Exporting
 
-    if (!parameters.real && parameters.output != "") repositoryManager?.write(parameters.output)
+    if (!parameters.real && parameters.output != "") { repositoryManager?.write(parameters.output) }
 
     wdFinder.close()
 }
