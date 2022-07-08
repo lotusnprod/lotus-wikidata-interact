@@ -8,6 +8,7 @@
 package net.nprod.lotus.wdimport.wd.query
 
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.engine.cio.endpoint
 import io.ktor.client.request.get
@@ -57,7 +58,7 @@ class WDKT : IWDKT {
                         parameter("format", "json")
                         parameter("list", "search")
                         parameter("srsearch", "haswbstatement:\"${property.id}=$value\"")
-                    }
+                    }.body()
                 }
             if (out.contains("error")) {
                 logger.error("Looking for $property = $value Found a problematic JSON string: $out")
