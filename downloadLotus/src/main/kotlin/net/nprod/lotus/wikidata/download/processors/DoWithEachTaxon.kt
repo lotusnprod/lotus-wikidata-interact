@@ -10,7 +10,7 @@ import net.nprod.lotus.wikidata.download.models.Taxon
 import net.nprod.lotus.wikidata.download.rdf.vocabulary.WikidataChemistry
 import net.nprod.lotus.wikidata.download.rdf.vocabulary.WikidataTaxonomy
 import net.nprod.lotus.wikidata.download.sparql.LOTUSQueries
-import org.eclipse.rdf4j.IsolationLevels
+import org.eclipse.rdf4j.common.transaction.IsolationLevels
 import org.eclipse.rdf4j.repository.Repository
 import org.eclipse.rdf4j.repository.RepositoryConnection
 

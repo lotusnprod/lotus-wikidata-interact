@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import net.nprod.lotus.wikidata.download.rdf.RDFRepository
 import net.nprod.lotus.wikidata.download.sparql.LOTUSQueries
-import org.eclipse.rdf4j.IsolationLevels
+import org.eclipse.rdf4j.common.transaction.IsolationLevels
 import org.eclipse.rdf4j.model.IRI
 import org.eclipse.rdf4j.model.Statement
 import org.eclipse.rdf4j.query.TupleQueryResult

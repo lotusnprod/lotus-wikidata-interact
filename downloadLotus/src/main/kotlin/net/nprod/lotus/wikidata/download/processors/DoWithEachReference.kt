@@ -9,7 +9,7 @@ package net.nprod.lotus.wikidata.download.processors
 import net.nprod.lotus.wikidata.download.models.Reference
 import net.nprod.lotus.wikidata.download.rdf.vocabulary.Wikidata
 import net.nprod.lotus.wikidata.download.rdf.vocabulary.WikidataBibliography
-import org.eclipse.rdf4j.IsolationLevels
+import org.eclipse.rdf4j.common.transaction.IsolationLevels
 import org.eclipse.rdf4j.repository.Repository
 import org.eclipse.rdf4j.repository.RepositoryConnection
 

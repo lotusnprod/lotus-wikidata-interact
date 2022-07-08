@@ -8,7 +8,7 @@ package net.nprod.lotus.wikidata.download.processors
 
 import net.nprod.lotus.wikidata.download.models.Compound
 import net.nprod.lotus.wikidata.download.rdf.vocabulary.WikidataChemistry
-import org.eclipse.rdf4j.IsolationLevels
+import org.eclipse.rdf4j.common.transaction.IsolationLevels
 import org.eclipse.rdf4j.repository.Repository
 import org.eclipse.rdf4j.repository.RepositoryConnection
 
