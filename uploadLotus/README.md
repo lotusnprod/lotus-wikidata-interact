@@ -8,7 +8,7 @@ It is written in [Kotlin](https://www.kotlinlang.org) and uses:
 - [Wikidata Toolkit](https://www.mediawiki.org/wiki/Wikidata_Toolkit)
 - [Chemistry Development Kit](https://cdk.github.io/)
 - [RDF4J](https://rdf4j.org/)
-- the super fast [Univocity Parsers](https://www.univocity.com/pages/about-parsers) for TSV files
+- the super fast [Univocity Parsers](https://github.com/uniVocity/univocity-parsers) for TSV files
 - [Kotlinx.cli](https://github.com/Kotlin/kotlinx-cli)
 
 Requires Java >=11
