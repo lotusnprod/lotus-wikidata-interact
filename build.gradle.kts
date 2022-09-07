@@ -93,7 +93,6 @@ project("uploadLotus") {
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
 
         implementation("io.ktor:ktor-client-cio:$ktorVersion")
-        implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
         implementation("org.apache.logging.log4j:log4j-api:$log4jVersion")
         implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")
 
