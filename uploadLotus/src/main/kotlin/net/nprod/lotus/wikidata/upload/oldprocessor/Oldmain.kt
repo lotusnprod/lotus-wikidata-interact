@@ -43,7 +43,7 @@ fun oldmain(args: Array<String>) {
 
     logger.info("LOTUS Importer")
 
-    if (!parameters.real) logger.info("We are in test mode")
+    // if (!parameters.real) logger.info("We are in test mode")
 
     logger.info("Initializing toolkit")
 
@@ -60,7 +60,9 @@ fun oldmain(args: Array<String>) {
 
     // Do we need a local repository
     val repositoryManager: RepositoryManager? =
-        if (parameters.real || parameters.realSparql || parameters.validation) { null } else {
+        if (parameters.real || parameters.realSparql || parameters.validation) {
+            null
+        } else {
             if (parameters.repositoryInputFilename == "") {
                 throw IllegalArgumentException("You need to give a repository input file name")
             }
@@ -68,16 +70,21 @@ fun oldmain(args: Array<String>) {
         }
 
     // What publishing system are we using
-    publisher = if (parameters.real) WDPublisher(instanceItems, pause = 0L) else TestPublisher(
-        instanceItems,
-        repositoryManager?.repository
-    )
+    publisher = if (parameters.real) {
+        WDPublisher(instanceItems, pause = 0L)
+    } else {
+        TestPublisher(
+            instanceItems,
+            repositoryManager?.repository
+        )
+    }
 
     // Are we using a local instance of sparql?
     wdSparql = if (parameters.realSparql || parameters.real) {
         WDSparql(instanceItems)
-    } else if (parameters.validation || repositoryManager == null) NopSparql()
-    else {
+    } else if (parameters.validation || repositoryManager == null) {
+        NopSparql()
+    } else {
         TestISparql(instanceItems, repositoryManager.repository)
     }
 
@@ -90,11 +97,15 @@ fun oldmain(args: Array<String>) {
     logger.info("Loading data")
 
     val dataTotal: DataTotal =
-        if (parameters.limit == -1) loadData(parameters.input, parameters.skip) else loadData(
-            parameters.input,
-            parameters.skip,
-            parameters.limit
-        )
+        if (parameters.limit == -1) {
+            loadData(parameters.input, parameters.skip)
+        } else {
+            loadData(
+                parameters.input,
+                parameters.skip,
+                parameters.limit
+            )
+        }
 
     logger.info("Producing data")
 
@@ -122,8 +133,9 @@ fun oldmain(args: Array<String>) {
     logger.info("Publisher has made ${publisher.newDocuments} new documents and updated ${publisher.updatedDocuments}")
 
     // Exporting
-
-    if (!parameters.real && parameters.output != "") { repositoryManager?.write(parameters.output) }
+    if (!parameters.real && parameters.output != "") {
+        repositoryManager?.write(parameters.output)
+    }
 
     wdFinder.close()
 }

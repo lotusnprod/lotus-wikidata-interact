@@ -148,8 +148,12 @@ abstract class Publishable {
                 val doc = it.getEntityDocument(id)
                 if (doc is ItemDocument) {
                     doc.allStatements.iterator().asSequence().toList() // so we have types
-                } else listOf()
-            } else listOf()
+                } else {
+                    listOf()
+                }
+            } else {
+                listOf()
+            }
         } ?: listOf()
 
         val existingPropertyValueCoupleToReferencesIds: Map<String, Map<Value, Statement>> =
