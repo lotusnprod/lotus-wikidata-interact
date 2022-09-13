@@ -54,7 +54,8 @@ val LIST_OF_ACCEPTED_DBS: Array<String> = arrayOf(
     "GBIF Backbone Taxonomy",
     "AlgaeBase",
     "BirdLife International",
-    "Mammal Species of the World"
+    "Mammal Species of the World",
+    "EUNIS"
 )
 
 /**
