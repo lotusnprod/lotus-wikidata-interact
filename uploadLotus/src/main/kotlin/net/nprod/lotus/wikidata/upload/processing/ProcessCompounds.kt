@@ -9,6 +9,7 @@ package net.nprod.lotus.wikidata.upload.processing
 
 import net.nprod.lotus.chemistry.smilesToCanonical
 import net.nprod.lotus.chemistry.smilesToFormula
+import net.nprod.lotus.chemistry.smilesToMass
 import net.nprod.lotus.chemistry.subscriptFormula
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
@@ -69,8 +70,15 @@ fun DataTotal.processCompounds(
                         logger.error("Invalid smiles exception cannot make a formula: ${e.message}")
                         return@forEachIndexed
                     },
-                iupac = compound.iupac,
-                undefinedStereocenters = compound.unspecifiedStereocenters,
+                mass =
+                    try {
+                        smilesToMass(smiles)
+                    } catch (e: InvalidSmilesException) {
+                        logger.error("Invalid smiles exception cannot make an exact mass: ${e.message}")
+                        return@forEachIndexed
+            },
+            iupac = compound.iupac,
+            undefinedStereocenters = compound.unspecifiedStereocenters,
             ).tryToFind(wdFinder, instanceItems, wikidataCompoundCache)
 
         logger.info(wdCompound)

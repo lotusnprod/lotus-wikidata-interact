@@ -11,6 +11,7 @@ import org.openscience.cdk.silent.SilentChemObjectBuilder
 import org.openscience.cdk.smiles.SmiFlavor
 import org.openscience.cdk.smiles.SmilesGenerator
 import org.openscience.cdk.smiles.SmilesParser
+import org.openscience.cdk.tools.manipulator.AtomContainerManipulator
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator
 
 fun subscriptFormula(formula: String): String =
@@ -37,4 +38,14 @@ val canonicalGenerator = SmilesGenerator(SmiFlavor.Canonical)
 fun smilesToCanonical(smiles: String): String {
     val atomContainer = SmilesParser(SilentChemObjectBuilder.getInstance()).parseSmiles(smiles)
     return canonicalGenerator.create(atomContainer)
+}
+
+fun smilesToMass(smiles: String): String {
+    val atomContainer = SmilesParser(SilentChemObjectBuilder.getInstance()).parseSmiles(smiles)
+    val mass = AtomContainerManipulator.getMass(atomContainer)
+    val sb = StringBuilder()
+    sb.append("+")
+    sb.append(mass)
+    sb.append("U483261")
+    return sb.toString() 
 }

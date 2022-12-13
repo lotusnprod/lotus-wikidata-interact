@@ -55,10 +55,11 @@ fun loadData(
         val organismID = it.getString("organismCleaned_id")
         val organismRanks = it.getString("organismCleaned_dbTaxoTaxonRanks")
         val organismNames = it.getString("organismCleaned_dbTaxoTaxonomy")
+
         val unspecifiedCenters = it.getInt("structureCleaned_stereocenters_unspecified")
         val totalCenters = it.getInt("structureCleaned_stereocenters_total")
-
         val smiles = it.getString("structureCleanedSmiles")
+        
         val doi = it.getString("referenceCleanedDoi")
 
         if (RequiredTaxonRanks.any { organismRanks.contains("it") } ||
