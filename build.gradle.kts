@@ -74,17 +74,18 @@ subprojects {
 project("uploadLotus") {
 
     dependencies {
-        val kotlinxCliVersion: String by project
         val cdkVersion: String by project
-        val wdtkVersion: String by project
-        val rdf4jVersion: String by project
-        val log4jVersion: String by project
-        val junitApiVersion: String by project
-        val ktorVersion: String by project
-        val serializationVersion: String by project
-        val kotlinVersion: String by project
-        val konnectorVersion: String by project
         val detektVersion: String by project
+        val jsoupVersion: String by project
+        val junitApiVersion: String by project
+        val konnectorVersion: String by project
+        val kotlinVersion: String by project
+        val kotlinxCliVersion: String by project
+        val ktorVersion: String by project
+        val log4jVersion: String by project
+        val rdf4jVersion: String by project
+        val serializationVersion: String by project
+        val wdtkVersion: String by project
 
         detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:$detektVersion")
 
@@ -116,6 +117,9 @@ project("uploadLotus") {
         implementation("org.eclipse.rdf4j:rdf4j-repository-sail:$rdf4jVersion")
         implementation("org.eclipse.rdf4j:rdf4j-sail-memory:$rdf4jVersion")
 
+        // jsoup HTML parser library @ https://jsoup.org/
+        implementation("org.jsoup:jsoup:$jsoupVersion")
+
         implementation("net.nprod:konnector:$konnectorVersion")
 
         testImplementation(kotlin("test-junit5"))
@@ -127,17 +131,18 @@ project("uploadLotus") {
 project("wdkt") {
 
     dependencies {
-        val kotlinxCliVersion: String by project
         val cdkVersion: String by project
-        val wdtkVersion: String by project
-        val rdf4jVersion: String by project
-        val log4jVersion: String by project
-        val junitApiVersion: String by project
-        val ktorVersion: String by project
-        val serializationVersion: String by project
-        val kotlinVersion: String by project
-        val konnectorVersion: String by project
         val detektVersion: String by project
+        val jsoupVersion: String by project
+        val junitApiVersion: String by project
+        val konnectorVersion: String by project
+        val kotlinVersion: String by project
+        val kotlinxCliVersion: String by project
+        val ktorVersion: String by project
+        val log4jVersion: String by project
+        val rdf4jVersion: String by project
+        val serializationVersion: String by project
+        val wdtkVersion: String by project
 
         detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:$detektVersion")
 
@@ -168,6 +173,9 @@ project("wdkt") {
         implementation("org.eclipse.rdf4j:rdf4j-core:$rdf4jVersion")
         implementation("org.eclipse.rdf4j:rdf4j-repository-sail:$rdf4jVersion")
         implementation("org.eclipse.rdf4j:rdf4j-sail-memory:$rdf4jVersion")
+
+        // jsoup HTML parser library @ https://jsoup.org/
+        implementation("org.jsoup:jsoup:$jsoupVersion")
 
         implementation("net.nprod:konnector:$konnectorVersion")
 

@@ -7,13 +7,17 @@
 
 package net.nprod.lotus.helpers
 
+import org.jsoup.Jsoup.parse
+
 fun String.ifEqualReplace(search: String, replaceBy: String): String {
     if (this == search) return replaceBy
     return this
 }
 
-fun String.titleCleaner(): String = this.ifEqualReplace("NA", "")
-    .replace("\\s+".toRegex(), " ")
-    .replace(" ", " ")
-    .replace("\n", "")
-    .replace("\r", "")
+fun String.titleCleaner(): String =
+    parse(this.ifEqualReplace("NA", ""))
+        .text()
+        .replace("\\s+".toRegex(), " ")
+        .replace(" ", " ")
+        .replace("\n", "")
+        .replace("\r", "")

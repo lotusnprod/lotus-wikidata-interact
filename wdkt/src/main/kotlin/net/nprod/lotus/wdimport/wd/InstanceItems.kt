@@ -45,6 +45,7 @@ interface InstanceItems {
     val canonicalSMILES: PropertyIdValue
     val pcId: PropertyIdValue
     val chemicalFormula: PropertyIdValue
+    val mass: PropertyIdValue
 
     // Taxon
     val taxonName: PropertyIdValue
@@ -153,6 +154,7 @@ object TestInstanceItems : InstanceItems {
     override val canonicalSMILES: PropertyIdValue = property("P95466")
     override val pcId: PropertyIdValue = property("P95464")
     override val chemicalFormula: PropertyIdValue = property("P95465")
+    override val mass: PropertyIdValue = property("P95467")
     override val instanceOf: PropertyIdValue = wdproperty("P82")
 
     override val taxonName: PropertyIdValue = wdtproperty("P95494") // This is a random one
@@ -256,6 +258,7 @@ object MainInstanceItems : InstanceItems {
     override val canonicalSMILES: PropertyIdValue = property("P233")
     override val pcId: PropertyIdValue = property("P662")
     override val chemicalFormula: PropertyIdValue = property("P274")
+    override val mass: PropertyIdValue = property("P2067")
     override val instanceOf: PropertyIdValue = property("P31")
 
     // Properties of taxa
