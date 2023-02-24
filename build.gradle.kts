@@ -6,7 +6,7 @@ val localProperties = if (localPropertiesFile.exists()) {
     val properties = Properties()
     properties.load(localPropertiesFile.inputStream())
     properties
-} else null
+} else { null }
 
 plugins {
     kotlin("jvm")
