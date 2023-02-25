@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-java@v3
         with:
           distribution: 'adopt-hotspot'
-          java-version: '16'
+          java-version: '17'
           cache: 'gradle'
       - name: "Build"
         run: |
