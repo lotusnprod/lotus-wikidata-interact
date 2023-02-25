@@ -37,6 +37,8 @@ allprojects {
 }
 
 subprojects {
+    val java = "17"
+
     apply {
         plugin("com.github.ben-manes.versions")
         plugin("io.gitlab.arturbosch.detekt")
@@ -46,13 +48,20 @@ subprojects {
         plugin("org.jetbrains.kotlin.plugin.serialization")
     }
 
+    tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+        this.jvmTarget = java
+    }
+
     tasks.withType<KotlinCompile> {
         kotlinOptions {
+            jvmTarget = java
             freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
         }
     }
 
     tasks.withType<JavaCompile> {
+        sourceCompatibility = java
+        targetCompatibility = java
         options.encoding = "UTF-8"
     }
 
