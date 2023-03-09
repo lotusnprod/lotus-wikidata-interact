@@ -1,7 +1,7 @@
 # Lotus_bot
 
-This is a Bot for [WikiData](https://www.wikidata.org). It is used to import the data for the LOTUS and
-the [WikiData Natural Products Chemistry project](https://www.wikidata.org/wiki/Wikidata:WikiProject_Chemistry/Natural_products)
+This is a Bot for [Wikidata](https://www.wikidata.org). It is used to import the data for the LOTUS and
+the [Wikidata Natural Products Chemistry project](https://www.wikidata.org/wiki/Wikidata:WikiProject_Chemistry/Natural_products)
 
 It is written in [Kotlin](https://www.kotlinlang.org) and uses:
 
