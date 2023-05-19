@@ -45,6 +45,7 @@ data class WDCompound(
     val f: WDCompound.() -> Unit = {}
 ) : Publishable() {
     override var type: RemoteItem =
+        // Add typeOfChemicalEntity to chemicalCompound (TODO)
         if (undefinedStereocenters == 0) InstanceItems::chemicalCompound else InstanceItems::groupOfStereoIsomers
     private val logger: Logger = LogManager.getLogger(WDCompound::class.qualifiedName)
 

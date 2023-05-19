@@ -16,6 +16,6 @@ object WikidataChemistry {
     }
 
     val chemicalCompound = Wikidata.wd("Q11173")
-    val chemicalEntity = Wikidata.wd("Q43460564")
+    val typeOfChemicalEntity = Wikidata.wd("Q113145171")
     val groupOfStereoIsomers = Wikidata.wd("Q59199015")
 }
