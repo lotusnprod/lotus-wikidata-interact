@@ -2,5 +2,5 @@
 SELECT ?publication
 WHERE {
   ?publication     wdt:P31 ?type.
-  VALUES ?type { wd:Q11173 wd:Q43460564 wd:Q59199015 }
+  VALUES ?type { wd:Q113145171 wd:Q59199015 }
 }

@@ -69,7 +69,7 @@ object LOTUSQueries {
                              prov:wasDerivedFrom ?derived.
             ?derived         pr:P248 ?reference_id.
 
-            #VALUES ?type { wd:Q11173 wd:Q113145171 wd:Q59199015 } # chemical compound or type of chemical entity or group of stereoisomers
+            #VALUES ?type { wd:Q113145171 wd:Q59199015 } # type of chemical entity or group of stereoisomers
         }
         """.trimIndent()
 
