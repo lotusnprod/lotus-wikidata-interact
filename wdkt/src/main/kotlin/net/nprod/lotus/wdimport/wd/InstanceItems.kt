@@ -216,7 +216,7 @@ object TestInstanceItems : InstanceItems {
     override val publication: ItemIdValue = item("Q732577")
 
     // Things
-    //override val chemicalCompound: ItemIdValue = item("Q212525")
+    // override val chemicalCompound: ItemIdValue = item("Q212525")
     override val groupOfStereoIsomers: ItemIdValue = item("Q59199015")
     override val typeOfAChemicalEntity: ItemIdValue = item("Q12040628")
 
