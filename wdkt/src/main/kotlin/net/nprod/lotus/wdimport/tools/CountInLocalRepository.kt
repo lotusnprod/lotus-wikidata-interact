@@ -25,7 +25,7 @@ fun countInLocalRepository(
                    }
                    
                    { SELECT (count (distinct ?cpd) as ?cpdcount) WHERE {
-                   ?cpd <${instanceItems.instanceOf.iri}> <${instanceItems.chemicalCompound.iri}>.
+                   ?cpd <${instanceItems.instanceOf.iri}> <${instanceItems.typeOfAChemicalEntity.iri}>.
                    }
                    }
                 }
