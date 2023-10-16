@@ -291,7 +291,7 @@ allprojects {
     detekt {
         val detektVersion: String by project
         toolVersion = detektVersion
-        config = rootProject.files("qc/detekt.yml")
+        config.setFrom(rootProject.files("qc/detekt.yml"))
         baseline = rootProject.file("qc/detekt-baseline.xml")
     }
 }
