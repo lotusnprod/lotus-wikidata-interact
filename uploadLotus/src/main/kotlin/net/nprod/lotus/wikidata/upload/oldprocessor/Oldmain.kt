@@ -7,7 +7,6 @@
 
 package net.nprod.lotus.wdimport.net.nprod.lotus.importer
 
-import io.ktor.util.KtorExperimentalAPI
 import net.nprod.lotus.rdf.RepositoryManager
 import net.nprod.lotus.wdimport.tools.countInLocalRepository
 import net.nprod.lotus.wdimport.wd.InstanceItems
@@ -33,7 +32,6 @@ import org.slf4j.LoggerFactory
 import kotlin.time.ExperimentalTime
 
 @ExperimentalTime
-@KtorExperimentalAPI
 @Suppress("ComplexMethod")
 fun oldmain(args: Array<String>) {
     val logger = LoggerFactory.getLogger("main")

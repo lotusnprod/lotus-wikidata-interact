@@ -7,7 +7,6 @@
 
 package net.nprod.lotus.wikidata.upload.processing
 
-import io.ktor.util.KtorExperimentalAPI
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
 import net.nprod.lotus.wdimport.wd.models.entries.WDArticle
@@ -28,7 +27,6 @@ class ReferenceProcessor(
     private val articlesCache: MutableMap<Reference, WDArticle> = mutableMapOf()
 
     @ExperimentalTime
-    @KtorExperimentalAPI
     private fun articleFromReference(reference: Reference): WDArticle {
         val article =
             WDArticle(
