@@ -15,7 +15,7 @@ import org.wikidata.wdtk.datamodel.interfaces.Value
 
 data class PropertyStore(
     val property: RemoteProperty,
-    val value: Value
+    val value: Value,
 )
 
 class WDPreReference {
@@ -30,7 +30,10 @@ class WDPreReference {
         return referenceBuilder.build()
     }
 
-    fun add(property: RemoteProperty, value: Value): WDPreReference {
+    fun add(
+        property: RemoteProperty,
+        value: Value,
+    ): WDPreReference {
         listOfProperties.add(PropertyStore(property, value))
         return this
     }

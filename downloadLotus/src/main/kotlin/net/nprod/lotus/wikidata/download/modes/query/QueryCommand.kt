@@ -23,7 +23,7 @@ class QueryCommand : CliktCommand(help = "Run a SPARQL SELECT query on the local
     private val direct by option(
         "-d",
         "--direct",
-        help = "Connect directly to WikiData, do not use the local instance"
+        help = "Connect directly to WikiData, do not use the local instance",
     ).flag("-l", "--local", default = false, defaultForHelp = "Use the local instance")
     private val queryFilename by argument(help = "File with the SPARQL query")
 

@@ -57,15 +57,15 @@ internal class IntegrationTest {
         assert(sparqlRepository.getEverythingAbout(setOf(iri), channel = Channel()).isNotEmpty())
     }*/
 
-    companion
-
-    object {
+    companion object {
         private lateinit var rdfRepository: RDFRepository
         private lateinit var sparqlRepository: SPARQLRepository
 
         @BeforeAll
         @JvmStatic
-        fun setup(@TempDir tempDir: Path) {
+        fun setup(
+            @TempDir tempDir: Path,
+        ) {
             sparqlRepository = SPARQLRepository("https://query.wikidata.org/sparql")
             rdfRepository = RDFRepository(tempDir.toFile())
         }

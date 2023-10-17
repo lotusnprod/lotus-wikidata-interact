@@ -21,7 +21,10 @@ interface Cache<T, U> {
     /**
      * Get or add a new entity
      */
-    fun getOrNew(key: T, value: U): U
+    fun getOrNew(
+        key: T,
+        value: U,
+    ): U
 }
 
 /**
@@ -33,7 +36,11 @@ class IndexableCache<T, U : Indexable> : Cache<T, U> {
     override val store: MutableMap<T, U> = mutableMapOf()
 
     private var counter = AtomicLong(0)
-    override fun getOrNew(key: T, value: U): U {
+
+    override fun getOrNew(
+        key: T,
+        value: U,
+    ): U {
         return store[key] ?: run {
             val count = counter.incrementAndGet()
             value.id = count
@@ -45,7 +52,10 @@ class IndexableCache<T, U : Indexable> : Cache<T, U> {
     /**
      * Generate a value using an extension function
      */
-    fun getOrNew(key: T, generator: () -> U): U {
+    fun getOrNew(
+        key: T,
+        generator: () -> U,
+    ): U {
         return getOrNew(key, generator())
     }
 }

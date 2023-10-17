@@ -9,12 +9,12 @@ package net.nprod.lotus.wikidata.upload.input
 
 data class Database(
     override var id: Long? = null,
-    val name: String
+    val name: String,
 ) : Indexable
 
 data class OrganismTaxInfo(
     // val id: String,
-    val name: String
+    val name: String,
 )
 
 data class Organism(
@@ -25,8 +25,7 @@ data class Organism(
     val textRanks: MutableMap<String, String> = mutableMapOf(),
     val textNames: MutableMap<String, String> = mutableMapOf(),
     // We are not using a map for the organismTaxInfo as we want to keep the order
-    val rankIds: MutableMap<TaxonomyDatabase, List<Pair<String, OrganismTaxInfo>>> = mutableMapOf()
-
+    val rankIds: MutableMap<TaxonomyDatabase, List<Pair<String, OrganismTaxInfo>>> = mutableMapOf(),
 ) : Indexable {
     /**
      * Reorganize the ranks and ids per taxonomic database
@@ -34,15 +33,17 @@ data class Organism(
     fun resolve(cache: IndexableCache<String, TaxonomyDatabase>) {
         rankIds.clear()
         textRanks.keys.forEach {
-            val taxDb = cache.getOrNew(it) {
-                TaxonomyDatabase(name = it)
-            }
+            val taxDb =
+                cache.getOrNew(it) {
+                    TaxonomyDatabase(name = it)
+                }
             // val ids = textIds[it]?.split("|") ?: listOf()
             val ranks = textRanks[it]?.split("|") ?: listOf()
             val names = textNames[it]?.split("|") ?: listOf()
-            rankIds[taxDb] = ranks.mapIndexed { index, rank ->
-                rank to OrganismTaxInfo(names[index])
-            }
+            rankIds[taxDb] =
+                ranks.mapIndexed { index, rank ->
+                    rank to OrganismTaxInfo(names[index])
+                }
         }
     }
 
@@ -66,7 +67,7 @@ data class Organism(
 
 data class TaxonomyDatabase(
     override var id: Long? = null,
-    val name: String
+    val name: String,
 ) : Indexable
 
 data class Compound(
@@ -77,7 +78,7 @@ data class Compound(
     val inchikey: String,
     val iupac: String,
     val unspecifiedStereocenters: Int,
-    val atLeastSomeStereoDefined: Boolean
+    val atLeastSomeStereoDefined: Boolean,
 ) : Indexable
 
 data class Reference(
@@ -85,7 +86,7 @@ data class Reference(
     val doi: String,
     val pmcid: String?,
     val title: String?,
-    val pmid: String?
+    val pmid: String?,
 ) : Indexable
 
 fun String.ifEqualReplaceByNull(search: String): String? {
@@ -96,7 +97,7 @@ fun String.ifEqualReplaceByNull(search: String): String? {
 data class Triplet(
     val organism: Organism,
     val compound: Compound,
-    val reference: Reference
+    val reference: Reference,
 )
 
 data class DataTotal(
@@ -104,5 +105,5 @@ data class DataTotal(
     val taxonomyDatabaseCache: IndexableCache<String, TaxonomyDatabase> = IndexableCache(),
     val organismCache: IndexableCache<String, Organism> = IndexableCache(),
     val compoundCache: IndexableCache<String, Compound> = IndexableCache(),
-    val referenceCache: IndexableCache<String, Reference> = IndexableCache()
+    val referenceCache: IndexableCache<String, Reference> = IndexableCache(),
 )

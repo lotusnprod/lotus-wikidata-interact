@@ -21,7 +21,7 @@ import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue
 data class AuthorInfo(
     val orcid: String?,
     val givenName: String = "",
-    val familyName: String
+    val familyName: String,
 ) {
     var wikidataID: ItemIdValue? = null
     val fullName: String

@@ -19,7 +19,10 @@ import org.eclipse.rdf4j.repository.Repository
  * A test class that use a local repository to answer SPARQL queries
  */
 class TestISparql(override val instanceItems: InstanceItems, private val repository: Repository) : ISparql {
-    override fun <T> selectQuery(query: String, function: (TupleQueryResult) -> T): T {
+    override fun <T> selectQuery(
+        query: String,
+        function: (TupleQueryResult) -> T,
+    ): T {
         return repository.connection.use { conn ->
             function(conn.prepareTupleQuery(query).evaluate())
         }
@@ -35,9 +38,13 @@ class TestISparql(override val instanceItems: InstanceItems, private val reposit
 @Suppress("EmptyFunctionBlock")
 private class FakeTupleQueryResult : TupleQueryResult {
     override fun hasNext(): Boolean = false
+
     override fun next(): BindingSet = EmptyBindingSet()
+
     override fun remove() {}
+
     override fun close() {}
+
     override fun getBindingNames(): MutableList<String> = mutableListOf()
 }
 
@@ -45,7 +52,10 @@ private class FakeTupleQueryResult : TupleQueryResult {
  * A do nothing mock sparql implementation
  */
 class NopSparql : ISparql {
-    override fun <T> selectQuery(query: String, function: (TupleQueryResult) -> T): T {
+    override fun <T> selectQuery(
+        query: String,
+        function: (TupleQueryResult) -> T,
+    ): T {
         return function(FakeTupleQueryResult())
     }
 

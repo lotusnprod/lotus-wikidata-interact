@@ -23,9 +23,10 @@ fun main(args: Array<String>) {
     val logger: Logger = LoggerFactory.getLogger("MainThread")
     // runApplication<LotusImporter>(*args)
     logger.info("Hello!")
-    val tsvReader = UnivocityBasedReader<LotusRaw> {
-        LotusRaw.fromRecord(it)
-    }
+    val tsvReader =
+        UnivocityBasedReader<LotusRaw> {
+            LotusRaw.fromRecord(it)
+        }
 
     // val filePrepath = "../"
     val fileName = args[0]

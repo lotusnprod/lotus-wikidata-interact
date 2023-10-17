@@ -9,5 +9,5 @@ package net.nprod.lotus.wikidata.download.models
 data class CompoundReferenceTaxon(
     val compound: String,
     val taxon: String,
-    val reference: String?
+    val reference: String?,
 )

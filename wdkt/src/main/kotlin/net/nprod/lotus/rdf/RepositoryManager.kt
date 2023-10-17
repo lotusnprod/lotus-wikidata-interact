@@ -31,9 +31,10 @@ class RepositoryManager(persistent: Boolean, persistenceLocation: String) {
         if (persistent) {
             try {
                 logger.info("Loading old data")
-                val file = File(persistenceLocation).also {
-                    if (!it.canWrite() || !it.canRead()) throw AccessDeniedException(it)
-                }
+                val file =
+                    File(persistenceLocation).also {
+                        if (!it.canWrite() || !it.canRead()) throw AccessDeniedException(it)
+                    }
                 repository.let {
                     it.connection
                     it.connection.add(file.inputStream(), "", RDFFormat.RDFXML)

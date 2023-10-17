@@ -43,14 +43,18 @@ interface IReferencedStatement {
     /**
      * Add a reference to that statement
      */
-    fun reference(property: RemoteProperty, value: Value): Boolean =
-        preReferences.add(WDPreReference().add(property, value))
+    fun reference(
+        property: RemoteProperty,
+        value: Value,
+    ): Boolean = preReferences.add(WDPreReference().add(property, value))
 
     /**
      * Add a qualifier to that statement
      */
-    fun qualifier(property: KProperty1<InstanceItems, PropertyIdValue>, value: Value) =
-        preQualifiers.add(WDPreQualifier(property, value))
+    fun qualifier(
+        property: KProperty1<InstanceItems, PropertyIdValue>,
+        value: Value,
+    ) = preQualifiers.add(WDPreQualifier(property, value))
 
     /**
      * Add a statedIn reference
@@ -60,12 +64,13 @@ interface IReferencedStatement {
     /**
      * Add a reference for that statement and return the object
      */
-    fun withReferenceURL(source: String?) = this.apply {
-        source?.let {
-            this.reference(
-                InstanceItems::referenceURL,
-                Datamodel.makeStringValue(source)
-            )
+    fun withReferenceURL(source: String?) =
+        this.apply {
+            source?.let {
+                this.reference(
+                    InstanceItems::referenceURL,
+                    Datamodel.makeStringValue(source),
+                )
+            }
         }
-    }
 }

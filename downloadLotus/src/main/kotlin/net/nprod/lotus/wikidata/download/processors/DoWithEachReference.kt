@@ -15,7 +15,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection
 
 fun doWithEachReference(
     repository: Repository,
-    f: (Reference) -> Unit
+    f: (Reference) -> Unit,
 ) {
     repository.connection.use { conn: RepositoryConnection ->
         conn.begin(IsolationLevels.NONE) // We are not writing anything
@@ -26,14 +26,14 @@ fun doWithEachReference(
                             <${WikidataBibliography.Properties.doi}> ?doi.
                 OPTIONAL { ?article_id <${WikidataBibliography.Properties.title}> ?title. }
             }
-            """.trimIndent()
+            """.trimIndent(),
         ).evaluate().groupBy { it.getValue("article_id").stringValue() }.forEach { (key, value) ->
             f(
                 Reference(
                     wikidataId = key,
                     dois = value.mapNotNull { it.getValue("doi")?.stringValue() },
-                    title = value.mapNotNull { it.getValue("title")?.stringValue() }.firstOrNull()
-                )
+                    title = value.mapNotNull { it.getValue("title")?.stringValue() }.firstOrNull(),
+                ),
             )
         }
         conn.commit()

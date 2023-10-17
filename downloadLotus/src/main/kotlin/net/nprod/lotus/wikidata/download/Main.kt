@@ -22,6 +22,7 @@ class Exporter : CliktCommand() {
     }
 }
 
-fun main(args: Array<String>) = Exporter()
-    .subcommands(MirrorCommand(), QueryCommand(), ExportCommand())
-    .main(args)
+fun main(args: Array<String>) =
+    Exporter()
+        .subcommands(MirrorCommand(), QueryCommand(), ExportCommand())
+        .main(args)

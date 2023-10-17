@@ -84,8 +84,11 @@ interface InstanceItems {
     val p: Prefix
 
     fun wdproperty(id: String): PropertyIdValue = Datamodel.makePropertyIdValue(id, wdURI)
+
     fun wdtproperty(id: String): PropertyIdValue = Datamodel.makePropertyIdValue(id, wdtURI)
+
     fun property(id: String): PropertyIdValue = Datamodel.makePropertyIdValue(id, pURI)
+
     fun item(id: String): ItemIdValue = Datamodel.makeItemIdValue(id, siteIri)
 
     val idNCBITaxonomy: PropertyIdValue

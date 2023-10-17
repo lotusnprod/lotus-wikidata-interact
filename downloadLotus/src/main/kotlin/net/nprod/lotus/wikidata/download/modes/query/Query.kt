@@ -23,7 +23,10 @@ import java.io.OutputStreamWriter
  * Write the results from the SPARQL query to a TSV file
  */
 
-fun RepositoryConnection.queryToTSV(tsvWriter: TsvWriter, query: String) {
+fun RepositoryConnection.queryToTSV(
+    tsvWriter: TsvWriter,
+    query: String,
+) {
     this.prepareTupleQuery(query).evaluate().let { results ->
         val bindingNames = results.bindingNames
         tsvWriter.writeHeaders(bindingNames)
@@ -33,17 +36,23 @@ fun RepositoryConnection.queryToTSV(tsvWriter: TsvWriter, query: String) {
     }
 }
 
-fun query(repositoryLocation: File, queryFile: File, outFile: File?, direct: Boolean) {
+fun query(
+    repositoryLocation: File,
+    queryFile: File,
+    outFile: File?,
+    direct: Boolean,
+) {
     val logger = LoggerFactory.getLogger("query")
 
     logger.info("Starting in querying mode into the repository: $repositoryLocation with the query file $queryFile")
 
     val rdfRepository = RDFRepository(repositoryLocation)
-    val connection = if (direct) {
-        SPARQLRepository("https://query.wikidata.org/sparql").connection
-    } else {
-        rdfRepository.repository.connection
-    }
+    val connection =
+        if (direct) {
+            SPARQLRepository("https://query.wikidata.org/sparql").connection
+        } else {
+            rdfRepository.repository.connection
+        }
 
     val fileWriter = outFile?.bufferedWriter() ?: BufferedWriter(OutputStreamWriter(System.out))
     fileWriter.use {

@@ -21,5 +21,9 @@ class NopWDKT : IWDKT {
     }
 
     override fun searchDOI(doi: String): QueryActionResponse? = null
-    override fun searchForPropertyValue(property: PropertyIdValue, value: String): QueryActionResponse? = null
+
+    override fun searchForPropertyValue(
+        property: PropertyIdValue,
+        value: String,
+    ): QueryActionResponse? = null
 }

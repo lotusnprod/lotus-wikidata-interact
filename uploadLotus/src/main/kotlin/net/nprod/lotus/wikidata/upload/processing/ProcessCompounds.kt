@@ -36,7 +36,7 @@ fun DataTotal.processCompounds(
     wdFinder: WDFinder,
     instanceItems: InstanceItems,
     wikidataCompoundCache: MutableMap<InChIKey, String>,
-    publisher: IPublisher
+    publisher: IPublisher,
 ) {
     val logger = LogManager.getLogger("net.nprod.lotus.wdimport.processing.processCompounds")
 
@@ -49,26 +49,29 @@ fun DataTotal.processCompounds(
         val compoundName = if (compound.name.length < MAXIMUM_COMPOUND_NAME_LENGTH) compound.name else compound.inchikey
         val isomericSMILES = if (compound.atLeastSomeStereoDefined) compound.smiles else null
         val smiles = compound.smiles.replace("\n", "")
-        val wdCompound = WDCompound(
-            label = compoundName,
-            inChIKey = compound.inchikey,
-            inChI = if (compound.inchi.length < MAXIMUM_INCHI_LENGTH) compound.inchi else null,
-            isomericSMILES = isomericSMILES,
-            canonicalSMILES = try {
-                smilesToCanonical(smiles)
-            } catch (e: InvalidSmilesException) {
-                logger.error("Invalid smiles exception: ${e.message}")
-                return@forEachIndexed
-            },
-            chemicalFormula = try {
-                subscriptFormula(smilesToFormula(smiles))
-            } catch (e: InvalidSmilesException) {
-                logger.error("Invalid smiles exception cannot make a formula: ${e.message}")
-                return@forEachIndexed
-            },
-            iupac = compound.iupac,
-            undefinedStereocenters = compound.unspecifiedStereocenters
-        ).tryToFind(wdFinder, instanceItems, wikidataCompoundCache)
+        val wdCompound =
+            WDCompound(
+                label = compoundName,
+                inChIKey = compound.inchikey,
+                inChI = if (compound.inchi.length < MAXIMUM_INCHI_LENGTH) compound.inchi else null,
+                isomericSMILES = isomericSMILES,
+                canonicalSMILES =
+                    try {
+                        smilesToCanonical(smiles)
+                    } catch (e: InvalidSmilesException) {
+                        logger.error("Invalid smiles exception: ${e.message}")
+                        return@forEachIndexed
+                    },
+                chemicalFormula =
+                    try {
+                        subscriptFormula(smilesToFormula(smiles))
+                    } catch (e: InvalidSmilesException) {
+                        logger.error("Invalid smiles exception cannot make a formula: ${e.message}")
+                        return@forEachIndexed
+                    },
+                iupac = compound.iupac,
+                undefinedStereocenters = compound.unspecifiedStereocenters,
+            ).tryToFind(wdFinder, instanceItems, wikidataCompoundCache)
 
         logger.info(wdCompound)
 
@@ -80,7 +83,7 @@ fun DataTotal.processCompounds(
                         taxon?.let {
                             logger.info(" Found taxon $taxon")
                             foundInTaxon(
-                                taxon
+                                taxon,
                             ) {
                                 quads.map {
                                     statedIn(referenceProcessor.get(it.reference).id)
@@ -91,7 +94,7 @@ fun DataTotal.processCompounds(
                     } catch (e: InvalidTaxonName) {
                         logger.error(
                             " ERROR: Couldn't a good database for the organism: ${organism.name} -" +
-                                " ${e.message}"
+                                " ${e.message}",
                         )
                     }
                 }

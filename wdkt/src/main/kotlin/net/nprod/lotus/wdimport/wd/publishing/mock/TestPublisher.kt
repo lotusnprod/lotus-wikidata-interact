@@ -47,9 +47,10 @@ class TestPublisher(override val instanceItems: InstanceItems, private val repos
     private val site = InstanceItems::wdURI.get(instanceItems)
     private var counter = 0
 
-    private val dumpProcessingController = DumpProcessingController(
-        "wikidatawiki"
-    )
+    private val dumpProcessingController =
+        DumpProcessingController(
+            "wikidatawiki",
+        )
 
     private val sites: Sites?
 
@@ -66,15 +67,22 @@ class TestPublisher(override val instanceItems: InstanceItems, private val repos
         logger.info("Disconnecting")
     }
 
-    override fun newProperty(name: String, description: String): PropertyIdValue {
+    override fun newProperty(
+        name: String,
+        description: String,
+    ): PropertyIdValue {
         logger.debug("Trying to add a property name: $name ; description: $description")
-        val doc = PropertyDocumentBuilder.forPropertyIdAndDatatype(PropertyIdValue.NULL, DatatypeIdValue.DT_STRING)
-            .withLabel(Datamodel.makeMonolingualTextValue(name, "en"))
-            .withDescription(Datamodel.makeMonolingualTextValue(description, "en")).build()
+        val doc =
+            PropertyDocumentBuilder.forPropertyIdAndDatatype(PropertyIdValue.NULL, DatatypeIdValue.DT_STRING)
+                .withLabel(Datamodel.makeMonolingualTextValue(name, "en"))
+                .withDescription(Datamodel.makeMonolingualTextValue(description, "en")).build()
         return doc.entityId
     }
 
-    override fun publish(publishable: Publishable, summary: String): ItemIdValue {
+    override fun publish(
+        publishable: Publishable,
+        summary: String,
+    ): ItemIdValue {
         logger.debug("Trying to add the publishable: $publishable with a summary $summary")
 
         val entityId = ItemIdValueImpl.fromId("Q${counter.toString().padStart(length = 8, '0')}", site)
@@ -99,18 +107,19 @@ class TestPublisher(override val instanceItems: InstanceItems, private val repos
         val conn = repository?.connection
 
         val stream = ByteArrayOutputStream()
-        val serializer = RdfSerializer(
-            RDFFormat.NTRIPLES,
-            stream,
-            sites,
-            PropertyRegister.getWikidataPropertyRegister()
-        )
+        val serializer =
+            RdfSerializer(
+                RDFFormat.NTRIPLES,
+                stream,
+                sites,
+                PropertyRegister.getWikidataPropertyRegister(),
+            )
 
         // Serialize simple statements (and nothing else) for all items
         serializer.tasks = (
             RdfSerializer.TASK_ITEMS
                 or RdfSerializer.TASK_SIMPLE_STATEMENTS
-            )
+        )
 
         // Run serialization
         serializer.open()

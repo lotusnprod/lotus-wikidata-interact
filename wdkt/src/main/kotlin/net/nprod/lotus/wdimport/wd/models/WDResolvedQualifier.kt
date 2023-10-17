@@ -19,13 +19,15 @@ import org.wikidata.wdtk.datamodel.interfaces.Value
  */
 data class WDResolvedQualifier(
     val property: PropertyIdValue,
-    val value: Value
+    val value: Value,
 ) {
     companion object {
         /**
          * Resolve the qualifier
          */
-        fun fromQualifier(prequalifier: WDPreQualifier, instanceItems: InstanceItems): WDResolvedQualifier =
-            WDResolvedQualifier(prequalifier.property.get(instanceItems), prequalifier.value)
+        fun fromQualifier(
+            prequalifier: WDPreQualifier,
+            instanceItems: InstanceItems,
+        ): WDResolvedQualifier = WDResolvedQualifier(prequalifier.property.get(instanceItems), prequalifier.value)
     }
 }

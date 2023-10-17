@@ -14,7 +14,6 @@ plugins {
     application
     id("com.github.ben-manes.versions")
     id("io.gitlab.arturbosch.detekt")
-    id("org.jlleitschuh.gradle.ktlint")
     id("org.jmailen.kotlinter")
     id("org.springframework.boot") apply false
     id("io.spring.dependency-management") apply false
@@ -42,7 +41,6 @@ subprojects {
     apply {
         plugin("com.github.ben-manes.versions")
         plugin("io.gitlab.arturbosch.detekt")
-        plugin("org.jlleitschuh.gradle.ktlint")
         plugin("org.jmailen.kotlinter")
         plugin("org.jetbrains.kotlin.jvm")
         plugin("org.jetbrains.kotlin.plugin.serialization")
@@ -284,7 +282,6 @@ project("importPublication") {
 
 kotlinter {
     ignoreFailures = project.hasProperty("lintContinueOnError")
-    experimentalRules = project.hasProperty("lintKotlinExperimental")
 }
 
 allprojects {

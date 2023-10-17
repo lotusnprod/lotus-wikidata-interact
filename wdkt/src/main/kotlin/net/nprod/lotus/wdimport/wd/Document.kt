@@ -25,7 +25,11 @@ import org.wikidata.wdtk.datamodel.interfaces.Value
  * Type safe builder or DSL
  */
 
-fun newDocument(name: String, id: ItemIdValue? = null, f: ItemDocumentBuilder.() -> Unit): ItemDocument {
+fun newDocument(
+    name: String,
+    id: ItemIdValue? = null,
+    f: ItemDocumentBuilder.() -> Unit,
+): ItemDocument {
     val builder = ItemDocumentBuilder.forItemId(id ?: ItemIdValue.NULL)
 
     if (name != "") builder.withLabel(name, "en")
@@ -41,27 +45,27 @@ fun ItemDocumentBuilder.statement(
     subject: ItemIdValue? = null,
     property: PropertyIdValue,
     value: Value,
-    f: (StatementBuilder) -> Unit = {}
-): ItemDocumentBuilder =
-    this.withStatement(newStatement(property, subject, value, f))
+    f: (StatementBuilder) -> Unit = {},
+): ItemDocumentBuilder = this.withStatement(newStatement(property, subject, value, f))
 
 fun ItemDocumentBuilder.statement(
     subject: ItemIdValue? = null,
     referencedStatement: ReferencedValueStatement,
-    instanceItems: InstanceItems
+    instanceItems: InstanceItems,
 ) {
-    val statement = newStatement(
-        referencedStatement.property.get(instanceItems),
-        subject,
-        referencedStatement.value
-    ) { statementBuilder ->
-        referencedStatement.preReferences.forEach {
-            statementBuilder.withReference(it.build(instanceItems))
+    val statement =
+        newStatement(
+            referencedStatement.property.get(instanceItems),
+            subject,
+            referencedStatement.value,
+        ) { statementBuilder ->
+            referencedStatement.preReferences.forEach {
+                statementBuilder.withReference(it.build(instanceItems))
+            }
+            referencedStatement.preQualifiers.forEach { (property, value) ->
+                statementBuilder.withQualifierValue(property.get(instanceItems), value)
+            }
         }
-        referencedStatement.preQualifiers.forEach { (property, value) ->
-            statementBuilder.withQualifierValue(property.get(instanceItems), value)
-        }
-    }
 
     this.withStatement(statement)
 }
@@ -72,13 +76,14 @@ fun ItemDocumentBuilder.statement(
 fun ItemDocumentBuilder.statement(
     subject: ItemIdValue? = null,
     referencedStatement: IReferencedStatement,
-    instanceItems: InstanceItems
+    instanceItems: InstanceItems,
 ) {
-    val resolvedReferencedStatement = when (referencedStatement) {
-        is ReferencedValueStatement -> referencedStatement
-        is ReferencedRemoteItemStatement -> referencedStatement.resolveToReferencedValueStatetement(instanceItems)
-        else -> throw UnhandledReferencedStatementType("Unknown ReferencedStatement type")
-    }
+    val resolvedReferencedStatement =
+        when (referencedStatement) {
+            is ReferencedValueStatement -> referencedStatement
+            is ReferencedRemoteItemStatement -> referencedStatement.resolveToReferencedValueStatetement(instanceItems)
+            else -> throw UnhandledReferencedStatementType("Unknown ReferencedStatement type")
+        }
     statement(subject, resolvedReferencedStatement, instanceItems)
 }
 
@@ -86,11 +91,12 @@ fun newStatement(
     property: PropertyIdValue,
     subject: ItemIdValue? = null,
     value: Value,
-    f: (StatementBuilder) -> Unit = {}
+    f: (StatementBuilder) -> Unit = {},
 ): Statement {
-    val statement = StatementBuilder.forSubjectAndProperty(subject ?: ItemIdValue.NULL, property)
-        .withValue(value)
-        .apply(f)
+    val statement =
+        StatementBuilder.forSubjectAndProperty(subject ?: ItemIdValue.NULL, property)
+            .withValue(value)
+            .apply(f)
     return statement.build()
 }
 
@@ -101,12 +107,13 @@ fun newStatement(
     existingId: String? = null,
     value: Value,
     references: Collection<Reference>,
-    qualifiers: Collection<WDResolvedQualifier>
+    qualifiers: Collection<WDResolvedQualifier>,
 ): Statement {
-    val statement = StatementBuilder.forSubjectAndProperty(subject ?: ItemIdValue.NULL, property)
-        .withValue(value).also { statement ->
-            existingId?.let { statement.withId(it) }
-        }
+    val statement =
+        StatementBuilder.forSubjectAndProperty(subject ?: ItemIdValue.NULL, property)
+            .withValue(value).also { statement ->
+                existingId?.let { statement.withId(it) }
+            }
 
     references.forEach { statement.withReference(it) }
     qualifiers.forEach { statement.withQualifierValue(it.property, it.value) }

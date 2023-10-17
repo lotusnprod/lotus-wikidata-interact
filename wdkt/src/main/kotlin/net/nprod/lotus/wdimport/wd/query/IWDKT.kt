@@ -30,7 +30,7 @@ const val CONNECT_ATTEMPTS: Int = 5
 
 @Serializable
 data class SearchInfoResponse(
-    val totalhits: Int
+    val totalhits: Int,
 )
 
 @Serializable
@@ -41,19 +41,19 @@ data class SearchResponse(
     val size: Int,
     val wordcount: Int,
     val snippet: String,
-    val timestamp: String
+    val timestamp: String,
 )
 
 @Serializable
 data class QueryResponse(
     val searchinfo: SearchInfoResponse,
-    val search: List<SearchResponse>
+    val search: List<SearchResponse>,
 )
 
 @Serializable
 data class QueryActionResponse(
     val batchcomplete: String,
-    val query: QueryResponse
+    val query: QueryResponse,
 ) {
     /**
      * Get All the Ids for a given instance, they are sorted by numerical order so you can get the earlier one
@@ -85,5 +85,8 @@ interface IWDKT {
     /**
      * Search for an item with a specific property
      */
-    fun searchForPropertyValue(property: PropertyIdValue, value: String): QueryActionResponse?
+    fun searchForPropertyValue(
+        property: PropertyIdValue,
+        value: String,
+    ): QueryActionResponse?
 }

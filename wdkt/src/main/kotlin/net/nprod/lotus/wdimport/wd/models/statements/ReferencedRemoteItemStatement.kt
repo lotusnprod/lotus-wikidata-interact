@@ -22,7 +22,7 @@ import net.nprod.lotus.wdimport.wd.publishing.RemoteProperty
 data class ReferencedRemoteItemStatement(
     override var property: RemoteProperty,
     var value: RemoteItem,
-    override val overwritable: Boolean = false
+    override val overwritable: Boolean = false,
 ) : IReferencedStatement {
     override val preReferences: MutableList<WDPreReference> = mutableListOf()
     override val preQualifiers: MutableList<WDPreQualifier> = mutableListOf()
@@ -34,7 +34,7 @@ data class ReferencedRemoteItemStatement(
     fun resolveToReferencedValueStatetement(instanceItems: InstanceItems): ReferencedValueStatement =
         ReferencedValueStatement(
             this.property,
-            this.value.get(instanceItems)
+            this.value.get(instanceItems),
         ).also {
             it.preReferences.addAll(this.preReferences)
             it.preQualifiers.addAll(this.preQualifiers)

@@ -14,7 +14,10 @@ import org.eclipse.rdf4j.common.transaction.IsolationLevels
 import org.eclipse.rdf4j.repository.Repository
 import org.eclipse.rdf4j.repository.RepositoryConnection
 
-fun doWithEachTaxon(repository: Repository, f: (Taxon) -> Unit) {
+fun doWithEachTaxon(
+    repository: Repository,
+    f: (Taxon) -> Unit,
+) {
     repository.connection.use { conn: RepositoryConnection ->
         conn.begin(IsolationLevels.NONE) // We are not writing anything
         val query =
@@ -37,8 +40,8 @@ fun doWithEachTaxon(repository: Repository, f: (Taxon) -> Unit) {
                     Taxon(
                         wikidataId = key,
                         names = value.mapNotNull { it.getValue("taxon_name")?.stringValue() }.distinct(),
-                        rank = value.mapNotNull { it.getValue("taxon_rank")?.stringValue() }.firstOrNull()
-                    )
+                        rank = value.mapNotNull { it.getValue("taxon_rank")?.stringValue() }.firstOrNull(),
+                    ),
                 )
             }
         conn.commit()

@@ -19,7 +19,11 @@ import java.io.Reader
  * Returns the full list if lines is null
  */
 
-fun parseTSVFile(file: Reader, lines: Int? = null, skip: Int = 0): List<Record>? {
+fun parseTSVFile(
+    file: Reader,
+    lines: Int? = null,
+    skip: Int = 0,
+): List<Record>? {
     val settingsParser = TsvParserSettings()
     settingsParser.format.setLineSeparator("\n")
     settingsParser.isHeaderExtractionEnabled = true

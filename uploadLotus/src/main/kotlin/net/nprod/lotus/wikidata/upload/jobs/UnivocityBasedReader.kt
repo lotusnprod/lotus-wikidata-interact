@@ -13,12 +13,13 @@ import net.nprod.lotus.helpers.GZIPReader
 import java.io.BufferedReader
 import java.io.File
 
-fun tryGzipThenNormal(fileName: String): BufferedReader = try {
-    GZIPReader(fileName).bufferedReader
-} catch (e: java.util.zip.ZipException) {
-    e.message
-    File(fileName).bufferedReader()
-}
+fun tryGzipThenNormal(fileName: String): BufferedReader =
+    try {
+        GZIPReader(fileName).bufferedReader
+    } catch (e: java.util.zip.ZipException) {
+        e.message
+        File(fileName).bufferedReader()
+    }
 
 class UnivocityBasedReader<T>(private val f: (com.univocity.parsers.common.record.Record) -> T) {
     private var csvParser: CsvParser? = null
@@ -43,12 +44,13 @@ class UnivocityBasedReader<T>(private val f: (com.univocity.parsers.common.recor
         settingsParser.isHeaderExtractionEnabled = true
 
         bufferedReader = tryGzipThenNormal(fileName)
-        csvParser = bufferedReader?.let { reader ->
-            CsvParser(settingsParser).also { parser ->
-                parser.beginParsing(reader)
-                skip?.let { repeat(it) { parser.parseNextRecord() } }
+        csvParser =
+            bufferedReader?.let { reader ->
+                CsvParser(settingsParser).also { parser ->
+                    parser.beginParsing(reader)
+                    skip?.let { repeat(it) { parser.parseNextRecord() } }
+                }
             }
-        }
     }
 
     fun close() {

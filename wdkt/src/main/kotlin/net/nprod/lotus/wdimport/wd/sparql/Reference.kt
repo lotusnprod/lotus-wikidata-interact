@@ -16,6 +16,5 @@ typealias DOI = String
 fun WDSparql.findReferencesByDOI(
     keys: List<String>,
     chunkSize: Int = 100,
-    chunkFeedBack: () -> Unit = {}
-): Map<DOI, List<WDEntity>> =
-    findByPropertyValue("P356", keys, chunkSize, chunkFeedBack)
+    chunkFeedBack: () -> Unit = {},
+): Map<DOI, List<WDEntity>> = findByPropertyValue("P356", keys, chunkSize, chunkFeedBack)

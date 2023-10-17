@@ -9,5 +9,5 @@ package net.nprod.lotus.wikidata.download.models
 data class Reference(
     val wikidataId: String,
     val dois: List<String>,
-    val title: String?
+    val title: String?,
 )

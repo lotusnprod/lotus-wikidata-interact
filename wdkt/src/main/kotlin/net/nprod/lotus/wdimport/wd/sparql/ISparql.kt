@@ -22,7 +22,10 @@ interface ISparql : Resolver {
      * @param query SPARQL query
      * @param function the function to be run for each result
      */
-    fun <T> selectQuery(query: String, function: (TupleQueryResult) -> T): T
+    fun <T> selectQuery(
+        query: String,
+        function: (TupleQueryResult) -> T,
+    ): T
 
     /**
      * Run that ASK query and get the result back as a Boolean
@@ -43,19 +46,19 @@ interface ISparql : Resolver {
         property: String,
         keys: List<String>,
         chunkSize: Int = 100,
-        chunkFeedBack: () -> Unit = {}
+        chunkFeedBack: () -> Unit = {},
     ): Map<String, List<WDEntity>> {
         return keys.chunked(chunkSize).flatMap { chunk ->
             val valuesQuoted = chunk.joinToString(" ") { Rdf.literalOf(it).queryString }
 
             val query =
                 """
-            PREFIX wdt: <${InstanceItems::wdtURI.get(instanceItems)}>
-            PREFIX wd: <${InstanceItems::wdURI.get(instanceItems)}>
-            SELECT DISTINCT ?id ?value {
-              ?id wdt:$property ?value.
-              VALUES ?value { $valuesQuoted }
-            }
+                PREFIX wdt: <${InstanceItems::wdtURI.get(instanceItems)}>
+                PREFIX wd: <${InstanceItems::wdURI.get(instanceItems)}>
+                SELECT DISTINCT ?id ?value {
+                  ?id wdt:$property ?value.
+                  VALUES ?value { $valuesQuoted }
+                }
                 """.trimIndent()
 
             this.selectQuery(query) { result ->
@@ -67,7 +70,7 @@ interface ISparql : Resolver {
             }.also { chunkFeedBack() }
         }.groupBy(
             keySelector = { it.first },
-            valueTransform = { it.second }
+            valueTransform = { it.second },
         )
     }
 }

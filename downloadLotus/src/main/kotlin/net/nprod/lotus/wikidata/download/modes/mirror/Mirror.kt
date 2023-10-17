@@ -42,7 +42,7 @@ fun Repository.addEntriesFromConstruct(query: String = LOTUSQueries.queryCompoun
 data class Iris(
     val compoundIRIs: Set<IRI>,
     val referenceIRIs: Set<IRI>,
-    val taxaIRIs: Set<IRI>
+    val taxaIRIs: Set<IRI>,
 )
 
 fun Repository.getIRIsAndTaxaIRIs(logger: Logger? = null): Iris {
@@ -65,7 +65,7 @@ fun Repository.getIRIsAndTaxaIRIs(logger: Logger? = null): Iris {
 
     logger?.info(
         " We found $count LOTUS-like triplets (${compoundIrisToMirror.size} compounds, " +
-            " ${refIrisToMirror.size} references ${taxaToParentMirror.size} taxa)"
+            " ${refIrisToMirror.size} references ${taxaToParentMirror.size} taxa)",
     )
     return Iris(compoundIrisToMirror, refIrisToMirror, taxaToParentMirror)
 }
@@ -91,7 +91,7 @@ fun Repository.getTaxaParentIRIs(taxasToParentMirror: Set<IRI>): Set<IRI> {
                             null
                         }
                     }
-                }
+                },
             )
         }
     }
@@ -127,7 +127,7 @@ suspend fun Repository.getEverythingAbout(
     query: String,
     chunkSize: Int = CHUNK_SIZE,
     channel: Channel<List<Statement>>,
-    f: (Int) -> Unit = { }
+    f: (Int) -> Unit = { },
 ) {
     var count = 0
     iris.chunked(chunkSize).map {
@@ -153,7 +153,7 @@ suspend fun Repository.getAndLoadTaxaAndRefsAboutGivenCompounds(
     iris: Collection<IRI>,
     chunkSize: Int = CHUNK_SIZE,
     channel: Channel<List<Statement>>,
-    f: (Int) -> Unit = {}
+    f: (Int) -> Unit = {},
 ): List<Statement> {
     val list = mutableListOf<Statement>()
     val query = LOTUSQueries.queryCompoundTaxonRefModularForCompoundIds
@@ -189,84 +189,86 @@ suspend fun RDFRepository.repositoryWriter(channelStatements: Channel<List<State
 }
 
 @Suppress("MagicNumber", "LongMethod")
-fun mirror(repositoryLocation: File) = runBlocking<Unit> {
-    val logger = LoggerFactory.getLogger("mirror")
-    val sparqlRepository = SPARQLRepository("https://query.wikidata.org/sparql")
-    val rdfRepository = RDFRepository(repositoryLocation)
+fun mirror(repositoryLocation: File) =
+    runBlocking<Unit> {
+        val logger = LoggerFactory.getLogger("mirror")
+        val sparqlRepository = SPARQLRepository("https://query.wikidata.org/sparql")
+        val rdfRepository = RDFRepository(repositoryLocation)
 
-    logger.info("Starting in mirroring mode into the repository: $repositoryLocation")
+        logger.info("Starting in mirroring mode into the repository: $repositoryLocation")
 
-    val channelStatements = Channel<List<Statement>>(CHUNK_SIZE * 100)
+        val channelStatements = Channel<List<Statement>>(CHUNK_SIZE * 100)
 
-    // This is the coroutine that loads the data into the triple store
-    val repositoryWriter = launch(Dispatchers.IO) {
-        rdfRepository.repositoryWriter(channelStatements)
-    }
-
-    launch(Dispatchers.IO) {
-        logger.info("Querying Wikidata for the compounds having a found in taxon")
-        val compoundsIRIList = sparqlRepository.getAllCompoundsID()
-
-        logger.info("Querying Wikidata for all the triplets taxon-compound-reference and store them")
-        var last = 0
-        sparqlRepository.getAndLoadTaxaAndRefsAboutGivenCompounds(
-            compoundsIRIList,
-            channel = channelStatements,
-            chunkSize = CHUNK_SIZE
-        ) {
-            val percentage = 100 * it / compoundsIRIList.size
-            if (last != percentage) {
-                logger.info(" $percentage%")
-                last = percentage
+        // This is the coroutine that loads the data into the triple store
+        val repositoryWriter =
+            launch(Dispatchers.IO) {
+                rdfRepository.repositoryWriter(channelStatements)
             }
+
+        launch(Dispatchers.IO) {
+            logger.info("Querying Wikidata for the compounds having a found in taxon")
+            val compoundsIRIList = sparqlRepository.getAllCompoundsID()
+
+            logger.info("Querying Wikidata for all the triplets taxon-compound-reference and store them")
+            var last = 0
+            sparqlRepository.getAndLoadTaxaAndRefsAboutGivenCompounds(
+                compoundsIRIList,
+                channel = channelStatements,
+                chunkSize = CHUNK_SIZE,
+            ) {
+                val percentage = 100 * it / compoundsIRIList.size
+                if (last != percentage) {
+                    logger.info(" $percentage%")
+                    last = percentage
+                }
+            }
+
+            logger.info("Querying the local data for all the ids we need")
+            val localIris = rdfRepository.repository.getIRIsAndTaxaIRIs(logger)
+
+            logger.info("Getting the taxa relations remotely")
+
+            val newTaxaToMirrorIRIs = sparqlRepository.getTaxaParentIRIs(localIris.taxaIRIs)
+
+            logger.info("Getting the taxonomic ranks info")
+            channelStatements.send(sparqlRepository.getAllTaxRanks())
+
+            logger.info("Gathering full data about all the taxo")
+            val allIRIsTaxo = newTaxaToMirrorIRIs + localIris.taxaIRIs
+            sparqlRepository.getEverythingAbout(
+                allIRIsTaxo,
+                channel = channelStatements,
+                query = LOTUSQueries.mirrorQueryForTaxo,
+                chunkSize = LARGE_CHUNK_SIZE,
+            ) { count ->
+                logger.info(" $count/${allIRIsTaxo.size} done")
+            }
+
+            logger.info("Gathering data about the compounds")
+            sparqlRepository.getEverythingAbout(
+                localIris.compoundIRIs,
+                query = LOTUSQueries.mirrorQueryForCompound,
+                chunkSize = LARGE_CHUNK_SIZE,
+                channel = channelStatements,
+            ) { count ->
+                logger.info(" $count/${localIris.compoundIRIs.size} done")
+            }
+
+            logger.info("Gathering data about the references")
+            sparqlRepository.getEverythingAbout(
+                localIris.referenceIRIs,
+                query = LOTUSQueries.mirrorQueryForReference,
+                chunkSize = LARGE_CHUNK_SIZE,
+                channel = channelStatements,
+            ) { count ->
+                logger.info(" $count/${localIris.referenceIRIs.size} done")
+            }
+
+            logger.info("Finishing sending everything to the local store.")
+            channelStatements.close()
         }
 
-        logger.info("Querying the local data for all the ids we need")
-        val localIris = rdfRepository.repository.getIRIsAndTaxaIRIs(logger)
-
-        logger.info("Getting the taxa relations remotely")
-
-        val newTaxaToMirrorIRIs = sparqlRepository.getTaxaParentIRIs(localIris.taxaIRIs)
-
-        logger.info("Getting the taxonomic ranks info")
-        channelStatements.send(sparqlRepository.getAllTaxRanks())
-
-        logger.info("Gathering full data about all the taxo")
-        val allIRIsTaxo = newTaxaToMirrorIRIs + localIris.taxaIRIs
-        sparqlRepository.getEverythingAbout(
-            allIRIsTaxo,
-            channel = channelStatements,
-            query = LOTUSQueries.mirrorQueryForTaxo,
-            chunkSize = LARGE_CHUNK_SIZE
-        ) { count ->
-            logger.info(" $count/${allIRIsTaxo.size} done")
-        }
-
-        logger.info("Gathering data about the compounds")
-        sparqlRepository.getEverythingAbout(
-            localIris.compoundIRIs,
-            query = LOTUSQueries.mirrorQueryForCompound,
-            chunkSize = LARGE_CHUNK_SIZE,
-            channel = channelStatements
-        ) { count ->
-            logger.info(" $count/${localIris.compoundIRIs.size} done")
-        }
-
-        logger.info("Gathering data about the references")
-        sparqlRepository.getEverythingAbout(
-            localIris.referenceIRIs,
-            query = LOTUSQueries.mirrorQueryForReference,
-            chunkSize = LARGE_CHUNK_SIZE,
-            channel = channelStatements
-        ) { count ->
-            logger.info(" $count/${localIris.referenceIRIs.size} done")
-        }
-
-        logger.info("Finishing sending everything to the local store.")
-        channelStatements.close()
+        // We wait for the writer to be done
+        repositoryWriter.join()
+        logger.info("We have ${rdfRepository.repository.connection.use { it.size() }} entries in the local repository")
     }
-
-    // We wait for the writer to be done
-    repositoryWriter.join()
-    logger.info("We have ${rdfRepository.repository.connection.use { it.size() }} entries in the local repository")
-}

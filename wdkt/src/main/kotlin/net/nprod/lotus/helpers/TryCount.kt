@@ -20,7 +20,7 @@ import kotlin.reflect.full.starProjectedType
     "TooGenericExceptionThrown",
     "TooGenericExceptionCaught",
     "NestedBlockDepth",
-    "LongParameterList"
+    "LongParameterList",
 ) // On purpose we catch and throw it back
 inline fun <U> tryCount(
     listExceptions: List<KClass<out Exception>> = listOf(),
@@ -28,7 +28,7 @@ inline fun <U> tryCount(
     maxRetries: Int = 3,
     delayMilliSeconds: Milliseconds = 0,
     logger: Logger? = null,
-    f: () -> U
+    f: () -> U,
 ): U {
     var retries = 0
 
@@ -38,9 +38,9 @@ inline fun <U> tryCount(
         } catch (e: Exception) {
             retries += 1
             if (listExceptions.any { kclass ->
-                (e::class == kclass) ||
-                    (e::class.supertypes.contains(kclass.starProjectedType))
-            } || listNamedExceptions.any { e::class.qualifiedName == it }
+                    (e::class == kclass) ||
+                        (e::class.supertypes.contains(kclass.starProjectedType))
+                } || listNamedExceptions.any { e::class.qualifiedName == it }
             ) {
                 logger?.error("Retrying ($retries/$maxRetries): ${e.message}")
                 if (retries != maxRetries) {

@@ -501,6 +501,8 @@ potential-bugs:
 
 style:
   active: true
+  BracesOnWhenStatements:
+    active: false
   ClassOrdering:
     active: false
   CollapsibleIfStatements:
@@ -580,8 +582,6 @@ style:
   OptionalAbstractKeyword:
     active: true
   OptionalUnit:
-    active: false
-  OptionalWhenBraces:
     active: false
   PreferToOverPairSyntax:
     active: false

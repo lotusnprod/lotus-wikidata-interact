@@ -10,7 +10,7 @@ package net.nprod.lotus.wikidata.upload.jobs
 data class LotusRaw(
     val organism: LotusRawOrganism,
     val compound: LotusRawCompound,
-    val reference: LotusRawReference
+    val reference: LotusRawReference,
 ) {
     companion object {
         fun fromRecord(record: com.univocity.parsers.common.record.Record): LotusRaw {
@@ -35,16 +35,17 @@ data class LotusRaw(
 
             return LotusRaw(
                 organism = LotusRawOrganism(organismCleaned, organismDb, organismID, organismRanks, organismNames),
-                compound = LotusRawCompound(
-                    smiles,
-                    inchi,
-                    inchiKey,
-                    compoundName,
-                    iupacName,
-                    unspecifiedStereocenters,
-                    totalCenters
-                ),
-                reference = LotusRawReference(title, pmcid, pmid, doi)
+                compound =
+                    LotusRawCompound(
+                        smiles,
+                        inchi,
+                        inchiKey,
+                        compoundName,
+                        iupacName,
+                        unspecifiedStereocenters,
+                        totalCenters,
+                    ),
+                reference = LotusRawReference(title, pmcid, pmid, doi),
             )
         }
     }

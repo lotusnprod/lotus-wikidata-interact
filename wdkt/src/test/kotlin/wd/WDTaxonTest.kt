@@ -17,10 +17,11 @@ internal class WDTaxonTest {
 
     @Test
     fun findOrganismByTaxon() {
-        val expected = mapOf(
-            "Phalaris arundinacea" to listOf("Q157419"),
-            "Lactuca virosa" to listOf("Q578927")
-        )
+        val expected =
+            mapOf(
+                "Phalaris arundinacea" to listOf("Q157419"),
+                "Lactuca virosa" to listOf("Q578927"),
+            )
 
         val result = wdSparql.findTaxonByName(expected.keys.toList())
         assertEquals(2, result.size)

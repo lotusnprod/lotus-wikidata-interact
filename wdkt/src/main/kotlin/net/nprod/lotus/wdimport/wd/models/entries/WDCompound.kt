@@ -42,7 +42,7 @@ data class WDCompound(
     val chemicalFormula: String?,
     val iupac: String?,
     val undefinedStereocenters: Int,
-    val f: WDCompound.() -> Unit = {}
+    val f: WDCompound.() -> Unit = {},
 ) : Publishable() {
     override var type: RemoteItem =
         if (undefinedStereocenters == 0) InstanceItems::typeOfAChemicalEntity else InstanceItems::groupOfStereoIsomers
@@ -61,16 +61,18 @@ data class WDCompound(
             chemicalFormula?.let {
                 ReferencedValueStatement(
                     InstanceItems::chemicalFormula,
-                    it
+                    it,
                 )
             },
             // For this we need to check the labels first…
             // iupac?.let { ReferencableValueStatement(InstanceItems::iupac, it )},
-            pcId?.let { ReferencedValueStatement(InstanceItems::pcId, it) }
+            pcId?.let { ReferencedValueStatement(InstanceItems::pcId, it) },
         )
 
-    override fun tryToFind(wdFinder: WDFinder, instanceItems: InstanceItems): WDCompound =
-        tryToFind(wdFinder, instanceItems, mapOf())
+    override fun tryToFind(
+        wdFinder: WDFinder,
+        instanceItems: InstanceItems,
+    ): WDCompound = tryToFind(wdFinder, instanceItems, mapOf())
 
     /**
      * Try to find this entry, but also uses a cache to not hit the sparql all the time
@@ -78,34 +80,35 @@ data class WDCompound(
     fun tryToFind(
         wdFinder: WDFinder,
         instanceItems: InstanceItems,
-        cache: Map<InChIKey, String> = mapOf()
+        cache: Map<InChIKey, String> = mapOf(),
     ): WDCompound {
         // In the case of the test instance, we do not have the ability to do SPARQL queries
-        val results = if (cache.containsKey(inChIKey)) {
-            listOf(cache[inChIKey])
-        } else {
-            val query =
-                """
-            PREFIX wd: <${InstanceItems::wdURI.get(instanceItems)}>
-            PREFIX wdt: <${InstanceItems::wdtURI.get(instanceItems)}>
-            SELECT DISTINCT ?id {
-              ?id wdt:${wdFinder.sparql.resolve(InstanceItems::inChIKey).id} ${Rdf.literalOf(inChIKey).queryString}.
-            }
-                """.trimIndent()
+        val results =
+            if (cache.containsKey(inChIKey)) {
+                listOf(cache[inChIKey])
+            } else {
+                val query =
+                    """
+                    PREFIX wd: <${InstanceItems::wdURI.get(instanceItems)}>
+                    PREFIX wdt: <${InstanceItems::wdtURI.get(instanceItems)}>
+                    SELECT DISTINCT ?id {
+                      ?id wdt:${wdFinder.sparql.resolve(InstanceItems::inChIKey).id} ${Rdf.literalOf(inChIKey).queryString}.
+                    }
+                    """.trimIndent()
 
-            wdFinder.sparql.selectQuery(query) { result ->
-                result.map { bindingSet ->
-                    bindingSet.getValue("id").stringValue().replace(instanceItems.wdURI, "")
+                wdFinder.sparql.selectQuery(query) { result ->
+                    result.map { bindingSet ->
+                        bindingSet.getValue("id").stringValue().replace(instanceItems.wdURI, "")
+                    }
                 }
             }
-        }
 
         if (results.isNotEmpty()) {
             this.publishedAs(
                 ItemIdValueImpl.fromId(
                     results.first(),
-                    InstanceItems::wdURI.get(instanceItems)
-                ) as ItemIdValue
+                    InstanceItems::wdURI.get(instanceItems),
+                ) as ItemIdValue,
             )
         } else {
             logger.info("This is a new compound!")
@@ -117,7 +120,10 @@ data class WDCompound(
     /**
      * Add a `found in taxon` property with the given references
      */
-    fun foundInTaxon(wdTaxon: WDTaxon, f: ReferencedValueStatement.() -> Unit) {
+    fun foundInTaxon(
+        wdTaxon: WDTaxon,
+        f: ReferencedValueStatement.() -> Unit,
+    ) {
         require(wdTaxon.published) { "Can only add for an already published taxon." }
         // We make it overwritable, meaning we can add duplicates if needed
         val refStatement =

@@ -17,8 +17,8 @@ internal class WDKTTest {
         assert(
             instance.searchForPropertyValue(
                 MainInstanceItems.doi,
-                "10.1021/NP049900+"
-            ).query.searchinfo.totalhits >= 1
+                "10.1021/NP049900+",
+            ).query.searchinfo.totalhits >= 1,
         )
     }
 
@@ -27,8 +27,8 @@ internal class WDKTTest {
         assert(
             instance.searchForPropertyValue(
                 MainInstanceItems.issn,
-                "0163-3864"
-            ).query.searchinfo.totalhits >= 1
+                "0163-3864",
+            ).query.searchinfo.totalhits >= 1,
         )
     }
 }

@@ -23,7 +23,7 @@ import java.time.OffsetDateTime
 data class ReferencedValueStatement(
     override var property: RemoteProperty,
     var value: Value,
-    override val overwritable: Boolean = false
+    override val overwritable: Boolean = false,
 ) : IReferencedStatement {
     override val preReferences: MutableList<WDPreReference> = mutableListOf()
     override val preQualifiers: MutableList<WDPreQualifier> = mutableListOf()
@@ -31,22 +31,27 @@ data class ReferencedValueStatement(
     constructor(property: RemoteProperty, value: String, overwritable: Boolean = false) : this(
         property,
         Datamodel.makeStringValue(value),
-        overwritable = overwritable
+        overwritable = overwritable,
     )
 
     companion object {
-        fun monolingualValue(property: RemoteProperty, value: String): ReferencedValueStatement =
-            ReferencedValueStatement(property, Datamodel.makeMonolingualTextValue(value, "en"))
+        fun monolingualValue(
+            property: RemoteProperty,
+            value: String,
+        ): ReferencedValueStatement = ReferencedValueStatement(property, Datamodel.makeMonolingualTextValue(value, "en"))
 
-        fun datetimeValue(property: RemoteProperty, value: OffsetDateTime): ReferencedValueStatement =
+        fun datetimeValue(
+            property: RemoteProperty,
+            value: OffsetDateTime,
+        ): ReferencedValueStatement =
             ReferencedValueStatement(
                 property,
                 Datamodel.makeTimeValue(
                     value.year.toLong(),
                     value.monthValue.toByte(),
                     value.dayOfMonth.toByte(),
-                    TimeValue.CM_GREGORIAN_PRO
-                )
+                    TimeValue.CM_GREGORIAN_PRO,
+                ),
             )
     }
 }

@@ -19,15 +19,20 @@ import org.eclipse.rdf4j.repository.sparql.SPARQLRepository
 import org.slf4j.LoggerFactory
 import java.io.File
 
-fun export(repositoryLocation: File, outputDirectory: File, direct: Boolean) = GlobalScope.launch {
+fun export(
+    repositoryLocation: File,
+    outputDirectory: File,
+    direct: Boolean,
+) = GlobalScope.launch {
     val logger = LoggerFactory.getLogger("export")
     val rdfRepository = RDFRepository(repositoryLocation)
 
-    val repository = if (direct) {
-        SPARQLRepository("https://query.wikidata.org/sparql")
-    } else {
-        rdfRepository.repository
-    }
+    val repository =
+        if (direct) {
+            SPARQLRepository("https://query.wikidata.org/sparql")
+        } else {
+            rdfRepository.repository
+        }
 
     logger.info("Exporting from the repository: $repositoryLocation")
 

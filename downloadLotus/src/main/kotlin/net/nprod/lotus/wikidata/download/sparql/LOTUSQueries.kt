@@ -23,7 +23,8 @@ object LOTUSQueries {
         """.trimIndent()
 
     val queryCompoundsOfInterest =
-        """$prefixes
+        """
+        $prefixes
         SELECT ?compound_id
         WHERE {
             ?compound_id     wdt:P235 ?inchikey;
@@ -32,7 +33,8 @@ object LOTUSQueries {
         """.trimIndent()
 
     val queryCompoundTaxonRefModularForCompoundIds =
-        """$prefixes
+        """
+        $prefixes
         CONSTRUCT {
             ?compound_id    wdt:P703 ?taxon_id;
                             p:P703 ?pp703.
@@ -50,7 +52,8 @@ object LOTUSQueries {
         """.trimIndent()
 
     val queryCompoundTaxonRef =
-        """$prefixes
+        """
+        $prefixes
         CONSTRUCT {
             ?compound_id    wdt:P31 ?type;
                             wdt:P703 ?taxon_id;
@@ -74,7 +77,8 @@ object LOTUSQueries {
         """.trimIndent()
 
     val queryIdsLocal =
-        """$prefixes
+        """
+        $prefixes
         SELECT ?compound_id ?taxon_id ?reference_id
         WHERE {
             ?compound_id     p:P703 ?pp703.
@@ -84,7 +88,8 @@ object LOTUSQueries {
         """.trimIndent()
 
     val queryTaxonParents =
-        """$prefixes
+        """
+        $prefixes
         SELECT ?parenttaxon_id
         WHERE {
             VALUES ?id { %%IDS%% } 
@@ -93,7 +98,8 @@ object LOTUSQueries {
         """.trimIndent()
 
     val queryTaxoRanksInfo =
-        """$prefixes
+        """
+        $prefixes
         CONSTRUCT {
             ?id ?p ?o
         }
@@ -104,7 +110,8 @@ object LOTUSQueries {
         """.trimIndent()
 
     val mirrorQueryForTaxo =
-        """$prefixes
+        """
+        $prefixes
         CONSTRUCT {
             ?id ?p ?o.
             ?id p:P171 ?p171.
@@ -118,7 +125,8 @@ object LOTUSQueries {
         """.trimIndent()
 
     val mirrorQueryForCompound =
-        """$prefixes
+        """
+        $prefixes
         CONSTRUCT {
             ?id ?p ?o.
         } WHERE { 
@@ -130,7 +138,8 @@ object LOTUSQueries {
         """.trimIndent()
 
     val mirrorQueryForReference =
-        """$prefixes
+        """
+        $prefixes
         CONSTRUCT {
             ?id ?p ?o.
         } WHERE { 

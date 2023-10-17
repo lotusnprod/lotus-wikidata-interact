@@ -9,5 +9,5 @@ package net.nprod.lotus.wikidata.download.models
 data class Taxon(
     val wikidataId: String,
     val names: List<String>,
-    val rank: String?
+    val rank: String?,
 )

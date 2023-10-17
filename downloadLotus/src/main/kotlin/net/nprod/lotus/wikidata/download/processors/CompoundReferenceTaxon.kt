@@ -13,18 +13,18 @@ import org.eclipse.rdf4j.repository.RepositoryConnection
 
 val queryForCompoundsRefsAndTaxa =
     """
-  ${LOTUSQueries.prefixes}
-  SELECT DISTINCT ?compound_id ?taxon_id ?reference_id
-  WHERE {
-    ?compound_id     p:P703 ?pp703.
-    ?pp703           ps:P703 ?taxon_id;
-                     prov:wasDerivedFrom/pr:P248 ?reference_id.
-  }
+    ${LOTUSQueries.prefixes}
+    SELECT DISTINCT ?compound_id ?taxon_id ?reference_id
+    WHERE {
+      ?compound_id     p:P703 ?pp703.
+      ?pp703           ps:P703 ?taxon_id;
+                       prov:wasDerivedFrom/pr:P248 ?reference_id.
+    }
     """.trimIndent()
 
 fun doWithEachCompoundReferenceTaxon(
     repository: Repository,
-    f: (CompoundReferenceTaxon) -> Unit
+    f: (CompoundReferenceTaxon) -> Unit,
 ) {
     repository.connection.use { conn: RepositoryConnection ->
         conn.begin(IsolationLevels.NONE) // We are not writing anything

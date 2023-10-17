@@ -50,7 +50,7 @@ data class UpdatableStatement(
     val statement: Statement,
     val newReferences: List<Reference>,
     val newQualifiers: List<WDResolvedQualifier>,
-    val updateOnly: Boolean
+    val updateOnly: Boolean,
 )
 
 /**
@@ -80,10 +80,11 @@ abstract class Publishable {
      * Trying to access that value on an unpublished object will raise an ElementNotPublishedException
      */
     val id: ItemIdValue
-        get() = _id
-            ?: throw ElementNotPublishedException(
-                "This element has not been published yet or failed to get published."
-            )
+        get() =
+            _id
+                ?: throw ElementNotPublishedException(
+                    "This element has not been published yet or failed to get published.",
+                )
 
     /**
      * The statements that are not translated yet
@@ -109,16 +110,20 @@ abstract class Publishable {
      * Generate a document for that entry.
      * It will use the internal id if it exists already
      */
-    fun document(instanceItems: InstanceItems, subject: ItemIdValue? = null): ItemDocument {
+    fun document(
+        instanceItems: InstanceItems,
+        subject: ItemIdValue? = null,
+    ): ItemDocument {
         preStatements.addAll(dataStatements())
         logger.info("We upserted the document and we added ${dataStatements().size} statements")
 
         // We are limited to names < 250 characters
-        val legalName = if (label.length < MAXIMUM_LABEL_LENGTH) {
-            label
-        } else {
-            ""
-        }
+        val legalName =
+            if (label.length < MAXIMUM_LABEL_LENGTH) {
+                label
+            } else {
+                ""
+            }
 
         return newDocument(legalName, subject ?: _id) {
             statement(subject ?: _id, instanceItems.instanceOf, type.get(instanceItems))
@@ -136,25 +141,26 @@ abstract class Publishable {
      */
     fun listOfResolvedStatements(
         fetcher: WikibaseDataFetcher?,
-        instanceItems: InstanceItems
+        instanceItems: InstanceItems,
     ): List<Statement> {
         // Add the data statements
         preStatements.addAll(dataStatements())
         // If we have a fetcher, we take a dump of that entry to make sure we are not modifying existing entries
         // We generate a list of all the properties on the existing object (if it exist)
-        val existingStatements = fetcher?.let {
-            val id = _id?.id
-            if (id != null) {
-                val doc = it.getEntityDocument(id)
-                if (doc is ItemDocument) {
-                    doc.allStatements.iterator().asSequence().toList() // so we have types
+        val existingStatements =
+            fetcher?.let {
+                val id = _id?.id
+                if (id != null) {
+                    val doc = it.getEntityDocument(id)
+                    if (doc is ItemDocument) {
+                        doc.allStatements.iterator().asSequence().toList() // so we have types
+                    } else {
+                        listOf()
+                    }
                 } else {
                     listOf()
                 }
-            } else {
-                listOf()
-            }
-        } ?: listOf()
+            } ?: listOf()
 
         val existingPropertyValueCoupleToReferencesIds: Map<String, Map<Value, Statement>> =
             existingStatements.map {
@@ -164,22 +170,24 @@ abstract class Publishable {
             }.toMap()
 
         return preStatements.mapNotNull { statement ->
-            val value: Value? = when (statement) {
-                is ReferencedValueStatement -> statement.value
-                is ReferencedRemoteItemStatement -> statement.value.get(instanceItems)
-                else -> null // The statement is currently invalid if we do not know how to handle its values
-            }
+            val value: Value? =
+                when (statement) {
+                    is ReferencedValueStatement -> statement.value
+                    is ReferencedRemoteItemStatement -> statement.value.get(instanceItems)
+                    else -> null // The statement is currently invalid if we do not know how to handle its values
+                }
 
             value?.let {
                 constructStatement(statement, value, instanceItems, existingPropertyValueCoupleToReferencesIds)
             }
         }.filter { stmt ->
-            stmt.statementId !in existingStatements.map { it.statementId } || stmt.references.any {
-                val existingReferences =
-                    (existingStatements.firstOrNull { stmt.statementId == it.statementId })?.references?.map { it.hash }
-                        ?: listOf()
-                it.hash !in existingReferences
-            }
+            stmt.statementId !in existingStatements.map { it.statementId } ||
+                stmt.references.any {
+                    val existingReferences =
+                        (existingStatements.firstOrNull { stmt.statementId == it.statementId })?.references?.map { it.hash }
+                            ?: listOf()
+                    it.hash !in existingReferences
+                }
         }
     }
 
@@ -187,8 +195,9 @@ abstract class Publishable {
      * We need to find a cleaner and safer way to do that, for now it will crash the bot on purpose to make sure nothing
      * bad happens if anything is not of the expected type.
      */
-    fun Reference.forceGetStatedInValue(): List<Value> = (this as ReferenceImpl).snaks.filter { it.key == "P248" }
-        .flatMap { it.value.map { (it as ValueSnak).value } }
+    fun Reference.forceGetStatedInValue(): List<Value> =
+        (this as ReferenceImpl).snaks.filter { it.key == "P248" }
+            .flatMap { it.value.map { (it as ValueSnak).value } }
 
     /**
      * This is where the magic happens and the new statements are compared to existing statements
@@ -198,16 +207,17 @@ abstract class Publishable {
         statement: IReferencedStatement,
         newStatementValue: Value,
         instanceItems: InstanceItems,
-        existingPropertyValueCoupleToReferences: Map<String, Map<Value, Statement>>
+        existingPropertyValueCoupleToReferences: Map<String, Map<Value, Statement>>,
     ): Statement? {
         val newStatementProperty: PropertyIdValue = statement.property.get(instanceItems)
 
         val references = statement.preReferences.map { it.build(instanceItems) }
 
         val existingProperty = existingPropertyValueCoupleToReferences[newStatementProperty.id]
-        val existingStatement = existingProperty?.let { existingValueToReferences ->
-            existingValueToReferences[newStatementValue]
-        }
+        val existingStatement =
+            existingProperty?.let { existingValueToReferences ->
+                existingValueToReferences[newStatementValue]
+            }
 
         val existingSetOfReferences =
             existingStatement?.references?.map { it.forceGetStatedInValue() }?.toSet() ?: setOf()
@@ -215,17 +225,20 @@ abstract class Publishable {
             existingStatement?.qualifiers?.map { it.property }?.toSet() ?: setOf()
 
         // Anything that is not in the existing set should be a new reference
-        val newReferences = references.filterNot {
-            it.forceGetStatedInValue() in existingSetOfReferences
-        }
+        val newReferences =
+            references.filterNot {
+                it.forceGetStatedInValue() in existingSetOfReferences
+            }
 
-        val existingReferencesToPortOver = (existingStatement?.references ?: listOf()).filterNot { existingRef ->
-            newReferences.any { it.forceGetStatedInValue() == existingRef.forceGetStatedInValue() }
-        }
+        val existingReferencesToPortOver =
+            (existingStatement?.references ?: listOf()).filterNot { existingRef ->
+                newReferences.any { it.forceGetStatedInValue() == existingRef.forceGetStatedInValue() }
+            }
 
-        val newQualifiers = statement.preQualifiers.filterNot {
-            it.property.get(instanceItems) in existingSetOfQualifiers
-        }.map { WDResolvedQualifier.fromQualifier(it, instanceItems) }
+        val newQualifiers =
+            statement.preQualifiers.filterNot {
+                it.property.get(instanceItems) in existingSetOfQualifiers
+            }.map { WDResolvedQualifier.fromQualifier(it, instanceItems) }
 
         // We do not try to add or modify a non overridable statement
         existingProperty?.let { if (!statement.overwritable) return null }
@@ -234,9 +247,10 @@ abstract class Publishable {
          * We either create a new statement, or use the existing one, that's because the process is different for them
          */
 
-        val qualifiers = statement.preQualifiers.map {
-            WDResolvedQualifier.fromQualifier(it, instanceItems)
-        }
+        val qualifiers =
+            statement.preQualifiers.map {
+                WDResolvedQualifier.fromQualifier(it, instanceItems)
+            }
 
         return newStatement(
             newStatementProperty,
@@ -244,14 +258,17 @@ abstract class Publishable {
             existingStatement?.statementId,
             newStatementValue,
             existingReferencesToPortOver + newReferences,
-            qualifiers
+            qualifiers,
         )
     }
 
     /**
      * A function that will find an object matching the entries already existing
      */
-    abstract fun tryToFind(wdFinder: WDFinder, instanceItems: InstanceItems): Publishable
+    abstract fun tryToFind(
+        wdFinder: WDFinder,
+        instanceItems: InstanceItems,
+    ): Publishable
 
     /**
      * Add a property to that object
@@ -260,7 +277,11 @@ abstract class Publishable {
      * @param value value for that property
      * @param f function that will be applied on the statement built
      */
-    fun addProperty(remoteProperty: RemoteProperty, value: String, f: ReferencedValueStatement.() -> Unit = {}) {
+    fun addProperty(
+        remoteProperty: RemoteProperty,
+        value: String,
+        f: ReferencedValueStatement.() -> Unit = {},
+    ) {
         val refStatement = ReferencedValueStatement(remoteProperty, Datamodel.makeStringValue(value)).apply(f)
         preStatements.add(refStatement)
     }

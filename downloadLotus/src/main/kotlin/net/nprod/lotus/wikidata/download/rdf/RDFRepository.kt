@@ -23,9 +23,10 @@ class RDFRepository(location: File) {
 
     init {
         location.mkdirs()
-        val file = location.also {
-            if (!it.canWrite() || !it.canRead()) throw AccessDeniedException(it)
-        }
+        val file =
+            location.also {
+                if (!it.canWrite() || !it.canRead()) throw AccessDeniedException(it)
+            }
         logger.info("Opening the NativeStore at $file")
         repository = SailRepository(NativeStore(file))
     }

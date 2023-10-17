@@ -32,31 +32,32 @@ class NotEnoughInfoAboutTaxonException(override val message: String) : RuntimeEx
 data class AcceptedTaxonEntry(
     val rank: String,
     val instanceItem: KProperty1<InstanceItems, ItemIdValue>,
-    val value: String
+    val value: String,
 )
 
 /**
  * These are the taxonomic DBs we are using as references
  */
-val LIST_OF_ACCEPTED_DBS: Array<String> = arrayOf(
-    "Open Tree of Life",
-    "ITIS",
-    "GBIF",
-    "NCBI",
-    "Index Fungorum",
-    "The Interim Register of Marine and Nonmarine Genera",
-    "World Register of Marine Species",
-    "Database of Vascular Plants of Canada (VASCAN)",
-    "iNaturalist",
-    "Catalogue of Life",
-    "World Flora Online",
-    "VASCAN",
-    "GBIF Backbone Taxonomy",
-    "AlgaeBase",
-    "BirdLife International",
-    "Mammal Species of the World",
-    "EUNIS"
-)
+val LIST_OF_ACCEPTED_DBS: Array<String> =
+    arrayOf(
+        "Open Tree of Life",
+        "ITIS",
+        "GBIF",
+        "NCBI",
+        "Index Fungorum",
+        "The Interim Register of Marine and Nonmarine Genera",
+        "World Register of Marine Species",
+        "Database of Vascular Plants of Canada (VASCAN)",
+        "iNaturalist",
+        "Catalogue of Life",
+        "World Flora Online",
+        "VASCAN",
+        "GBIF Backbone Taxonomy",
+        "AlgaeBase",
+        "BirdLife International",
+        "Mammal Species of the World",
+        "EUNIS",
+    )
 
 /**
  * Process the Taxa, it will take the best database and use this taxon for the given entries.
@@ -65,11 +66,12 @@ val LIST_OF_ACCEPTED_DBS: Array<String> = arrayOf(
 class TaxonProcessor(
     val publisher: IPublisher,
     val wdFinder: WDFinder,
-    val instanceItems: InstanceItems
+    val instanceItems: InstanceItems,
 ) {
     val logger: Logger = LogManager.getLogger(TaxonProcessor::class.qualifiedName)
     val createNew = System.getenv("CREATE_SPECIES") == "yes_and_I_understand_that_I_will_not_complain_if_things_are_wrong"
     val organismCache: MutableMap<Organism, WDTaxon?> = mutableMapOf()
+
     fun taxonFromOrganism(organism: Organism): WDTaxon? {
         logger.debug("Organism Ranks and Ids: ${organism.rankIds}")
 
@@ -81,12 +83,13 @@ class TaxonProcessor(
         acceptedRanks.reversed().forEach {
             taxon?.let { return@forEach } // We skip all if we found one
             val name = fixSpecies(it.value)
-            val tax = WDTaxon(
-                label = name,
-                parentTaxon = taxon?.id,
-                taxonName = name,
-                taxonRank = it.instanceItem
-            ).tryToFind(wdFinder, instanceItems)
+            val tax =
+                WDTaxon(
+                    label = name,
+                    parentTaxon = taxon?.id,
+                    taxonName = name,
+                    taxonRank = it.instanceItem,
+                ).tryToFind(wdFinder, instanceItems)
             taxon = tax
         }
 
@@ -107,7 +110,7 @@ class TaxonProcessor(
                 """
                 Sorry we couldn't find any info from the accepted reference taxonomy source,
                 | we only have: ${organism.rankIds.keys.map { it.name }}
-                """.trimMargin()
+                """.trimMargin(),
             )
         } else {
             organism.finalIds.forEach { dbEntry -> finalTaxon.addTaxoDB(dbEntry.key, dbEntry.value) }
@@ -118,29 +121,29 @@ class TaxonProcessor(
     }
 
     @Suppress("NestedBlockDepth")
-    private fun searchForTaxonInfo(
-        organism: Organism
-    ): MutableList<AcceptedTaxonEntry> {
+    private fun searchForTaxonInfo(organism: Organism): MutableList<AcceptedTaxonEntry> {
         val acceptedRanks = mutableListOf<AcceptedTaxonEntry>()
         var fullTaxonFound = false
         LIST_OF_ACCEPTED_DBS.forEach { taxonDbName ->
             // First we check if we have that db in the current organism
             if (fullTaxonFound) return@forEach
 
-            val taxonDb = organism.rankIds.keys.firstOrNull { it.name == taxonDbName }
-                ?: RuntimeException("Taxonomy database not found, but we have a reference to it")
+            val taxonDb =
+                organism.rankIds.keys.firstOrNull { it.name == taxonDbName }
+                    ?: RuntimeException("Taxonomy database not found, but we have a reference to it")
 
             acceptedRanks.clear()
 
-            val ranks = listOf(
-                "family" to InstanceItems::family,
-                "subfamily" to InstanceItems::subfamily,
-                "tribe" to InstanceItems::tribe,
-                "subtribe" to InstanceItems::subtribe,
-                "genus" to InstanceItems::genus,
-                "species" to InstanceItems::species,
-                "variety" to InstanceItems::variety
-            )
+            val ranks =
+                listOf(
+                    "family" to InstanceItems::family,
+                    "subfamily" to InstanceItems::subfamily,
+                    "tribe" to InstanceItems::tribe,
+                    "subtribe" to InstanceItems::subtribe,
+                    "genus" to InstanceItems::genus,
+                    "species" to InstanceItems::species,
+                    "variety" to InstanceItems::variety,
+                )
 
             ranks.forEach { (rankName, rankItem) ->
                 val entity =

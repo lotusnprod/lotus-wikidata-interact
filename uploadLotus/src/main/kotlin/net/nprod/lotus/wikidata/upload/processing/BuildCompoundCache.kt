@@ -28,21 +28,22 @@ fun DataTotal.buildCompoundCache(
     instanceItems: InstanceItems,
     logger: org.slf4j.Logger,
     wdSparql: ISparql,
-    wikidataCompoundCache: MutableMap<InChIKey, String>
+    wikidataCompoundCache: MutableMap<InChIKey, String>,
 ) {
-    val inchiKeys = this.compoundCache.store.map { (_, compound) ->
-        compound.inchikey
-    }
+    val inchiKeys =
+        this.compoundCache.store.map { (_, compound) ->
+            compound.inchikey
+        }
     inchiKeys.chunked(COMPOUNDS_PROCESSING_CHUNK_SIZE) { inchiKeysBlock ->
         repositoryManager?.let {
             val query =
                 """
-               SELECT ?id ?inchikey WHERE {
-                   ?id <${instanceItems.inChIKey.iri}> ?inchikey.
-                   VALUES ?inchikey {
-                      ${inchiKeysBlock.joinToString(" ") { key -> Rdf.literalOf(key).queryString }}
-                   }
-                }
+                SELECT ?id ?inchikey WHERE {
+                    ?id <${instanceItems.inChIKey.iri}> ?inchikey.
+                    VALUES ?inchikey {
+                       ${inchiKeysBlock.joinToString(" ") { key -> Rdf.literalOf(key).queryString }}
+                    }
+                 }
                 """.trimIndent()
             logger.info(query)
             wdSparql.selectQuery(query) { result ->

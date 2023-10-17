@@ -17,10 +17,11 @@ internal class WDArticleTest {
 
     @Test
     fun `Find references by DOI`() {
-        val dois = mapOf(
-            "10.1021/ACS.JMEDCHEM.5B01009" to listOf("Q26778522"),
-            "10.3389/FPLS.2019.01329" to listOf("Q91218352")
-        )
+        val dois =
+            mapOf(
+                "10.1021/ACS.JMEDCHEM.5B01009" to listOf("Q26778522"),
+                "10.3389/FPLS.2019.01329" to listOf("Q91218352"),
+            )
 
         val result = wdSparql.findReferencesByDOI(dois.keys.toList())
         result.forEach {

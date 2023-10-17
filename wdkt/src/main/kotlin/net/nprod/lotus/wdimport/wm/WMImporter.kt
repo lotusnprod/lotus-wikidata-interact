@@ -9,11 +9,11 @@
 
 package net.nprod.lotus.wdimport.wm
 
+/*
+
 /**
  * This is for later when we will import wikimedia
  */
-
-/*
 
 import net.nprod.lotus.wdimport.wd.publishing.EnvironmentVariableError
 import org.wikipedia.WMFWiki

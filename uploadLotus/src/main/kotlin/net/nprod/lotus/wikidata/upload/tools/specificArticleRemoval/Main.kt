@@ -42,15 +42,16 @@ fun main() {
             ?derived     pr:P248 ?reference.
             VALUES ?reference { <http://www.wikidata.org/entity/Q104415021> }
         } 
-        """.trimIndent()
+        """.trimIndent(),
     ) { result ->
-        statements = result.map { bindingSet ->
-            Statement(
-                bindingSet.getValue("id").stringValue().replace("http://www.wikidata.org/entity/", ""),
-                bindingSet.getValue("taxo").stringValue().replace("http://www.wikidata.org/entity/", ""),
-                bindingSet.getValue("reference").stringValue().replace("http://www.wikidata.org/entity/", "")
-            )
-        }
+        statements =
+            result.map { bindingSet ->
+                Statement(
+                    bindingSet.getValue("id").stringValue().replace("http://www.wikidata.org/entity/", ""),
+                    bindingSet.getValue("taxo").stringValue().replace("http://www.wikidata.org/entity/", ""),
+                    bindingSet.getValue("reference").stringValue().replace("http://www.wikidata.org/entity/", ""),
+                )
+            }
     }
 
     logger.info("We have ${statements.size} to go over.")
@@ -60,55 +61,62 @@ fun main() {
         val document = publisher.fetcher?.getEntityDocument(compoundId) ?: return@map
         listOfqueryStatement.map { queryStatement ->
             if (document is ItemDocument) {
-                val documentStatements = document.allStatements.iterator().asSequence().toList().filter {
-                    it.mainSnak.propertyId.id == "P703"
-                }
-                    .filter {
-                        ((it.mainSnak as ValueSnak).value as ItemIdValue).id == queryStatement.taxonId
-                    } // filter for the right taxon
-                    .filter { // filter for the statement that contain our reference
-                        it.references.any {
-                            it.snakGroups.filter { it.property.id == "P248" }.any {
-                                it.any {
-                                    ((it as ValueSnak).value as ItemIdValue).id == queryStatement.referenceId
+                val documentStatements =
+                    document.allStatements.iterator().asSequence().toList().filter {
+                        it.mainSnak.propertyId.id == "P703"
+                    }
+                        .filter {
+                            ((it.mainSnak as ValueSnak).value as ItemIdValue).id == queryStatement.taxonId
+                        } // filter for the right taxon
+                        .filter { // filter for the statement that contain our reference
+                            it.references.any {
+                                it.snakGroups.filter { it.property.id == "P248" }.any {
+                                    it.any {
+                                        ((it as ValueSnak).value as ItemIdValue).id == queryStatement.referenceId
+                                    }
                                 }
                             }
                         }
-                    }
                 logger.info("So we have ${documentStatements.size} statements to process for that document")
                 // If we have only one ref, we kill the full statement, if not we just kill the ref
                 documentStatements.map {
                     if (it.references.size == 1) {
                         publisher.editor?.updateStatements(
                             document.entityId,
-                            listOf(), // adds
-                            listOf(it), // deletes
+                            // adds
+                            listOf(),
+                            // deletes
+                            listOf(it),
                             "Cleaning up my mistakes",
-                            listOf()
+                            listOf(),
                         ) ?: throw InternalException("Editor is not working!")
                         logger.info(" I deleted this statement")
                     } else {
-                        val newRefs = it.references.filter {
-                            it.snakGroups.filter { it.property.id == "P248" }.any {
-                                it.any {
-                                    ((it as ValueSnak).value as ItemIdValue).id != queryStatement.referenceId
+                        val newRefs =
+                            it.references.filter {
+                                it.snakGroups.filter { it.property.id == "P248" }.any {
+                                    it.any {
+                                        ((it as ValueSnak).value as ItemIdValue).id != queryStatement.referenceId
+                                    }
                                 }
                             }
-                        }
 
-                        val newStatement = StatementBuilder.forSubjectAndProperty(
-                            ItemIdValue.NULL,
-                            instanceItems.foundInTaxon
-                        )
-                            .withId(it.statementId)
-                            .withValue(it.value)
-                            .withReferences(newRefs).build()
+                        val newStatement =
+                            StatementBuilder.forSubjectAndProperty(
+                                ItemIdValue.NULL,
+                                instanceItems.foundInTaxon,
+                            )
+                                .withId(it.statementId)
+                                .withValue(it.value)
+                                .withReferences(newRefs).build()
                         publisher.editor?.updateStatements(
                             document.entityId,
-                            listOf(newStatement), // adds (we are overwriting it, no need to delete!)
-                            listOf(), // deletes
+                            // adds (we are overwriting it, no need to delete!)
+                            listOf(newStatement),
+                            // deletes
+                            listOf(),
                             "Cleaning up my mistakes, deleting a mismatched article",
-                            listOf()
+                            listOf(),
                         ) ?: throw InternalException("Editor is not working!")
                         logger.info(" I delete only the matching ref")
                     }

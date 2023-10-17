@@ -22,6 +22,7 @@ val TaxonomyDatabaseExclusionList = listOf("IPNI", "IRMNG (old)")
 val RequiredTaxonRanks = listOf("variety", "genus", "subgenus", "species", "subspecies", "family")
 
 val InChIKeyRegexp: Regex = "[A-Z]{14}-[A-Z]{10}-[A-Z]".toRegex()
+
 private fun String.validateInChIKey(): String {
     if (!this.matches(InChIKeyRegexp)) throw InvalidEntryDataException("InChIKey $this invalid")
     return this
@@ -42,15 +43,16 @@ class LotusProcessRaw : ItemProcessor<LotusRaw, DataTotal> {
         }
 
         items.filter(::canBeProcessed).forEach { lotusRaw ->
-            val organismObj = with(lotusRaw.organism) {
-                dataTotal.organismCache.getOrNew(organismCleaned) {
-                    Organism(name = organismCleaned)
-                }.apply {
-                    finalIds[organismDb] = organismID
-                    textRanks[organismDb] = organismRanks
-                    textNames[organismDb] = organismNames
+            val organismObj =
+                with(lotusRaw.organism) {
+                    dataTotal.organismCache.getOrNew(organismCleaned) {
+                        Organism(name = organismCleaned)
+                    }.apply {
+                        finalIds[organismDb] = organismID
+                        textRanks[organismDb] = organismRanks
+                        textNames[organismDb] = organismNames
+                    }
                 }
-            }
 
             val inchiKey = lotusRaw.compound.inchiKey.validateInChIKey()
 
@@ -70,34 +72,36 @@ class LotusProcessRaw : ItemProcessor<LotusRaw, DataTotal> {
         lotusRaw: LotusRaw,
         dataTotal: DataTotal,
         inchiKey: String,
-        organismObj: Organism
+        organismObj: Organism,
     ) {
         try {
-            val compoundObj = with(lotusRaw.compound) {
-                dataTotal.compoundCache.getOrNew(smiles) {
-                    Compound(
-                        name = compoundName,
-                        smiles = smiles,
-                        inchi = inchi,
-                        inchikey = inchiKey,
-                        iupac = iupacName,
-                        unspecifiedStereocenters = unspecifiedStereocenters,
-                        atLeastSomeStereoDefined = unspecifiedStereocenters != totalCenters
-                    )
+            val compoundObj =
+                with(lotusRaw.compound) {
+                    dataTotal.compoundCache.getOrNew(smiles) {
+                        Compound(
+                            name = compoundName,
+                            smiles = smiles,
+                            inchi = inchi,
+                            inchikey = inchiKey,
+                            iupac = iupacName,
+                            unspecifiedStereocenters = unspecifiedStereocenters,
+                            atLeastSomeStereoDefined = unspecifiedStereocenters != totalCenters,
+                        )
+                    }
                 }
-            }
 
-            val referenceObj = with(lotusRaw.reference) {
-                dataTotal.referenceCache.getOrNew(doi) {
-                    val title = title.titleCleaner()
-                    Reference(
-                        doi = doi,
-                        title = title,
-                        pmcid = pmcid?.ifEqualReplace("NA", "") ?: "",
-                        pmid = pmid?.ifEqualReplace("NA", "") ?: ""
-                    )
+            val referenceObj =
+                with(lotusRaw.reference) {
+                    dataTotal.referenceCache.getOrNew(doi) {
+                        val title = title.titleCleaner()
+                        Reference(
+                            doi = doi,
+                            title = title,
+                            pmcid = pmcid?.ifEqualReplace("NA", "") ?: "",
+                            pmid = pmid?.ifEqualReplace("NA", "") ?: "",
+                        )
+                    }
                 }
-            }
 
             /**
              * We had a bug where we matched all the NA to a single article

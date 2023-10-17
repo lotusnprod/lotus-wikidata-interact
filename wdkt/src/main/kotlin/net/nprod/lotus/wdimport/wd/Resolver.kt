@@ -17,6 +17,8 @@ import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue
  */
 interface Resolver {
     val instanceItems: InstanceItems
+
     fun resolve(item: RemoteItem): ItemIdValue = item.get(instanceItems)
+
     fun resolve(item: RemoteProperty): PropertyIdValue = item.get(instanceItems)
 }

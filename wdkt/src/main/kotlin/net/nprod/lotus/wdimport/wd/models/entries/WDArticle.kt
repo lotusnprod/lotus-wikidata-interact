@@ -58,25 +58,26 @@ data class WDArticle(
     var volume: String? = null,
     var pages: String? = null,
     var authors: List<AuthorInfo>? = null,
-    var resolvedISSN: ItemIdValue? = null
+    var resolvedISSN: ItemIdValue? = null,
 ) : Publishable() {
     var source: String? = null
 
     override var type: KProperty1<InstanceItems, ItemIdValue> = InstanceItems::scholarlyArticle
 
-    override fun dataStatements(): List<IReferencedStatement> = listOfNotNull(
-        title?.let {
-            ReferencedValueStatement.monolingualValue(InstanceItems::title, it).withReferenceURL(source)
-        },
-        doi?.let { ReferencedValueStatement(InstanceItems::doi, it) }?.withReferenceURL(source),
-        publicationDate?.let {
-            ReferencedValueStatement.datetimeValue(InstanceItems::publicationDate, it).withReferenceURL(source)
-        },
-        issue?.let { ReferencedValueStatement(InstanceItems::issue, it).withReferenceURL(source) },
-        volume?.let { ReferencedValueStatement(InstanceItems::volume, it).withReferenceURL(source) },
-        pages?.let { ReferencedValueStatement(InstanceItems::pages, it).withReferenceURL(source) },
-        resolvedISSN?.let { ReferencedValueStatement(InstanceItems::publishedIn, it).withReferenceURL(source) }
-    ) + authorsStatements()
+    override fun dataStatements(): List<IReferencedStatement> =
+        listOfNotNull(
+            title?.let {
+                ReferencedValueStatement.monolingualValue(InstanceItems::title, it).withReferenceURL(source)
+            },
+            doi?.let { ReferencedValueStatement(InstanceItems::doi, it) }?.withReferenceURL(source),
+            publicationDate?.let {
+                ReferencedValueStatement.datetimeValue(InstanceItems::publicationDate, it).withReferenceURL(source)
+            },
+            issue?.let { ReferencedValueStatement(InstanceItems::issue, it).withReferenceURL(source) },
+            volume?.let { ReferencedValueStatement(InstanceItems::volume, it).withReferenceURL(source) },
+            pages?.let { ReferencedValueStatement(InstanceItems::pages, it).withReferenceURL(source) },
+            resolvedISSN?.let { ReferencedValueStatement(InstanceItems::publishedIn, it).withReferenceURL(source) },
+        ) + authorsStatements()
 
     /**
      * Generate a list of authors statements
@@ -84,9 +85,12 @@ data class WDArticle(
     private fun authorsStatements(): List<IReferencedStatement> =
         authors?.filter { it.fullName != "" }?.mapIndexed { index, author ->
             val wikidataID = author.wikidataID
-            val statement = if (wikidataID != null) {
-                ReferencedValueStatement(InstanceItems::author, wikidataID)
-            } else { ReferencedValueStatement(InstanceItems::authorNameString, author.fullName) }
+            val statement =
+                if (wikidataID != null) {
+                    ReferencedValueStatement(InstanceItems::author, wikidataID)
+                } else {
+                    ReferencedValueStatement(InstanceItems::authorNameString, author.fullName)
+                }
 
             statement.withReferenceURL(source).apply {
                 this.qualifier(InstanceItems::seriesOrdinal, Datamodel.makeStringValue((index + 1).toString()))
@@ -97,12 +101,16 @@ data class WDArticle(
      * Try to find an article with that DOI, we always take the smallest ID, if it is not found,
      * we ask other databases, for now only CrossREF
      */
-    override fun tryToFind(wdFinder: WDFinder, instanceItems: InstanceItems): WDArticle {
+    override fun tryToFind(
+        wdFinder: WDFinder,
+        instanceItems: InstanceItems,
+    ): WDArticle {
         require(doi != null) { "The DOI cannot be null" }
         if (instanceItems == TestInstanceItems) return this
-        val entries = wdFinder.wdkt.searchForPropertyValue(instanceItems.doi, doi)?.getAllIdsForInstance(
-            instanceItems
-        ) ?: listOf()
+        val entries =
+            wdFinder.wdkt.searchForPropertyValue(instanceItems.doi, doi)?.getAllIdsForInstance(
+                instanceItems,
+            ) ?: listOf()
 
         if (entries.isNotEmpty()) this.publishedAs(entries.first())
 
@@ -112,13 +120,17 @@ data class WDArticle(
     /**
      * Resolve the ISSN to a Wikidata entry, and set the resolvedISSN accordingly
      */
-    fun resolveISSN(wdFinder: WDFinder, instanceItems: InstanceItems) {
+    fun resolveISSN(
+        wdFinder: WDFinder,
+        instanceItems: InstanceItems,
+    ) {
         if (instanceItems == TestInstanceItems) return // We are not doing anything with ISSN in test mode
         val issn = issn ?: return
         // We are not resolving empty ISSNs
-        val entries = wdFinder.wdkt.searchForPropertyValue(instanceItems.issn, issn)?.getAllIdsForInstance(
-            instanceItems
-        ) ?: listOf()
+        val entries =
+            wdFinder.wdkt.searchForPropertyValue(instanceItems.issn, issn)?.getAllIdsForInstance(
+                instanceItems,
+            ) ?: listOf()
 
         if (entries.isNotEmpty()) this.resolvedISSN = entries.first()
     }
@@ -127,29 +139,34 @@ data class WDArticle(
      * Populate the data for this article from CrossREF
      */
     @ExperimentalTime
-    fun populateFromCrossREF(wdFinder: WDFinder, instanceItems: InstanceItems) {
+    fun populateFromCrossREF(
+        wdFinder: WDFinder,
+        instanceItems: InstanceItems,
+    ) {
         require(doi != null) { "The DOI cannot be null" }
         logger.info("Looking on CrossREF for $doi")
-        val output = try {
-            tryCount<WorkResponse>(
-                listExceptions = listOf(
-                    MediaWikiApiErrorException::class,
-                    IOException::class,
-                    TimeoutCancellationException::class,
-                    MaxlagErrorException::class,
-                    UnManagedReturnCode::class,
-                    io.ktor.network.sockets.ConnectTimeoutException::class,
-                    io.ktor.utils.io.charsets.MalformedInputException::class
-                ),
-                maxRetries = 10,
-                delayMilliSeconds = 30_000L
-            ) {
-                wdFinder.crossRefConnector.workFromDOI(doi)
+        val output =
+            try {
+                tryCount<WorkResponse>(
+                    listExceptions =
+                        listOf(
+                            MediaWikiApiErrorException::class,
+                            IOException::class,
+                            TimeoutCancellationException::class,
+                            MaxlagErrorException::class,
+                            UnManagedReturnCode::class,
+                            io.ktor.network.sockets.ConnectTimeoutException::class,
+                            io.ktor.utils.io.charsets.MalformedInputException::class,
+                        ),
+                    maxRetries = 10,
+                    delayMilliSeconds = 30_000L,
+                ) {
+                    wdFinder.crossRefConnector.workFromDOI(doi)
+                }
+            } catch (e: NonExistent) {
+                logger.error("We couldn't find anything about the article with the DOI $doi in CrossREF")
+                return
             }
-        } catch (e: NonExistent) {
-            logger.error("We couldn't find anything about the article with the DOI $doi in CrossREF")
-            return
-        }
 
         val message = output.message
         if (message == null || output.status != "ok") {
@@ -176,17 +193,22 @@ data class WDArticle(
             AuthorInfo(
                 orcid = orcid,
                 givenName = it.given ?: "",
-                familyName = it.family ?: ""
+                familyName = it.family ?: "",
             ).apply { wikidataID = orcid?.let { findPersonFromORCID(wdFinder, instanceItems, orcid) } }
         } ?: listOf()
 
         source = "http://api.crossref.org/works/" + URLEncoder.encode(doiRetrieved, "utf-8")
     }
 
-    private fun findPersonFromORCID(wdFinder: WDFinder, instanceItems: InstanceItems, orcid: String): ItemIdValue? {
-        val entries = wdFinder.wdkt.searchForPropertyValue(instanceItems.orcid, orcid)?.getAllIdsForInstance(
-            instanceItems
-        ) ?: listOf()
+    private fun findPersonFromORCID(
+        wdFinder: WDFinder,
+        instanceItems: InstanceItems,
+        orcid: String,
+    ): ItemIdValue? {
+        val entries =
+            wdFinder.wdkt.searchForPropertyValue(instanceItems.orcid, orcid)?.getAllIdsForInstance(
+                instanceItems,
+            ) ?: listOf()
 
         return if (entries.isNotEmpty()) entries.first() else null
     }

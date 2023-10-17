@@ -12,7 +12,10 @@ import org.eclipse.rdf4j.common.transaction.IsolationLevels
 import org.eclipse.rdf4j.repository.Repository
 import org.eclipse.rdf4j.repository.RepositoryConnection
 
-fun doWithEachCompound(repository: Repository, f: (Compound) -> Unit) {
+fun doWithEachCompound(
+    repository: Repository,
+    f: (Compound) -> Unit,
+) {
     repository.connection.use { conn: RepositoryConnection ->
         conn.begin(IsolationLevels.NONE) // We are not writing anything
         conn.prepareTupleQuery(
@@ -23,7 +26,7 @@ fun doWithEachCompound(repository: Repository, f: (Compound) -> Unit) {
               OPTIONAL { ?compound_id <${WikidataChemistry.Properties.canonicalSmiles}> ?canonicalSmiles. }
               OPTIONAL { ?compound_id <${WikidataChemistry.Properties.isomericSmiles}> ?isomericSmiles. }
             }
-            """.trimIndent()
+            """.trimIndent(),
         ).evaluate().groupBy { it.getValue("compound_id").stringValue() }.forEach { (key, value) ->
             f(
                 Compound(
@@ -31,8 +34,8 @@ fun doWithEachCompound(repository: Repository, f: (Compound) -> Unit) {
                     inchiKeys = value.map { it.getValue("inchikey").stringValue() },
                     inchis = value.mapNotNull { it.getValue("inchi")?.stringValue() },
                     canonicalSmiles = value.mapNotNull { it.getValue("canonicalSmiles")?.stringValue() },
-                    isomericSmiles = value.mapNotNull { it.getValue("isomericSmiles")?.stringValue() }
-                )
+                    isomericSmiles = value.mapNotNull { it.getValue("isomericSmiles")?.stringValue() },
+                ),
             )
         }
         conn.commit()

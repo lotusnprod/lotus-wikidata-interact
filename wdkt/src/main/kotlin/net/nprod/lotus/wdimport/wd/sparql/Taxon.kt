@@ -16,6 +16,5 @@ typealias Taxon = String
 fun WDSparql.findTaxonByName(
     keys: List<String>,
     chunkSize: Int = 100,
-    chunkFeedBack: () -> Unit = {}
-): Map<Taxon, List<WDEntity>> =
-    findByPropertyValue("P225", keys, chunkSize, chunkFeedBack)
+    chunkFeedBack: () -> Unit = {},
+): Map<Taxon, List<WDEntity>> = findByPropertyValue("P225", keys, chunkSize, chunkFeedBack)

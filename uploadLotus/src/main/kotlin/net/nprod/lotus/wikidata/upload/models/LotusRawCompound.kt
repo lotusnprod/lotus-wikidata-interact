@@ -14,5 +14,5 @@ data class LotusRawCompound(
     val compoundName: String,
     val iupacName: String,
     val unspecifiedStereocenters: Int,
-    val totalCenters: Int
+    val totalCenters: Int,
 )

@@ -44,7 +44,8 @@ class WikiDataWriter : ItemWriter<DataTotal> {
         publisher.disconnect() // Lets try that to avoid the CSRF errors
 
         items.forEach {
-            try { // We will retry once if we have a CSRF or a token error
+            try {
+                // We will retry once if we have a CSRF or a token error
                 publisher.connect()
                 process(it)
             } catch (e: TokenErrorException) {

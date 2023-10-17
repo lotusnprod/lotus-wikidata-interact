@@ -15,5 +15,5 @@ data class Log(
     val validated: Int,
     val inserted: Int,
     val failed: Int,
-    val logFile: List<String>
+    val logFile: List<String>,
 )

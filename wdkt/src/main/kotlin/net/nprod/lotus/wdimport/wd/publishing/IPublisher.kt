@@ -39,11 +39,17 @@ interface IPublisher {
     /**
      * Create a new Property and returns its ID
      */
-    fun newProperty(name: String, description: String): PropertyIdValue
+    fun newProperty(
+        name: String,
+        description: String,
+    ): PropertyIdValue
 
     /**
      * Publish the given entity
      * It HAS to call publishable.document
      */
-    fun publish(publishable: Publishable, summary: String): ItemIdValue
+    fun publish(
+        publishable: Publishable,
+        summary: String,
+    ): ItemIdValue
 }

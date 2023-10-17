@@ -11,18 +11,19 @@ import kotlin.reflect.KClass
 
 typealias Milliseconds = Long
 
+// On purpose we catch and throw it back
+// We also remove the NestedBlockDepth as it is a helper function
+
 /**
  * This is used to retry a block of code a number of times if it files with the given exceptions.
  * Once it reaches the maximum of retries, it will throw the last exception received.
  */
-// On purpose we catch and throw it back
-// We also remove the NestedBlockDepth as it is a helper function
 @Suppress("TooGenericExceptionThrown", "TooGenericExceptionCaught", "NestedBlockDepth")
 inline fun <U> tryCount(
     listExceptions: List<KClass<out Exception>>,
     maxRetries: Int = 3,
     delayMilliSeconds: Milliseconds = 0,
-    f: () -> U
+    f: () -> U,
 ): U {
     var retries = 0
 

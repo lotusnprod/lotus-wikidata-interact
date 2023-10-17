@@ -26,28 +26,32 @@ import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue
  */
 class WDKT : IWDKT {
     private val logger: Logger = LogManager.getLogger(WDKT::class)
-    private val client: HttpClient = HttpClient(CIO) {
-        engine {
-            endpoint {
-                keepAliveTime = KEEP_ALIVE_TIMEOUT
-                connectTimeout = CONNECT_TIMEOUT
-                connectAttempts = CONNECT_ATTEMPTS
+    private val client: HttpClient =
+        HttpClient(CIO) {
+            engine {
+                endpoint {
+                    keepAliveTime = KEEP_ALIVE_TIMEOUT
+                    connectTimeout = CONNECT_TIMEOUT
+                    connectAttempts = CONNECT_ATTEMPTS
+                }
             }
         }
-    }
 
     override fun close(): Unit = client.close()
 
     @Deprecated("You should use searchForPropertyValue instead", level = DeprecationLevel.WARNING)
     override fun searchDOI(doi: String): QueryActionResponse = searchForPropertyValue(MainInstanceItems.doi, doi)
 
-    override fun searchForPropertyValue(property: PropertyIdValue, value: String): QueryActionResponse {
+    override fun searchForPropertyValue(
+        property: PropertyIdValue,
+        value: String,
+    ): QueryActionResponse {
         return tryCount(
             // no choice here, it is internal
             listNamedExceptions = listOf("kotlinx.serialization.json.internal.JsonDecodingException"),
             maxRetries = 10,
             delayMilliSeconds = 60_000L,
-            logger = logger
+            logger = logger,
         ) {
             // This was a dumb bug where we would not even try to re request the JSON, so we would just fail 10 times in a row
             val out: String =

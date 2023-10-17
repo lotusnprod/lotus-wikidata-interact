@@ -17,5 +17,5 @@ import kotlin.reflect.KProperty1
  */
 data class WDPreQualifier(
     val property: KProperty1<InstanceItems, PropertyIdValue>,
-    val value: Value
+    val value: Value,
 )

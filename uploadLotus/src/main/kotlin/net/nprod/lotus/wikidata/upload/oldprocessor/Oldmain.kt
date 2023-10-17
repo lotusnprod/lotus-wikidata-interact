@@ -45,7 +45,7 @@ fun oldmain(args: Array<String>) {
 
     // if (!parameters.real) logger.info("We are in test mode")
 
-    logger.info("Initializing toolkit")
+    // logger.info("Initializing toolkit")
 
     lateinit var wdSparql: ISparql
     lateinit var publisher: IPublisher
@@ -70,31 +70,33 @@ fun oldmain(args: Array<String>) {
         }
 
     // What publishing system are we using
-    publisher = if (parameters.real) {
-        WDPublisher(instanceItems, pause = 0L)
-    } else {
-        TestPublisher(
-            instanceItems,
-            repositoryManager?.repository
-        )
-    }
+    publisher =
+        if (parameters.real) {
+            WDPublisher(instanceItems, pause = 0L)
+        } else {
+            TestPublisher(
+                instanceItems,
+                repositoryManager?.repository,
+            )
+        }
 
     // Are we using a local instance of sparql?
-    wdSparql = if (parameters.realSparql || parameters.real) {
-        WDSparql(instanceItems)
-    } else if (parameters.validation || repositoryManager == null) {
-        NopSparql()
-    } else {
-        TestISparql(instanceItems, repositoryManager.repository)
-    }
+    wdSparql =
+        if (parameters.realSparql || parameters.real) {
+            WDSparql(instanceItems)
+        } else if (parameters.validation || repositoryManager == null) {
+            NopSparql()
+        } else {
+            TestISparql(instanceItems, repositoryManager.repository)
+        }
 
     val wdFinder = if (!parameters.validation) WDFinder(WDKT(), wdSparql) else WDFinder(NopWDKT(), wdSparql)
 
-    logger.info("Connecting to the publisher")
+    // logger.info("Connecting to the publisher")
 
     publisher.connect()
 
-    logger.info("Loading data")
+    // logger.info("Loading data")
 
     val dataTotal: DataTotal =
         if (parameters.limit == -1) {
@@ -103,7 +105,7 @@ fun oldmain(args: Array<String>) {
             loadData(
                 parameters.input,
                 parameters.skip,
-                parameters.limit
+                parameters.limit,
             )
         }
 

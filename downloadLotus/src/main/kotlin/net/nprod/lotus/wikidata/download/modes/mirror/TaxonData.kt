@@ -23,5 +23,5 @@ data class TaxonData(
     val otlId: String?,
     val vascanId: String?,
     val wfoId: String?,
-    val wormsId: String?
+    val wormsId: String?,
 )

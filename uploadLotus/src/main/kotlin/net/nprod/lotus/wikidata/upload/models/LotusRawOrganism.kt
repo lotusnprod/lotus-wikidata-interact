@@ -12,5 +12,5 @@ data class LotusRawOrganism(
     val organismDb: String,
     val organismID: String,
     val organismRanks: String,
-    val organismNames: String
+    val organismNames: String,
 )

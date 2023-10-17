@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test
 
 internal class RetryRunTest {
     class ExpectedError : Exception()
+
     class UnexpectedError : Exception()
 
     @Test
@@ -38,9 +39,10 @@ internal class RetryRunTest {
     fun `we get the output of the function`() {
         var touched = false
 
-        touched = tryCount(listOf(ExpectedError::class)) {
-            true
-        }
+        touched =
+            tryCount(listOf(ExpectedError::class)) {
+                true
+            }
 
         assert(touched)
     }

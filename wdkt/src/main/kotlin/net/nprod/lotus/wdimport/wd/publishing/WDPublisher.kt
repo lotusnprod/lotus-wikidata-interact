@@ -80,24 +80,27 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
     override fun connect() {
         if (connection?.isLoggedIn == true) return
 
-        connection = if (instanceItems == TestInstanceItems) {
-            BasicApiConnection.getTestWikidataApiConnection()
-        } else {
-            BasicApiConnection.getWikidataApiConnection()
-        }
+        connection =
+            if (instanceItems == TestInstanceItems) {
+                BasicApiConnection.getTestWikidataApiConnection()
+            } else {
+                BasicApiConnection.getWikidataApiConnection()
+            }
         @Suppress("DEPRECATION")
         connection?.login(user, password) ?: throw ConnectException("Impossible to connect to the WikiData instance.")
         logger.info("Connecting to the editor with siteIri: ${instanceItems.siteIri}")
-        editor = WikibaseDataEditor(connection, instanceItems.siteIri).also {
-            it.setEditAsBot(true)
-            it.maxLagFirstWaitTime = MAX_LAG_FIRST_WAIT_TIME
-            it.maxLagBackOffFactor = 2.0
-        }
+        editor =
+            WikibaseDataEditor(connection, instanceItems.siteIri).also {
+                it.setEditAsBot(true)
+                it.maxLagFirstWaitTime = MAX_LAG_FIRST_WAIT_TIME
+                it.maxLagBackOffFactor = 2.0
+            }
         logger.info("Connecting to the fetcher")
-        fetcher = WikibaseDataFetcher(connection, instanceItems.siteIri).also {
-            it.filter.excludeAllProperties()
-            it.filter.languageFilter = setOf("en")
-        }
+        fetcher =
+            WikibaseDataFetcher(connection, instanceItems.siteIri).also {
+                it.filter.excludeAllProperties()
+                it.filter.languageFilter = setOf("en")
+            }
 
         require(connection?.isLoggedIn ?: false) { "Impossible to login in the instance" }
     }
@@ -107,18 +110,23 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
         connection?.logout()
     }
 
-    override fun newProperty(name: String, description: String): PropertyIdValue {
+    override fun newProperty(
+        name: String,
+        description: String,
+    ): PropertyIdValue {
         logger.info("Building a property with $name $description")
-        val doc = PropertyDocumentBuilder.forPropertyIdAndDatatype(PropertyIdValue.NULL, DT_STRING)
-            .withLabel(Datamodel.makeMonolingualTextValue(name, "en"))
-            .withDescription(Datamodel.makeMonolingualTextValue(description, "en")).build()
+        val doc =
+            PropertyDocumentBuilder.forPropertyIdAndDatatype(PropertyIdValue.NULL, DT_STRING)
+                .withLabel(Datamodel.makeMonolingualTextValue(name, "en"))
+                .withDescription(Datamodel.makeMonolingualTextValue(description, "en")).build()
         try {
             return try {
-                val o = editor?.createPropertyDocument(
-                    doc,
-                    "Added a new property for ONPDB",
-                    listOf()
-                ) ?: throw InternalException("Sorry you can't create a property without connecting first.")
+                val o =
+                    editor?.createPropertyDocument(
+                        doc,
+                        "Added a new property for ONPDB",
+                        listOf(),
+                    ) ?: throw InternalException("Sorry you can't create a property without connecting first.")
                 o.entityId
             } catch (e: IllegalArgumentException) {
                 logger.error("There is a weird bug here, it still creates it, but isn't happy anyway")
@@ -131,9 +139,9 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
                 return Datamodel.makePropertyIdValue(
                     e.errorMessage.subSequence(
                         e.errorMessage.indexOf(':') + 1,
-                        e.errorMessage.indexOf('|')
+                        e.errorMessage.indexOf('|'),
                     ).toString(),
-                    ""
+                    "",
                 )
             } else {
                 throw e
@@ -141,7 +149,10 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
         }
     }
 
-    override fun publish(publishable: Publishable, summary: String): ItemIdValue {
+    override fun publish(
+        publishable: Publishable,
+        summary: String,
+    ): ItemIdValue {
         require(connection != null) { "You need to connect first" }
         require(editor != null) { "The editor should exist, you connection likely failed and we didn't catch that" }
         WebResourceFetcherImpl.setUserAgent(userAgent)
@@ -158,10 +169,10 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
                     listOf(
                         MediaWikiApiErrorException::class,
                         IOException::class,
-                        TimeoutCancellationException::class
+                        TimeoutCancellationException::class,
                     ),
                     maxRetries = 10,
-                    delayMilliSeconds = 30_000L
+                    delayMilliSeconds = 30_000L,
                 ) { // Sometimes it needs time to let the DB recover
                     editor?.createItemDocument(document, summary, null)
                         ?: throw InternalException("There is no editor anymore")
@@ -169,40 +180,43 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
 
             val itemId = newItemDocument.entityId
             publishedDocumentsIds.add(itemId.iri)
-            logger.info("New document ${itemId.id} - Summary: $summary")
-            logger.info("you can access it at ${instanceItems.sitePageIri}${itemId.id}")
+            // logger.info("New document ${itemId.id} - Summary: $summary")
+            // logger.info("you can access it at ${instanceItems.sitePageIri}${itemId.id}")
             publishable.publishedAs(itemId)
         } else { // The publishable is already existing, this means we only have to update the statements
             updatedDocuments++
 
-            val statements = tryCount(
-                listExceptions = listOf(
-                    MediaWikiApiErrorException::class,
-                    IOException::class,
-                    TimeoutCancellationException::class,
-                    MaxlagErrorException::class,
-                    SocketTimeoutException::class,
-                    JsonParseException::class
-                ),
-                maxRetries = 10,
-                delayMilliSeconds = 60_000L
-            ) {
-                publishable.listOfResolvedStatements(fetcher, instanceItems)
-            }
+            val statements =
+                tryCount(
+                    listExceptions =
+                        listOf(
+                            MediaWikiApiErrorException::class,
+                            IOException::class,
+                            TimeoutCancellationException::class,
+                            MaxlagErrorException::class,
+                            SocketTimeoutException::class,
+                            JsonParseException::class,
+                        ),
+                    maxRetries = 10,
+                    delayMilliSeconds = 60_000L,
+                ) {
+                    publishable.listOfResolvedStatements(fetcher, instanceItems)
+                }
 
-            logger.info("Updated document ${publishable.id} - Summary: $summary - Statements: ${statements.size}")
+            // logger.info("Updated document ${publishable.id} - Summary: $summary - Statements: ${statements.size}")
 
             if (statements.isNotEmpty()) {
                 tryCount<Unit>(
-                    listExceptions = listOf(
-                        MediaWikiApiErrorException::class,
-                        IOException::class,
-                        TimeoutCancellationException::class,
-                        MaxlagErrorException::class,
-                        SocketTimeoutException::class
-                    ),
+                    listExceptions =
+                        listOf(
+                            MediaWikiApiErrorException::class,
+                            IOException::class,
+                            TimeoutCancellationException::class,
+                            MaxlagErrorException::class,
+                            SocketTimeoutException::class,
+                        ),
                     maxRetries = 10,
-                    delayMilliSeconds = 60_000L
+                    delayMilliSeconds = 60_000L,
                 ) { // Sometimes it needs time to let the DB recover
                     // We update the existing statements
                     // We send the new statements
@@ -211,7 +225,7 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
                         statements,
                         listOf(),
                         "Updating the statements",
-                        listOf()
+                        listOf(),
                     )
                 }
             }

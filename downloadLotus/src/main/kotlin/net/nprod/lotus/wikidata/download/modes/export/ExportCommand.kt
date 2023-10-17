@@ -23,16 +23,17 @@ class ExportCommand : CliktCommand(help = "Export LOTUS to… something") {
     private val direct by option(
         "-d",
         "--direct",
-        help = "Connect directly to WikiData, do not use the local instance"
+        help = "Connect directly to WikiData, do not use the local instance",
     ).flag("-l", "--local", default = false, defaultForHelp = "Use the local instance")
 
     override fun run() {
         val storeFile = File(store)
-        val outputDirectory = outputDirectory.let {
-            File(it).also {
-                it.mkdirs()
+        val outputDirectory =
+            outputDirectory.let {
+                File(it).also {
+                    it.mkdirs()
+                }
             }
-        }
         runBlocking {
             export(storeFile, outputDirectory, direct).join()
         }

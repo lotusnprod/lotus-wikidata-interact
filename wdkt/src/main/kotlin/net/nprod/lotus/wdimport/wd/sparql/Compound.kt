@@ -18,9 +18,8 @@ typealias InChIKey = String
 fun WDSparql.findCompoundsByInChIKey(
     keys: List<String>,
     chunkSize: Int = 100,
-    chunkFeedBack: () -> Unit = {}
-): Map<InChIKey, List<WDEntity>> =
-    findByPropertyValue("P235", keys, chunkSize, chunkFeedBack)
+    chunkFeedBack: () -> Unit = {},
+): Map<InChIKey, List<WDEntity>> = findByPropertyValue("P235", keys, chunkSize, chunkFeedBack)
 
 /**
  * Search large quantities of InChI, by default they are chunked by groups of 100
@@ -29,9 +28,8 @@ fun WDSparql.findCompoundsByInChIKey(
 fun WDSparql.findCompoundsByInChI(
     keys: List<String>,
     chunkSize: Int = 100,
-    chunkFeedBack: () -> Unit = {}
-): Map<InChIKey, List<WDEntity>> =
-    findByPropertyValue("P234", keys, chunkSize, chunkFeedBack)
+    chunkFeedBack: () -> Unit = {},
+): Map<InChIKey, List<WDEntity>> = findByPropertyValue("P234", keys, chunkSize, chunkFeedBack)
 
 /**
  * Search large quantities of InChIKeys, by default they are chunked by groups of 100
@@ -40,9 +38,8 @@ fun WDSparql.findCompoundsByInChI(
 fun WDSparql.findCompoundsByIsomericSMILES(
     keys: List<String>,
     chunkSize: Int = 100,
-    chunkFeedBack: () -> Unit = {}
-): Map<InChIKey, List<WDEntity>> =
-    findByPropertyValue("P2017", keys, chunkSize, chunkFeedBack)
+    chunkFeedBack: () -> Unit = {},
+): Map<InChIKey, List<WDEntity>> = findByPropertyValue("P2017", keys, chunkSize, chunkFeedBack)
 
 /**
  * Search large quantities of InChIKeys, by default they are chunked by groups of 100
@@ -51,6 +48,5 @@ fun WDSparql.findCompoundsByIsomericSMILES(
 fun WDSparql.findCompoundsByPubChemID(
     keys: List<String>,
     chunkSize: Int = 100,
-    chunkFeedBack: () -> Unit = {}
-): Map<InChIKey, List<WDEntity>> =
-    findByPropertyValue("P664", keys, chunkSize, chunkFeedBack)
+    chunkFeedBack: () -> Unit = {},
+): Map<InChIKey, List<WDEntity>> = findByPropertyValue("P664", keys, chunkSize, chunkFeedBack)

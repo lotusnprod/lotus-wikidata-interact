@@ -22,7 +22,7 @@ class ReferenceProcessor(
     val dataTotal: DataTotal,
     val publisher: IPublisher,
     val wdFinder: WDFinder,
-    val instanceItems: InstanceItems
+    val instanceItems: InstanceItems,
 ) {
     @ExperimentalTime
     private val articlesCache: MutableMap<Reference, WDArticle> = mutableMapOf()
@@ -30,25 +30,28 @@ class ReferenceProcessor(
     @ExperimentalTime
     @KtorExperimentalAPI
     private fun articleFromReference(reference: Reference): WDArticle {
-        val article = WDArticle(
-            label = reference.title ?: reference.doi,
-            title = reference.title,
-            doi = reference.doi.uppercase(Locale.getDefault()) // DOIs are always uppercase but in reality we see both
-        ).tryToFind(wdFinder, instanceItems)
+        val article =
+            WDArticle(
+                label = reference.title ?: reference.doi,
+                title = reference.title,
+                // DOIs are always uppercase but in reality we see both
+                doi = reference.doi.uppercase(Locale.getDefault()),
+            ).tryToFind(wdFinder, instanceItems)
 
         // Get the article info on crossref if needed
 
-        val hasAuthorsAlready = if (article.published) {
-            wdFinder.sparql.askQuery(
-                """
-                ASK {
-                  <${article.id.iri}> <${instanceItems.author.iri}> ?o.
-                }
-                """.trimIndent()
-            )
-        } else {
-            false
-        }
+        val hasAuthorsAlready =
+            if (article.published) {
+                wdFinder.sparql.askQuery(
+                    """
+                    ASK {
+                      <${article.id.iri}> <${instanceItems.author.iri}> ?o.
+                    }
+                    """.trimIndent(),
+                )
+            } else {
+                false
+            }
 
         if (!hasAuthorsAlready) {
             article.populateFromCrossREF(wdFinder, instanceItems)
