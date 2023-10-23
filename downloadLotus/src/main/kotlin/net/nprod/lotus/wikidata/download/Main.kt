@@ -18,7 +18,6 @@ const val DEFAULT_REPOSITORY = "data/local_rdf"
 class Exporter : CliktCommand() {
     override fun run() {
         echo("Lotus Exporter")
-        this.shortHelp()
     }
 }
 
