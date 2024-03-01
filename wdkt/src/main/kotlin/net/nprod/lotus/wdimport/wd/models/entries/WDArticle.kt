@@ -181,7 +181,7 @@ data class WDArticle(
         label = title?.take(MAXIMUM_LABEL_LENGTH) ?: doi
         issn = message.issn?.firstOrNull()
         if (issn != null) resolveISSN(wdFinder, instanceItems)
-        publicationDate = message.created?.datetime?.let { OffsetDateTime.parse(it) }
+        publicationDate = message.publishedPrint?.datetime?.let { OffsetDateTime.parse(it) }
         if (message.issue != "") issue = message.issue
         if (message.volume != "") volume = message.volume
         if (message.page != "") pages = message.page
