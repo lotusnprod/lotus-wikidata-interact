@@ -8,7 +8,7 @@
 package net.nprod.lotus.wdimport.wd.publishing
 
 import com.fasterxml.jackson.core.JsonParseException
-import io.ktor.client.features.SocketTimeoutException
+import io.ktor.client.network.sockets.SocketTimeoutException
 import kotlinx.coroutines.TimeoutCancellationException
 import net.nprod.lotus.helpers.tryCount
 import net.nprod.lotus.wdimport.wd.InstanceItems
@@ -30,7 +30,6 @@ import org.wikidata.wdtk.wikibaseapi.apierrors.MaxlagErrorException
 import org.wikidata.wdtk.wikibaseapi.apierrors.MediaWikiApiErrorException
 import java.io.IOException
 import java.net.ConnectException
-import java.net.SocketTimeoutException
 
 const val MAX_LAG_FIRST_WAIT_TIME = 10_000
 

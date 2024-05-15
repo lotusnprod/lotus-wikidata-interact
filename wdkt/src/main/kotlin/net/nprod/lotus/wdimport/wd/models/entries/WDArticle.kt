@@ -155,7 +155,7 @@ data class WDArticle(
                             TimeoutCancellationException::class,
                             MaxlagErrorException::class,
                             UnManagedReturnCode::class,
-                            io.ktor.network.sockets.ConnectTimeoutException::class,
+                            io.ktor.client.network.sockets.ConnectTimeoutException::class,
                             io.ktor.utils.io.charsets.MalformedInputException::class,
                         ),
                     maxRetries = 10,
