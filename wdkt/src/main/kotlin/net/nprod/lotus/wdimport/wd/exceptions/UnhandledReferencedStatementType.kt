@@ -10,4 +10,6 @@ package net.nprod.lotus.wdimport.wd.exceptions
 /**
  * Thrown when we have a type that implements ReferencedStatement, but is not handled by all our logic
  */
-class UnhandledReferencedStatementType(override val message: String) : RuntimeException()
+class UnhandledReferencedStatementType(
+    override val message: String,
+) : RuntimeException()

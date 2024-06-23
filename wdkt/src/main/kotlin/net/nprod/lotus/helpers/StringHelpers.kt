@@ -16,7 +16,8 @@ fun String.ifEqualReplace(
 }
 
 fun String.titleCleaner(): String =
-    this.ifEqualReplace("NA", "")
+    this
+        .ifEqualReplace("NA", "")
         .replace("\\s+".toRegex(), " ")
         .replace(" ", " ")
         .replace("\n", "")

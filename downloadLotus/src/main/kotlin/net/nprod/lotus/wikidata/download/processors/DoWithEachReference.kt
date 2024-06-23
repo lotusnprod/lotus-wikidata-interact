@@ -19,23 +19,26 @@ fun doWithEachReference(
 ) {
     repository.connection.use { conn: RepositoryConnection ->
         conn.begin(IsolationLevels.NONE) // We are not writing anything
-        conn.prepareTupleQuery(
-            """
-            SELECT ?article_id ?doi ?title {
-                ?article_id <${Wikidata.Properties.instanceOf}> ?type;
-                            <${WikidataBibliography.Properties.doi}> ?doi.
-                OPTIONAL { ?article_id <${WikidataBibliography.Properties.title}> ?title. }
+        conn
+            .prepareTupleQuery(
+                """
+                SELECT ?article_id ?doi ?title {
+                    ?article_id <${Wikidata.Properties.instanceOf}> ?type;
+                                <${WikidataBibliography.Properties.doi}> ?doi.
+                    OPTIONAL { ?article_id <${WikidataBibliography.Properties.title}> ?title. }
+                }
+                """.trimIndent(),
+            ).evaluate()
+            .groupBy { it.getValue("article_id").stringValue() }
+            .forEach { (key, value) ->
+                f(
+                    Reference(
+                        wikidataId = key,
+                        dois = value.mapNotNull { it.getValue("doi")?.stringValue() },
+                        title = value.mapNotNull { it.getValue("title")?.stringValue() }.firstOrNull(),
+                    ),
+                )
             }
-            """.trimIndent(),
-        ).evaluate().groupBy { it.getValue("article_id").stringValue() }.forEach { (key, value) ->
-            f(
-                Reference(
-                    wikidataId = key,
-                    dois = value.mapNotNull { it.getValue("doi")?.stringValue() },
-                    title = value.mapNotNull { it.getValue("title")?.stringValue() }.firstOrNull(),
-                ),
-            )
-        }
         conn.commit()
     }
 }

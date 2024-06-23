@@ -31,7 +31,11 @@ fun countInLocalRepository(
             }
             """.trimIndent()
         logger.info(query)
-        val bindingSet = it.connection.prepareTupleQuery(query).evaluate().first()
+        val bindingSet =
+            it.connection
+                .prepareTupleQuery(query)
+                .evaluate()
+                .first()
         val orgcount = bindingSet.getBinding("orgcount").value.stringValue()
         val cpdcount = bindingSet.getBinding("cpdcount").value.stringValue()
 

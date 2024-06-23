@@ -34,7 +34,10 @@ fun doWithEachTaxon(
               
             }
             """.trimIndent()
-        conn.prepareTupleQuery(query).evaluate().groupBy { it.getValue("taxon_id").stringValue() }
+        conn
+            .prepareTupleQuery(query)
+            .evaluate()
+            .groupBy { it.getValue("taxon_id").stringValue() }
             .forEach { (key, value) ->
                 f(
                     Taxon(

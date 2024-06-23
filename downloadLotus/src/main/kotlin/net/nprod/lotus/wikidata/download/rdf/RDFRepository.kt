@@ -17,7 +17,9 @@ import java.io.File
  * We use that to make sure that we can access the repo. We may add
  * the querying directly here as well if needed.
  */
-class RDFRepository(location: File) {
+class RDFRepository(
+    location: File,
+) {
     val repository: SailRepository
     private val logger = LoggerFactory.getLogger(javaClass)
 

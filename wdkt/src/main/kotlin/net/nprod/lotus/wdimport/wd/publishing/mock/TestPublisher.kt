@@ -33,13 +33,17 @@ import java.io.ByteArrayOutputStream
 /**
  * Tried to add an empty property
  */
-class EmptyPropertyNotAllowedException(override val message: String) : RuntimeException()
+class EmptyPropertyNotAllowedException(
+    override val message: String,
+) : RuntimeException()
 
 /**
  * A Test publisher to test the publishing system
  */
-class TestPublisher(override val instanceItems: InstanceItems, private val repository: Repository?) :
-    Resolver,
+class TestPublisher(
+    override val instanceItems: InstanceItems,
+    private val repository: Repository?,
+) : Resolver,
     IPublisher {
     private val logger: Logger = LogManager.getLogger("Test Publisher")
     override var newDocuments: Int = 0
@@ -73,9 +77,11 @@ class TestPublisher(override val instanceItems: InstanceItems, private val repos
     ): PropertyIdValue {
         logger.debug("Trying to add a property name: $name ; description: $description")
         val doc =
-            PropertyDocumentBuilder.forPropertyIdAndDatatype(PropertyIdValue.NULL, DatatypeIdValue.DT_STRING)
+            PropertyDocumentBuilder
+                .forPropertyIdAndDatatype(PropertyIdValue.NULL, DatatypeIdValue.DT_STRING)
                 .withLabel(Datamodel.makeMonolingualTextValue(name, "en"))
-                .withDescription(Datamodel.makeMonolingualTextValue(description, "en")).build()
+                .withDescription(Datamodel.makeMonolingualTextValue(description, "en"))
+                .build()
         return doc.entityId
     }
 

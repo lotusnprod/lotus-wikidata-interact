@@ -13,7 +13,10 @@ import net.nprod.lotus.wdimport.wd.query.IWDKT
 import net.nprod.lotus.wdimport.wd.sparql.ISparql
 import kotlin.time.ExperimentalTime
 
-class WDFinder(val wdkt: IWDKT, val sparql: ISparql) {
+class WDFinder(
+    val wdkt: IWDKT,
+    val sparql: ISparql,
+) {
     @ExperimentalTime
     val crossRefConnector: CrossRefConnector by lazy {
         CrossRefConnector(OfficialCrossRefAPI())

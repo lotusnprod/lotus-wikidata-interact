@@ -94,7 +94,8 @@ fun newStatement(
     f: (StatementBuilder) -> Unit = {},
 ): Statement {
     val statement =
-        StatementBuilder.forSubjectAndProperty(subject ?: ItemIdValue.NULL, property)
+        StatementBuilder
+            .forSubjectAndProperty(subject ?: ItemIdValue.NULL, property)
             .withValue(value)
             .apply(f)
     return statement.build()
@@ -110,8 +111,10 @@ fun newStatement(
     qualifiers: Collection<WDResolvedQualifier>,
 ): Statement {
     val statement =
-        StatementBuilder.forSubjectAndProperty(subject ?: ItemIdValue.NULL, property)
-            .withValue(value).also { statement ->
+        StatementBuilder
+            .forSubjectAndProperty(subject ?: ItemIdValue.NULL, property)
+            .withValue(value)
+            .also { statement ->
                 existingId?.let { statement.withId(it) }
             }
 

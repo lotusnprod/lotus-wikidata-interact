@@ -15,20 +15,22 @@ internal class WDKTTest {
     @Test
     fun `make sure we can have weird DOIs`() {
         assert(
-            instance.searchForPropertyValue(
-                MainInstanceItems.doi,
-                "10.1021/NP049900+",
-            ).query.searchinfo.totalhits >= 1,
+            instance
+                .searchForPropertyValue(
+                    MainInstanceItems.doi,
+                    "10.1021/NP049900+",
+                ).query.searchinfo.totalhits >= 1,
         )
     }
 
     @Test
     fun `make sure we can find ISSNs`() {
         assert(
-            instance.searchForPropertyValue(
-                MainInstanceItems.issn,
-                "0163-3864",
-            ).query.searchinfo.totalhits >= 1,
+            instance
+                .searchForPropertyValue(
+                    MainInstanceItems.issn,
+                    "0163-3864",
+                ).query.searchinfo.totalhits >= 1,
         )
     }
 }

@@ -47,30 +47,34 @@ interface ISparql : Resolver {
         keys: List<String>,
         chunkSize: Int = 100,
         chunkFeedBack: () -> Unit = {},
-    ): Map<String, List<WDEntity>> {
-        return keys.chunked(chunkSize).flatMap { chunk ->
-            val valuesQuoted = chunk.joinToString(" ") { Rdf.literalOf(it).queryString }
+    ): Map<String, List<WDEntity>> =
+        keys
+            .chunked(chunkSize)
+            .flatMap { chunk ->
+                val valuesQuoted = chunk.joinToString(" ") { Rdf.literalOf(it).queryString }
 
-            val query =
-                """
-                PREFIX wdt: <${InstanceItems::wdtURI.get(instanceItems)}>
-                PREFIX wd: <${InstanceItems::wdURI.get(instanceItems)}>
-                SELECT DISTINCT ?id ?value {
-                  ?id wdt:$property ?value.
-                  VALUES ?value { $valuesQuoted }
-                }
-                """.trimIndent()
+                val query =
+                    """
+                    PREFIX wdt: <${InstanceItems::wdtURI.get(instanceItems)}>
+                    PREFIX wd: <${InstanceItems::wdURI.get(instanceItems)}>
+                    SELECT DISTINCT ?id ?value {
+                      ?id wdt:$property ?value.
+                      VALUES ?value { $valuesQuoted }
+                    }
+                    """.trimIndent()
 
-            this.selectQuery(query) { result ->
-                result.map { bindingSet ->
-                    (bindingSet.getValue("value").stringValue()) to
-                        bindingSet.getValue("id").stringValue()
-                            .replace(instanceItems.wdURI, "")
-                }
-            }.also { chunkFeedBack() }
-        }.groupBy(
-            keySelector = { it.first },
-            valueTransform = { it.second },
-        )
-    }
+                this
+                    .selectQuery(query) { result ->
+                        result.map { bindingSet ->
+                            (bindingSet.getValue("value").stringValue()) to
+                                bindingSet
+                                    .getValue("id")
+                                    .stringValue()
+                                    .replace(instanceItems.wdURI, "")
+                        }
+                    }.also { chunkFeedBack() }
+            }.groupBy(
+                keySelector = { it.first },
+                valueTransform = { it.second },
+            )
 }

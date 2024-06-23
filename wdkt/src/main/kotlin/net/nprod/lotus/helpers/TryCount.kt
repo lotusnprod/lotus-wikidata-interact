@@ -40,7 +40,8 @@ inline fun <U> tryCount(
             if (listExceptions.any { kclass ->
                     (e::class == kclass) ||
                         (e::class.supertypes.contains(kclass.starProjectedType))
-                } || listNamedExceptions.any { e::class.qualifiedName == it }
+                } ||
+                listNamedExceptions.any { e::class.qualifiedName == it }
             ) {
                 logger?.error("Retrying ($retries/$maxRetries): ${e.message}")
                 if (retries != maxRetries) {

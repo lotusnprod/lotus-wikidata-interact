@@ -21,7 +21,9 @@ fun tryGzipThenNormal(fileName: String): BufferedReader =
         File(fileName).bufferedReader()
     }
 
-class UnivocityBasedReader<T>(private val f: (com.univocity.parsers.common.record.Record) -> T) {
+class UnivocityBasedReader<T>(
+    private val f: (com.univocity.parsers.common.record.Record) -> T,
+) {
     private var csvParser: CsvParser? = null
 
     /**

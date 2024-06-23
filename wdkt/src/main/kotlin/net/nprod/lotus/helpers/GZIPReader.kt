@@ -12,7 +12,9 @@ import java.io.FileInputStream
 import java.io.InputStreamReader
 import java.util.zip.GZIPInputStream
 
-class GZIPReader(name: String) {
+class GZIPReader(
+    name: String,
+) {
     val bufferedReader: BufferedReader
     private val fileInputStream: FileInputStream = FileInputStream(name)
     private val inputStreamReader: InputStreamReader

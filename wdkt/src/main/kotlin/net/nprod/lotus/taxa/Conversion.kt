@@ -11,6 +11,4 @@ fun fixNothospecies(taxon: String): String =
     taxon
         .replace("× ", "×")
 
-fun fixSpecies(taxon: String): String {
-    return fixNothospecies(taxon)
-}
+fun fixSpecies(taxon: String): String = fixNothospecies(taxon)

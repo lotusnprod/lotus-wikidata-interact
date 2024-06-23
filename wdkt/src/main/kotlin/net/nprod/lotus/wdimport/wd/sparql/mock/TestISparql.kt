@@ -18,21 +18,22 @@ import org.eclipse.rdf4j.repository.Repository
 /**
  * A test class that use a local repository to answer SPARQL queries
  */
-class TestISparql(override val instanceItems: InstanceItems, private val repository: Repository) : ISparql {
+class TestISparql(
+    override val instanceItems: InstanceItems,
+    private val repository: Repository,
+) : ISparql {
     override fun <T> selectQuery(
         query: String,
         function: (TupleQueryResult) -> T,
-    ): T {
-        return repository.connection.use { conn ->
+    ): T =
+        repository.connection.use { conn ->
             function(conn.prepareTupleQuery(query).evaluate())
         }
-    }
 
-    override fun askQuery(query: String): Boolean {
-        return repository.connection.use { conn ->
+    override fun askQuery(query: String): Boolean =
+        repository.connection.use { conn ->
             conn.prepareBooleanQuery(query).evaluate()
         }
-    }
 }
 
 @Suppress("EmptyFunctionBlock")
@@ -55,9 +56,7 @@ class NopSparql : ISparql {
     override fun <T> selectQuery(
         query: String,
         function: (TupleQueryResult) -> T,
-    ): T {
-        return function(FakeTupleQueryResult())
-    }
+    ): T = function(FakeTupleQueryResult())
 
     override fun askQuery(query: String): Boolean = false
 

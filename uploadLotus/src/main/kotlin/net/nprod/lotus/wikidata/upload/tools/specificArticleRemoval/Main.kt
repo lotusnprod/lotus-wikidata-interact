@@ -62,13 +62,17 @@ fun main() {
         listOfqueryStatement.map { queryStatement ->
             if (document is ItemDocument) {
                 val documentStatements =
-                    document.allStatements.iterator().asSequence().toList().filter {
-                        it.mainSnak.propertyId.id == "P703"
-                    }
+                    document.allStatements
+                        .iterator()
+                        .asSequence()
+                        .toList()
                         .filter {
+                            it.mainSnak.propertyId.id == "P703"
+                        }.filter {
                             ((it.mainSnak as ValueSnak).value as ItemIdValue).id == queryStatement.taxonId
                         } // filter for the right taxon
-                        .filter { // filter for the statement that contain our reference
+                        .filter {
+                            // filter for the statement that contain our reference
                             it.references.any {
                                 it.snakGroups.filter { it.property.id == "P248" }.any {
                                     it.any {
@@ -102,13 +106,14 @@ fun main() {
                             }
 
                         val newStatement =
-                            StatementBuilder.forSubjectAndProperty(
-                                ItemIdValue.NULL,
-                                instanceItems.foundInTaxon,
-                            )
-                                .withId(it.statementId)
+                            StatementBuilder
+                                .forSubjectAndProperty(
+                                    ItemIdValue.NULL,
+                                    instanceItems.foundInTaxon,
+                                ).withId(it.statementId)
                                 .withValue(it.value)
-                                .withReferences(newRefs).build()
+                                .withReferences(newRefs)
+                                .build()
                         publisher.editor?.updateStatements(
                             document.entityId,
                             // adds (we are overwriting it, no need to delete!)

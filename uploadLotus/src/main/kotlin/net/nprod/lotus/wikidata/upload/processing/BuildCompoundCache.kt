@@ -49,7 +49,11 @@ fun DataTotal.buildCompoundCache(
             wdSparql.selectQuery(query) { result ->
                 result.forEach {
                     wikidataCompoundCache[it.getValue("inchikey").stringValue()] =
-                        it.getValue("id").stringValue().split("/").last()
+                        it
+                            .getValue("id")
+                            .stringValue()
+                            .split("/")
+                            .last()
                 }
             }
         }

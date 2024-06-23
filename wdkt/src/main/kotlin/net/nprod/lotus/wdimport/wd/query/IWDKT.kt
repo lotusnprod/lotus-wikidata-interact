@@ -59,8 +59,12 @@ data class QueryActionResponse(
      * Get All the Ids for a given instance, they are sorted by numerical order so you can get the earlier one
      */
     fun getAllIdsForInstance(instanceItems: InstanceItems): List<ItemIdValue> =
-        this.query.search.map { it.title.trimStart('Q').toInt() to it.title }
-            .toMap().toSortedMap().values.map {
+        this.query.search
+            .map { it.title.trimStart('Q').toInt() to it.title }
+            .toMap()
+            .toSortedMap()
+            .values
+            .map {
                 ItemIdValueImpl.fromId(it, InstanceItems::wdURI.get(instanceItems)) as ItemIdValue
             }
 }

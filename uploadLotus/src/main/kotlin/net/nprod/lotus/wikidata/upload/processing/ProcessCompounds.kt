@@ -76,7 +76,11 @@ fun DataTotal.processCompounds(
         logger.info(wdCompound)
 
         wdCompound.apply {
-            this@processCompounds.triplets.filter { it.compound == compound }.distinct().groupBy { it.organism }
+            this@processCompounds
+                .triplets
+                .filter { it.compound == compound }
+                .distinct()
+                .groupBy { it.organism }
                 .forEach { (organism, quads) ->
                     try {
                         val taxon = taxonProcessor.get(organism)

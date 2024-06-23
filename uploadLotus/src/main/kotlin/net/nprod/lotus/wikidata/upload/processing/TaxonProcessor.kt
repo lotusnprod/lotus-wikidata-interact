@@ -27,7 +27,9 @@ class InvalidTaxonName : RuntimeException()
 /**
  * We got a wrong taxon name
  */
-class NotEnoughInfoAboutTaxonException(override val message: String) : RuntimeException()
+class NotEnoughInfoAboutTaxonException(
+    override val message: String,
+) : RuntimeException()
 
 data class AcceptedTaxonEntry(
     val rank: String,
@@ -147,7 +149,10 @@ class TaxonProcessor(
 
             ranks.forEach { (rankName, rankItem) ->
                 val entity =
-                    organism.rankIds[taxonDb]?.firstOrNull { it.first.lowercase(Locale.getDefault()) == rankName }?.second?.name
+                    organism.rankIds[taxonDb]
+                        ?.firstOrNull { it.first.lowercase(Locale.getDefault()) == rankName }
+                        ?.second
+                        ?.name
                 if (!entity.isNullOrEmpty()) {
                     acceptedRanks.add(AcceptedTaxonEntry(rankName, rankItem, entity))
                     if (rankName in listOf("genus", "subgenus", "subspecies", "species", "variety", "family")) {

@@ -40,14 +40,13 @@ class IndexableCache<T, U : Indexable> : Cache<T, U> {
     override fun getOrNew(
         key: T,
         value: U,
-    ): U {
-        return store[key] ?: run {
+    ): U =
+        store[key] ?: run {
             val count = counter.incrementAndGet()
             value.id = count
             store[key] = value
             value
         }
-    }
 
     /**
      * Generate a value using an extension function
@@ -55,7 +54,5 @@ class IndexableCache<T, U : Indexable> : Cache<T, U> {
     fun getOrNew(
         key: T,
         generator: () -> U,
-    ): U {
-        return getOrNew(key, generator())
-    }
+    ): U = getOrNew(key, generator())
 }

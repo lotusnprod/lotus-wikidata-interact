@@ -36,12 +36,16 @@ const val MAX_LAG_FIRST_WAIT_TIME = 10_000
 /**
  * We have a missing environment variable
  */
-class EnvironmentVariableError(message: String) : Exception(message)
+class EnvironmentVariableError(
+    message: String,
+) : Exception(message)
 
 /**
  * Internal error that should not be thrown? A bit dirty isn't it
  */
-class InternalException(message: String) : Exception(message)
+class InternalException(
+    message: String,
+) : Exception(message)
 
 /**
  * Type safe unit for milliseconds
@@ -56,7 +60,11 @@ typealias Milliseconds = Long
  *
  * We need to find a way to reconnect when receiving org.wikidata.wdtk.wikibaseapi.apierrors.TokenErrorException
  */
-class WDPublisher(override val instanceItems: InstanceItems, val pause: Milliseconds = 0L) : Resolver, IPublisher {
+class WDPublisher(
+    override val instanceItems: InstanceItems,
+    val pause: Milliseconds = 0L,
+) : Resolver,
+    IPublisher {
     private val userAgent = "Wikidata Toolkit EditOnlineDataExample"
     private val logger: Logger = LogManager.getLogger(WDPublisher::class.java)
     private var user: String? = null
@@ -115,9 +123,11 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
     ): PropertyIdValue {
         logger.info("Building a property with $name $description")
         val doc =
-            PropertyDocumentBuilder.forPropertyIdAndDatatype(PropertyIdValue.NULL, DT_STRING)
+            PropertyDocumentBuilder
+                .forPropertyIdAndDatatype(PropertyIdValue.NULL, DT_STRING)
                 .withLabel(Datamodel.makeMonolingualTextValue(name, "en"))
-                .withDescription(Datamodel.makeMonolingualTextValue(description, "en")).build()
+                .withDescription(Datamodel.makeMonolingualTextValue(description, "en"))
+                .build()
         try {
             return try {
                 val o =
@@ -136,10 +146,11 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
             if ("already has label" in e.errorMessage) {
                 logger.error("This property already exists: ${e.errorMessage}")
                 return Datamodel.makePropertyIdValue(
-                    e.errorMessage.subSequence(
-                        e.errorMessage.indexOf(':') + 1,
-                        e.errorMessage.indexOf('|'),
-                    ).toString(),
+                    e.errorMessage
+                        .subSequence(
+                            e.errorMessage.indexOf(':') + 1,
+                            e.errorMessage.indexOf('|'),
+                        ).toString(),
                     "",
                 )
             } else {
@@ -172,7 +183,8 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
                     ),
                     maxRetries = 10,
                     delayMilliSeconds = 30_000L,
-                ) { // Sometimes it needs time to let the DB recover
+                ) {
+                    // Sometimes it needs time to let the DB recover
                     editor?.createItemDocument(document, summary, null)
                         ?: throw InternalException("There is no editor anymore")
                 }
@@ -216,7 +228,8 @@ class WDPublisher(override val instanceItems: InstanceItems, val pause: Millisec
                         ),
                     maxRetries = 10,
                     delayMilliSeconds = 60_000L,
-                ) { // Sometimes it needs time to let the DB recover
+                ) {
+                    // Sometimes it needs time to let the DB recover
                     // We update the existing statements
                     // We send the new statements
                     editor?.updateStatements(

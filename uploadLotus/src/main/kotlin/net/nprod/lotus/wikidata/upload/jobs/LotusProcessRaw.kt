@@ -45,13 +45,14 @@ class LotusProcessRaw : ItemProcessor<LotusRaw, DataTotal> {
         items.filter(::canBeProcessed).forEach { lotusRaw ->
             val organismObj =
                 with(lotusRaw.organism) {
-                    dataTotal.organismCache.getOrNew(organismCleaned) {
-                        Organism(name = organismCleaned)
-                    }.apply {
-                        finalIds[organismDb] = organismID
-                        textRanks[organismDb] = organismRanks
-                        textNames[organismDb] = organismNames
-                    }
+                    dataTotal.organismCache
+                        .getOrNew(organismCleaned) {
+                            Organism(name = organismCleaned)
+                        }.apply {
+                            finalIds[organismDb] = organismID
+                            textRanks[organismDb] = organismRanks
+                            textNames[organismDb] = organismNames
+                        }
                 }
 
             val inchiKey = lotusRaw.compound.inchiKey.validateInChIKey()
@@ -60,7 +61,8 @@ class LotusProcessRaw : ItemProcessor<LotusRaw, DataTotal> {
         }
 
         logger.info("Resolving the taxo DB")
-        dataTotal.organismCache.store.values.forEach { it.resolve(dataTotal.taxonomyDatabaseCache) }
+        dataTotal.organismCache.store.values
+            .forEach { it.resolve(dataTotal.taxonomyDatabaseCache) }
         return dataTotal
     }
 

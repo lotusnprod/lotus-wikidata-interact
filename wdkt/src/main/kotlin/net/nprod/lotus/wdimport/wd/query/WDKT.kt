@@ -46,8 +46,8 @@ class WDKT : IWDKT {
     override fun searchForPropertyValue(
         property: PropertyIdValue,
         value: String,
-    ): QueryActionResponse {
-        return tryCount(
+    ): QueryActionResponse =
+        tryCount(
             // no choice here, it is internal
             listNamedExceptions = listOf("kotlinx.serialization.json.internal.JsonDecodingException"),
             maxRetries = 10,
@@ -57,12 +57,13 @@ class WDKT : IWDKT {
             // This was a dumb bug where we would not even try to re request the JSON, so we would just fail 10 times in a row
             val out: String =
                 runBlocking {
-                    client.get("https://www.wikidata.org/w/api.php") {
-                        parameter("action", "query")
-                        parameter("format", "json")
-                        parameter("list", "search")
-                        parameter("srsearch", "haswbstatement:\"${property.id}=$value\"")
-                    }.bodyAsText()
+                    client
+                        .get("https://www.wikidata.org/w/api.php") {
+                            parameter("action", "query")
+                            parameter("format", "json")
+                            parameter("list", "search")
+                            parameter("srsearch", "haswbstatement:\"${property.id}=$value\"")
+                        }.bodyAsText()
                 }
             if (out.contains("error")) {
                 logger.error("Looking for $property = $value Found a problematic JSON string: $out")
@@ -70,7 +71,8 @@ class WDKT : IWDKT {
 
             Json.decodeFromString(out)
         }
-    }
 
-    class JsonDecodingException(override val message: String) : Exception()
+    class JsonDecodingException(
+        override val message: String,
+    ) : Exception()
 }

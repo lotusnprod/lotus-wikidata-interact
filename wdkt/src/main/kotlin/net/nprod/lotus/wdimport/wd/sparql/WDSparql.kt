@@ -21,7 +21,10 @@ import org.eclipse.rdf4j.repository.sparql.SPARQLRepository
  *
  * @param instanceItems the items specific to that instance
  */
-class WDSparql(override val instanceItems: InstanceItems) : Resolver, ISparql {
+class WDSparql(
+    override val instanceItems: InstanceItems,
+) : Resolver,
+    ISparql {
     private val repository: Repository
 
     init {
@@ -34,8 +37,8 @@ class WDSparql(override val instanceItems: InstanceItems) : Resolver, ISparql {
     override fun <T> selectQuery(
         query: String,
         function: (TupleQueryResult) -> T,
-    ): T {
-        return repository.connection.use {
+    ): T =
+        repository.connection.use {
             tryCount<TupleQueryResult>(
                 listOf(QueryEvaluationException::class, TimeoutCancellationException::class),
                 delayMilliSeconds = 30_000L,
@@ -45,10 +48,9 @@ class WDSparql(override val instanceItems: InstanceItems) : Resolver, ISparql {
                 function(result)
             }
         }
-    }
 
-    override fun askQuery(query: String): Boolean {
-        return repository.connection.use {
+    override fun askQuery(query: String): Boolean =
+        repository.connection.use {
             tryCount(
                 listOf(QueryEvaluationException::class, TimeoutCancellationException::class),
                 delayMilliSeconds = 30_000L,
@@ -56,5 +58,4 @@ class WDSparql(override val instanceItems: InstanceItems) : Resolver, ISparql {
                 it.prepareBooleanQuery(query).evaluate()
             }
         }
-    }
 }

@@ -19,7 +19,10 @@ import java.io.FileNotFoundException
 /**
  * Create a local SPARQL repository potentially persistent
  */
-class RepositoryManager(persistent: Boolean, persistenceLocation: String) {
+class RepositoryManager(
+    persistent: Boolean,
+    persistenceLocation: String,
+) {
     private val logger = LogManager.getLogger(RepositoryManager::class.qualifiedName)
 
     /**

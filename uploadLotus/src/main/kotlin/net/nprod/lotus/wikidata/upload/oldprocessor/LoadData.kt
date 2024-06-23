@@ -27,7 +27,9 @@ fun tryGzipThenNormal(fileName: String): BufferedReader =
         File(fileName).bufferedReader()
     }
 
-class InvalidEntryDataException(override val message: String) : RuntimeException()
+class InvalidEntryDataException(
+    override val message: String,
+) : RuntimeException()
 
 val TaxonomyDatabaseExclusionList = listOf("IPNI", "IRMNG (old)")
 val RequiredTaxonRanks = listOf("variety", "genus", "subgenus", "species", "subspecies", "family")
@@ -87,13 +89,16 @@ fun loadData(
                         Reference(
                             doi = doi,
                             title =
-                                it.getString("referenceCleanedTitle")
+                                it
+                                    .getString("referenceCleanedTitle")
                                     .ifEqualReplace("NA", ""),
                             pmcid =
-                                it.getString("referenceCleanedPmcid")
+                                it
+                                    .getString("referenceCleanedPmcid")
                                     .ifEqualReplace("NA", ""),
                             pmid =
-                                it.getString("referenceCleanedPmid")
+                                it
+                                    .getString("referenceCleanedPmid")
                                     .ifEqualReplace("NA", ""),
                         )
                     }
@@ -108,7 +113,8 @@ fun loadData(
     }
     logger.info("Done importing")
     logger.info("Resolving the taxo DB")
-    dataTotal.organismCache.store.values.forEach { it.resolve(dataTotal.taxonomyDatabaseCache) }
+    dataTotal.organismCache.store.values
+        .forEach { it.resolve(dataTotal.taxonomyDatabaseCache) }
 
     return dataTotal
 }

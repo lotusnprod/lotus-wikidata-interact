@@ -38,7 +38,9 @@ const val MAXIMUM_LABEL_LENGTH: Int = 249
 /**
  * Raised when an element should have been published before running that function
  */
-class ElementNotPublishedException(msg: String) : Exception(msg)
+class ElementNotPublishedException(
+    msg: String,
+) : Exception(msg)
 
 typealias RemoteItem = KProperty1<InstanceItems, ItemIdValue>
 typealias RemoteProperty = KProperty1<InstanceItems, PropertyIdValue>
@@ -153,7 +155,10 @@ abstract class Publishable {
                 if (id != null) {
                     val doc = it.getEntityDocument(id)
                     if (doc is ItemDocument) {
-                        doc.allStatements.iterator().asSequence().toList() // so we have types
+                        doc.allStatements
+                            .iterator()
+                            .asSequence()
+                            .toList() // so we have types
                     } else {
                         listOf()
                     }
@@ -163,32 +168,35 @@ abstract class Publishable {
             } ?: listOf()
 
         val existingPropertyValueCoupleToReferencesIds: Map<String, Map<Value, Statement>> =
-            existingStatements.map {
-                it.mainSnak.propertyId.id to it
-            }.groupBy { it.first }.map {
-                it.key to it.value.map { it.second.value to it.second }.toMap()
-            }.toMap()
+            existingStatements
+                .map {
+                    it.mainSnak.propertyId.id to it
+                }.groupBy { it.first }
+                .map {
+                    it.key to it.value.map { it.second.value to it.second }.toMap()
+                }.toMap()
 
-        return preStatements.mapNotNull { statement ->
-            val value: Value? =
-                when (statement) {
-                    is ReferencedValueStatement -> statement.value
-                    is ReferencedRemoteItemStatement -> statement.value.get(instanceItems)
-                    else -> null // The statement is currently invalid if we do not know how to handle its values
+        return preStatements
+            .mapNotNull { statement ->
+                val value: Value? =
+                    when (statement) {
+                        is ReferencedValueStatement -> statement.value
+                        is ReferencedRemoteItemStatement -> statement.value.get(instanceItems)
+                        else -> null // The statement is currently invalid if we do not know how to handle its values
+                    }
+
+                value?.let {
+                    constructStatement(statement, value, instanceItems, existingPropertyValueCoupleToReferencesIds)
                 }
-
-            value?.let {
-                constructStatement(statement, value, instanceItems, existingPropertyValueCoupleToReferencesIds)
+            }.filter { stmt ->
+                stmt.statementId !in existingStatements.map { it.statementId } ||
+                    stmt.references.any {
+                        val existingReferences =
+                            (existingStatements.firstOrNull { stmt.statementId == it.statementId })?.references?.map { it.hash }
+                                ?: listOf()
+                        it.hash !in existingReferences
+                    }
             }
-        }.filter { stmt ->
-            stmt.statementId !in existingStatements.map { it.statementId } ||
-                stmt.references.any {
-                    val existingReferences =
-                        (existingStatements.firstOrNull { stmt.statementId == it.statementId })?.references?.map { it.hash }
-                            ?: listOf()
-                    it.hash !in existingReferences
-                }
-        }
     }
 
     /**
@@ -196,7 +204,9 @@ abstract class Publishable {
      * bad happens if anything is not of the expected type.
      */
     fun Reference.forceGetStatedInValue(): List<Value> =
-        (this as ReferenceImpl).snaks.filter { it.key == "P248" }
+        (this as ReferenceImpl)
+            .snaks
+            .filter { it.key == "P248" }
             .flatMap { it.value.map { (it as ValueSnak).value } }
 
     /**
@@ -236,9 +246,10 @@ abstract class Publishable {
             }
 
         val newQualifiers =
-            statement.preQualifiers.filterNot {
-                it.property.get(instanceItems) in existingSetOfQualifiers
-            }.map { WDResolvedQualifier.fromQualifier(it, instanceItems) }
+            statement.preQualifiers
+                .filterNot {
+                    it.property.get(instanceItems) in existingSetOfQualifiers
+                }.map { WDResolvedQualifier.fromQualifier(it, instanceItems) }
 
         // We do not try to add or modify a non overridable statement
         existingProperty?.let { if (!statement.overwritable) return null }
