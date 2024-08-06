@@ -59,7 +59,7 @@ fun loadData(
         val unspecifiedCenters = it.getInt("structureCleaned_stereocenters_unspecified")
         val totalCenters = it.getInt("structureCleaned_stereocenters_total")
         val smiles = it.getString("structureCleanedSmiles")
-        
+
         val doi = it.getString("referenceCleanedDoi")
 
         if (RequiredTaxonRanks.any { organismRanks.contains("it") } ||

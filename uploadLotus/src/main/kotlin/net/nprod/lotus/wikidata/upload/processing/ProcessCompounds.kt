@@ -76,9 +76,9 @@ fun DataTotal.processCompounds(
                     } catch (e: InvalidSmilesException) {
                         logger.error("Invalid smiles exception cannot make an exact mass: ${e.message}")
                         return@forEachIndexed
-            },
-            iupac = compound.iupac,
-            undefinedStereocenters = compound.unspecifiedStereocenters,
+                    },
+                iupac = compound.iupac,
+                undefinedStereocenters = compound.unspecifiedStereocenters,
             ).tryToFind(wdFinder, instanceItems, wikidataCompoundCache)
 
         logger.info(wdCompound)
@@ -94,9 +94,7 @@ fun DataTotal.processCompounds(
                         val taxon = taxonProcessor.get(organism)
                         taxon?.let {
                             logger.info(" Found taxon $taxon")
-                            foundInTaxon(
-                                taxon,
-                            ) {
+                            foundInTaxon(taxon) {
                                 quads.map {
                                     statedIn(referenceProcessor.get(it.reference).id)
                                 }
@@ -104,10 +102,7 @@ fun DataTotal.processCompounds(
                             logger.info("     Properties generated")
                         }
                     } catch (e: InvalidTaxonName) {
-                        logger.error(
-                            " ERROR: Couldn't a good database for the organism: ${organism.name} -" +
-                                " ${e.message}",
-                        )
+                        logger.error(" ERROR: Couldn't a good database for the organism: ${organism.name} -" + " ${e.message}")
                     }
                 }
         }
