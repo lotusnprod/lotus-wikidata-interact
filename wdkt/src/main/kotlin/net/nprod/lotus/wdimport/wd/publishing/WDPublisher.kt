@@ -8,7 +8,7 @@
 package net.nprod.lotus.wdimport.wd.publishing
 
 import com.fasterxml.jackson.core.JsonParseException
-import io.ktor.client.network.sockets.SocketTimeoutException
+import io.ktor.network.sockets.SocketTimeoutException
 import kotlinx.coroutines.TimeoutCancellationException
 import net.nprod.lotus.helpers.tryCount
 import net.nprod.lotus.wdimport.wd.InstanceItems
