@@ -283,7 +283,7 @@ project("importPublication") {
 }
 
 kotlinter {
-    ignoreFailures = project.hasProperty("lintContinueOnError")
+    ignoreLintFailures = project.hasProperty("lintContinueOnError")
 }
 
 allprojects {
