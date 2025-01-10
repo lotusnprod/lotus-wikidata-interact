@@ -8,6 +8,7 @@
 package net.nprod.lotus.wikidata.download.modes.query
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.Context
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
@@ -16,7 +17,11 @@ import net.nprod.lotus.wikidata.download.DEFAULT_REPOSITORY
 import java.io.File
 import java.io.FileNotFoundException
 
-class QueryCommand : CliktCommand(help = "Run a SPARQL SELECT query on the local instance or directly on WD") {
+class QueryCommand : CliktCommand(name = "query") {
+    // Overridden help attribute
+    override fun help(context: Context) = "Run a SPARQL SELECT query on the local instance or directly on WD"
+
+    // Parameters
     private val store by option("-s", "--store", help = "Where the triplestore is")
         .default(DEFAULT_REPOSITORY)
     private val outputFilename by option("-o", "--output", help = "Output file")
@@ -27,6 +32,7 @@ class QueryCommand : CliktCommand(help = "Run a SPARQL SELECT query on the local
     ).flag("-l", "--local", default = false, defaultForHelp = "Use the local instance")
     private val queryFilename by argument(help = "File with the SPARQL query")
 
+    // Execution logic
     override fun run() {
         val storeFile = File(store)
 

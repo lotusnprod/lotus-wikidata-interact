@@ -8,6 +8,7 @@
 package net.nprod.lotus.wikidata.download.modes.export
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.Context
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
@@ -16,7 +17,13 @@ import kotlinx.coroutines.runBlocking
 import net.nprod.lotus.wikidata.download.DEFAULT_REPOSITORY
 import java.io.File
 
-class ExportCommand : CliktCommand(help = "Export LOTUS to… something") {
+class ExportCommand : CliktCommand(name = "export") {
+    // Overridden help attributes
+    override fun help(context: Context) = "Export LOTUS to… something"
+
+    override val printHelpOnEmptyArgs = true
+
+    // Parameters
     private val store by option("-s", "--store", help = "Where the data is going to be stored")
         .default(DEFAULT_REPOSITORY)
     private val outputDirectory by option("-o", "--output", help = "Output directory").required()
@@ -26,6 +33,7 @@ class ExportCommand : CliktCommand(help = "Export LOTUS to… something") {
         help = "Connect directly to WikiData, do not use the local instance",
     ).flag("-l", "--local", default = false, defaultForHelp = "Use the local instance")
 
+    // Execution logic
     override fun run() {
         val storeFile = File(store)
         val outputDirectory =

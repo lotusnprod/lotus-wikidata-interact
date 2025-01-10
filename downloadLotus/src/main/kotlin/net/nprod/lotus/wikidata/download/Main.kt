@@ -8,6 +8,7 @@
 package net.nprod.lotus.wikidata.download
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.main
 import com.github.ajalt.clikt.core.subcommands
 import net.nprod.lotus.wikidata.download.modes.export.ExportCommand
 import net.nprod.lotus.wikidata.download.modes.mirror.MirrorCommand
