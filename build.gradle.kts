@@ -118,7 +118,8 @@ project("uploadLotus") {
             exclude("org.slf4j", "slf4j-api")
         }
 
-        implementation("org.openscience.cdk:cdk-bundle:$cdkVersion")
+        implementation("org.openscience.cdk:cdk-silent:$cdkVersion")
+        implementation("org.openscience.cdk:cdk-smiles:$cdkVersion")
 
         implementation("org.eclipse.rdf4j:rdf4j-client:$rdf4jVersion")
         implementation("org.eclipse.rdf4j:rdf4j-core:$rdf4jVersion")
@@ -171,7 +172,10 @@ project("wdkt") {
             exclude("org.slf4j", "slf4j-api")
         }
 
-        implementation("org.openscience.cdk:cdk-bundle:$cdkVersion")
+        implementation("org.openscience.cdk:cdk-depict:$cdkVersion")
+        implementation("org.openscience.cdk:cdk-formula:$cdkVersion")
+        implementation("org.openscience.cdk:cdk-silent:$cdkVersion")
+        implementation("org.openscience.cdk:cdk-smiles:$cdkVersion")
 
         implementation("org.eclipse.rdf4j:rdf4j-client:$rdf4jVersion")
         implementation("org.eclipse.rdf4j:rdf4j-core:$rdf4jVersion")
