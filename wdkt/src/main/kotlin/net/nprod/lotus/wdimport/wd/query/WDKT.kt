@@ -12,7 +12,6 @@ import io.ktor.client.engine.cio.CIO
 import io.ktor.client.engine.cio.endpoint
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
-import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -63,7 +62,7 @@ class WDKT : IWDKT {
                             parameter("format", "json")
                             parameter("list", "search")
                             parameter("srsearch", "haswbstatement:\"${property.id}=$value\"")
-                        }.bodyAsText()
+                        }
                 }
             if (out.contains("error")) {
                 logger.error("Looking for $property = $value Found a problematic JSON string: $out")
