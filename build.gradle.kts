@@ -11,7 +11,7 @@ val localProperties = if (localPropertiesFile.exists()) {
 } else { null }
 
 plugins {
-    kotlin("jvm") version "2.2.0"
+    kotlin("jvm")
     kotlin("plugin.serialization")
     application
     id("com.github.ben-manes.versions")
@@ -38,7 +38,7 @@ allprojects {
 }
 
 subprojects {
-    val java = "22"
+    val java = "17"
 
     apply {
         plugin("com.github.ben-manes.versions")
@@ -54,7 +54,7 @@ subprojects {
 
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_22)
+            jvmTarget.set(JvmTarget.JVM_17)
             freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
         }
     }
