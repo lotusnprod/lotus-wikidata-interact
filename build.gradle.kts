@@ -11,7 +11,7 @@ val localProperties = if (localPropertiesFile.exists()) {
 } else { null }
 
 plugins {
-    kotlin("jvm") version "2.2.0"
+    kotlin("jvm") version "2.2.20"
     kotlin("plugin.serialization")
     application
     id("com.github.ben-manes.versions")
