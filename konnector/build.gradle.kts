@@ -41,8 +41,8 @@ dependencies {
     implementation("io.grpc:grpc-kotlin-stub:1.4.1")
     implementation("io.grpc:grpc-protobuf:1.64.0")
     implementation("io.grpc:grpc-stub:1.64.0")
-    implementation("com.google.protobuf:protobuf-java:3.25.3")
-    implementation("com.google.protobuf:protobuf-java-util:3.25.3")
+    implementation("com.google.protobuf:protobuf-java:3.25.8")
+    implementation("com.google.protobuf:protobuf-java-util:3.25.8")
     implementation("javax.annotation:javax.annotation-api:1.3.2")
     // For grpc-netty if needed
     implementation("io.grpc:grpc-netty-shaded:1.64.0")
@@ -50,7 +50,7 @@ dependencies {
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:3.25.3"
+        artifact = "com.google.protobuf:protoc:3.25.8"
     }
     plugins {
         create("grpc") {
