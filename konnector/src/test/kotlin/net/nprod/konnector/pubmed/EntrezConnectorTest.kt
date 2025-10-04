@@ -93,19 +93,30 @@ internal class EntrezConnectorTest {
 
     @Test
     fun `Testing multi page requests`() {
-        val eSearch =
-            ESearch.fromString(
-                eSearchConn
-                    .esearch(
-                        "sitosterol curcumin",
-                    ).asString(),
-            )
+        println("EntrezConnector using API key: ${System.getenv("NCBI_API_KEY") != null}")
+        try {
+            val eSearch =
+                ESearch.fromString(
+                    eSearchConn
+                        .esearch(
+                            "sitosterol curcumin",
+                        ).asString(),
+                )
 
-        eSearchConn.getNewIDs(
-            (eSearch.esearchresult.webenv ?: ""),
-            (eSearch.esearchresult.querykey ?: 1),
-            retmax = 2,
-        )
+            eSearchConn.getNewIDs(
+                (eSearch.esearchresult.webenv ?: ""),
+                (eSearch.esearchresult.querykey ?: 1),
+                retmax = 2,
+            )
+        } catch (e: net.nprod.konnector.commons.TooManyRequests) {
+            val isCI = System.getenv("GITHUB_ACTIONS") == "true"
+            if (isCI) {
+                println("Skipping test due to NCBI rate limiting (429) on CI")
+                org.junit.jupiter.api.Assumptions.assumeTrue(false, "Skipping test due to NCBI rate limiting (429) on CI")
+            } else {
+                throw e
+            }
+        }
     }
 
     @Test
