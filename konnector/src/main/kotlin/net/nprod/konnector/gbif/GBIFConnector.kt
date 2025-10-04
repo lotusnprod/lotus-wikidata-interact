@@ -8,7 +8,6 @@
 
 package net.nprod.konnector.gbif
 
-import io.ktor.util.KtorExperimentalAPI
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -58,7 +57,6 @@ data class TaxonSearchResponse(
 )
 
 @ExperimentalTime
-@KtorExperimentalAPI
 class GBIFConnector constructor(
     private val api: GBIFAPI,
 ) {

@@ -10,7 +10,6 @@ package net.nprod.konnector.otol
 
 import io.ktor.client.HttpClient
 import io.ktor.client.statement.HttpResponse
-import io.ktor.util.KtorExperimentalAPI
 import mu.KotlinLogging
 import org.slf4j.Logger
 import kotlin.time.Duration.Companion.seconds
@@ -41,7 +40,6 @@ const val OTOL_MAX_EXACT_NAME_MATCH = 1000
  * Connect to the official GBIF API.
  */
 @ExperimentalTime
-@KtorExperimentalAPI
 class OfficialOtolAPI : OtolAPI {
     override val log: Logger = KotlinLogging.logger(this::class.java.name)
     override var httpClient: HttpClient = newClient()

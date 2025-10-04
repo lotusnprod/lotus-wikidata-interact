@@ -10,7 +10,6 @@ package net.nprod.konnector.gbif
 
 import io.ktor.client.HttpClient
 import io.ktor.client.statement.HttpResponse
-import io.ktor.util.KtorExperimentalAPI
 import mu.KotlinLogging
 import org.slf4j.Logger
 import kotlin.time.Duration.Companion.seconds
@@ -37,7 +36,6 @@ const val GBIF_DEFAULT_RETRY_DELAY: Long = 2_000
  * Connect to the official GBIF API.
  */
 @ExperimentalTime
-@KtorExperimentalAPI
 class OfficialGBIFAPI : GBIFAPI {
     override val log: Logger = KotlinLogging.logger(this::class.java.name)
     override var httpClient: HttpClient = newClient()

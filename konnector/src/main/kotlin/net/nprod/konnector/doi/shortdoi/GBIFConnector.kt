@@ -8,7 +8,6 @@
 
 package net.nprod.konnector.doi.shortdoi
 
-import io.ktor.util.KtorExperimentalAPI
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -22,7 +21,6 @@ data class ShortDOI(
 )
 
 @ExperimentalTime
-@KtorExperimentalAPI
 class ShortDOIConnector constructor(
     private val api: ShortDOIAPI,
 ) {

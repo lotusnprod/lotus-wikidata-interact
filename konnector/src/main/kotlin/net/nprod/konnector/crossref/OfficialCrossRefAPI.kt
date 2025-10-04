@@ -11,8 +11,11 @@ package net.nprod.konnector.crossref
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.statement.HttpResponse
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asCoroutineDispatcher
 import mu.KotlinLogging
 import org.slf4j.Logger
+import java.util.concurrent.Executors
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
@@ -71,8 +74,8 @@ class OfficialCrossRefAPI(
         HttpClient(CIO) {
             expectSuccess = false
             engine {
-                threadsCount = numberOfThreads
-
+                // threadsCount is deprecated in Ktor 3.x; use dispatcher instead
+                dispatcher = Executors.newFixedThreadPool(numberOfThreads).asCoroutineDispatcher()
                 with(endpoint) {
                     requestTimeout = networkRequestTimeout
                     keepAliveTime = networkKeepAliveTime
