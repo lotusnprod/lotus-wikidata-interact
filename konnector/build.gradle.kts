@@ -32,7 +32,7 @@ dependencies {
     implementation("org.slf4j:slf4j-api:2.0.17")
     implementation("org.slf4j:slf4j-simple:2.0.17")
     // Woodstox for XML
-    implementation("com.fasterxml.woodstox:woodstox-core:6.7.0")
+    implementation("com.fasterxml.woodstox:woodstox-core:7.1.1")
     // JUnit for testing (JUnit 5 latest via BOM; JUnit 6 does not exist yet)
     testImplementation(platform("org.junit:junit-bom:$junitApiVersion"))
     testImplementation(kotlin("test-junit5"))
