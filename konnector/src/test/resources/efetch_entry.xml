@@ -1,0 +1,523 @@
+<?xml version="1.0" ?>
+<!DOCTYPE PubmedArticleSet PUBLIC "-//NLM//DTD PubMedArticle, 1st January 2019//EN" "https://dtd.nlm.nih.gov/ncbi/pubmed/out/pubmed_190101.dtd">
+<PubmedArticleSet>
+<PubmedArticle>
+    <MedlineCitation Status="MEDLINE" Owner="NLM">
+        <PMID Version="1">17284678</PMID>
+        <DateCompleted>
+            <Year>2007</Year>
+            <Month>04</Month>
+            <Day>05</Day>
+        </DateCompleted>
+        <DateRevised>
+            <Year>2018</Year>
+            <Month>11</Month>
+            <Day>13</Day>
+        </DateRevised>
+        <Article PubModel="Print-Electronic">
+            <Journal>
+                <ISSN IssnType="Print">1088-9051</ISSN>
+                <JournalIssue CitedMedium="Print">
+                    <Volume>17</Volume>
+                    <Issue>3</Issue>
+                    <PubDate>
+                        <Year>2007</Year>
+                        <Month>Mar</Month>
+                    </PubDate>
+                </JournalIssue>
+                <Title>Genome research</Title>
+                <ISOAbbreviation>Genome Res.</ISOAbbreviation>
+            </Journal>
+            <ArticleTitle>Sequencing and analysis of chromosome 1 of Eimeria tenella reveals a unique segmental organization.</ArticleTitle>
+            <Pagination>
+                <MedlinePgn>311-9</MedlinePgn>
+            </Pagination>
+            <Abstract>
+                <AbstractText>Eimeria tenella is an intracellular protozoan parasite that infects the intestinal tracts of domestic fowl and causes coccidiosis, a serious and sometimes lethal enteritis. Eimeria falls in the same phylum (Apicomplexa) as several human and animal parasites such as Cryptosporidium, Toxoplasma, and the malaria parasite, Plasmodium. Here we report the sequencing and analysis of the first chromosome of E. tenella, a chromosome believed to carry loci associated with drug resistance and known to differ between virulent and attenuated strains of the parasite. The chromosome--which appears to be representative of the genome--is gene-dense and rich in simple-sequence repeats, many of which appear to give rise to repetitive amino acid tracts in the predicted proteins. Most striking is the segmentation of the chromosome into repeat-rich regions peppered with transposon-like elements and telomere-like repeats, alternating with repeat-free regions. Predicted genes differ in character between the two types of segment, and the repeat-rich regions appear to be associated with strain-to-strain variation.</AbstractText>
+            </Abstract>
+            <AuthorList CompleteYN="Y">
+                <Author ValidYN="Y">
+                    <LastName>Ling</LastName>
+                    <ForeName>King-Hwa</ForeName>
+                    <Initials>KH</Initials>
+                    <AffiliationInfo>
+                        <Affiliation>Malaysia Genome Institute, UKM-MTDC Smart Technology Centre, Universiti Kebangsaan Malaysia, 43600 UKM Bangi, Selangor DE, Malaysia.</Affiliation>
+                    </AffiliationInfo>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Rajandream</LastName>
+                    <ForeName>Marie-Adele</ForeName>
+                    <Initials>MA</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Rivailler</LastName>
+                    <ForeName>Pierre</ForeName>
+                    <Initials>P</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Ivens</LastName>
+                    <ForeName>Alasdair</ForeName>
+                    <Initials>A</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Yap</LastName>
+                    <ForeName>Soon-Joo</ForeName>
+                    <Initials>SJ</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Madeira</LastName>
+                    <ForeName>Alda M B N</ForeName>
+                    <Initials>AM</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Mungall</LastName>
+                    <ForeName>Karen</ForeName>
+                    <Initials>K</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Billington</LastName>
+                    <ForeName>Karen</ForeName>
+                    <Initials>K</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Yee</LastName>
+                    <ForeName>Wai-Yan</ForeName>
+                    <Initials>WY</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Bankier</LastName>
+                    <ForeName>Alan T</ForeName>
+                    <Initials>AT</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Carroll</LastName>
+                    <ForeName>Fionnadh</ForeName>
+                    <Initials>F</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Durham</LastName>
+                    <ForeName>Alan M</ForeName>
+                    <Initials>AM</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Peters</LastName>
+                    <ForeName>Nicholas</ForeName>
+                    <Initials>N</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Loo</LastName>
+                    <ForeName>Shu-San</ForeName>
+                    <Initials>SS</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Isa</LastName>
+                    <ForeName>Mohd Noor Mat</ForeName>
+                    <Initials>MN</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Novaes</LastName>
+                    <ForeName>Jeniffer</ForeName>
+                    <Initials>J</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Quail</LastName>
+                    <ForeName>Michael</ForeName>
+                    <Initials>M</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Rosli</LastName>
+                    <ForeName>Rozita</ForeName>
+                    <Initials>R</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Nor Shamsudin</LastName>
+                    <ForeName>Mariana</ForeName>
+                    <Initials>M</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Sobreira</LastName>
+                    <ForeName>Tiago J P</ForeName>
+                    <Initials>TJ</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Tivey</LastName>
+                    <ForeName>Adrian R</ForeName>
+                    <Initials>AR</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Wai</LastName>
+                    <ForeName>Siew-Fun</ForeName>
+                    <Initials>SF</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>White</LastName>
+                    <ForeName>Sarah</ForeName>
+                    <Initials>S</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Wu</LastName>
+                    <ForeName>Xikun</ForeName>
+                    <Initials>X</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Kerhornou</LastName>
+                    <ForeName>Arnaud</ForeName>
+                    <Initials>A</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Blake</LastName>
+                    <ForeName>Damer</ForeName>
+                    <Initials>D</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Mohamed</LastName>
+                    <ForeName>Rahmah</ForeName>
+                    <Initials>R</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Shirley</LastName>
+                    <ForeName>Martin</ForeName>
+                    <Initials>M</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Gruber</LastName>
+                    <ForeName>Arthur</ForeName>
+                    <Initials>A</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Berriman</LastName>
+                    <ForeName>Matthew</ForeName>
+                    <Initials>M</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Tomley</LastName>
+                    <ForeName>Fiona</ForeName>
+                    <Initials>F</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Dear</LastName>
+                    <ForeName>Paul H</ForeName>
+                    <Initials>PH</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Wan</LastName>
+                    <ForeName>Kiew-Lian</ForeName>
+                    <Initials>KL</Initials>
+                </Author>
+            </AuthorList>
+            <Language>eng</Language>
+            <GrantList CompleteYN="Y">
+                <Grant>
+                    <GrantID>MC_U105131672</GrantID>
+                    <Agency>Medical Research Council</Agency>
+                    <Country>United Kingdom</Country>
+                </Grant>
+                <Grant>
+                    <GrantID>S19705</GrantID>
+                    <Agency>Biotechnology and Biological Sciences Research Council</Agency>
+                    <Country>United Kingdom</Country>
+                </Grant>
+                <Grant>
+                    <Agency>Wellcome Trust</Agency>
+                    <Country>United Kingdom</Country>
+                </Grant>
+            </GrantList>
+            <PublicationTypeList>
+                <PublicationType UI="D003160">Comparative Study</PublicationType>
+                <PublicationType UI="D016428">Journal Article</PublicationType>
+                <PublicationType UI="D013485">Research Support, Non-U.S. Gov't</PublicationType>
+            </PublicationTypeList>
+            <ArticleDate DateType="Electronic">
+                <Year>2007</Year>
+                <Month>02</Month>
+                <Day>06</Day>
+            </ArticleDate>
+        </Article>
+        <MedlineJournalInfo>
+            <Country>United States</Country>
+            <MedlineTA>Genome Res</MedlineTA>
+            <NlmUniqueID>9518021</NlmUniqueID>
+            <ISSNLinking>1088-9051</ISSNLinking>
+        </MedlineJournalInfo>
+        <CitationSubset>IM</CitationSubset>
+        <MeshHeadingList>
+            <MeshHeading>
+                <DescriptorName UI="D000818" MajorTopicYN="N">Animals</DescriptorName>
+            </MeshHeading>
+            <MeshHeading>
+                <DescriptorName UI="D001483" MajorTopicYN="N">Base Sequence</DescriptorName>
+            </MeshHeading>
+            <MeshHeading>
+                <DescriptorName UI="D002874" MajorTopicYN="N">Chromosome Mapping</DescriptorName>
+            </MeshHeading>
+            <MeshHeading>
+                <DescriptorName UI="D022004" MajorTopicYN="N">Chromosome Structures</DescriptorName>
+                <QualifierName UI="Q000235" MajorTopicYN="Y">genetics</QualifierName>
+            </MeshHeading>
+            <MeshHeading>
+                <DescriptorName UI="D019295" MajorTopicYN="N">Computational Biology</DescriptorName>
+            </MeshHeading>
+            <MeshHeading>
+                <DescriptorName UI="D016786" MajorTopicYN="N">Eimeria tenella</DescriptorName>
+                <QualifierName UI="Q000235" MajorTopicYN="Y">genetics</QualifierName>
+            </MeshHeading>
+            <MeshHeading>
+                <DescriptorName UI="D017125" MajorTopicYN="N">Genes, Protozoan</DescriptorName>
+                <QualifierName UI="Q000235" MajorTopicYN="Y">genetics</QualifierName>
+            </MeshHeading>
+            <MeshHeading>
+                <DescriptorName UI="D018598" MajorTopicYN="N">Minisatellite Repeats</DescriptorName>
+                <QualifierName UI="Q000235" MajorTopicYN="N">genetics</QualifierName>
+            </MeshHeading>
+            <MeshHeading>
+                <DescriptorName UI="D008969" MajorTopicYN="N">Molecular Sequence Data</DescriptorName>
+            </MeshHeading>
+            <MeshHeading>
+                <DescriptorName UI="D012150" MajorTopicYN="N">Polymorphism, Restriction Fragment Length</DescriptorName>
+            </MeshHeading>
+            <MeshHeading>
+                <DescriptorName UI="D017422" MajorTopicYN="N">Sequence Analysis, DNA</DescriptorName>
+            </MeshHeading>
+        </MeshHeadingList>
+    </MedlineCitation>
+    <PubmedData>
+        <History>
+            <PubMedPubDate PubStatus="pubmed">
+                <Year>2007</Year>
+                <Month>2</Month>
+                <Day>8</Day>
+                <Hour>9</Hour>
+                <Minute>0</Minute>
+            </PubMedPubDate>
+            <PubMedPubDate PubStatus="medline">
+                <Year>2007</Year>
+                <Month>4</Month>
+                <Day>6</Day>
+                <Hour>9</Hour>
+                <Minute>0</Minute>
+            </PubMedPubDate>
+            <PubMedPubDate PubStatus="entrez">
+                <Year>2007</Year>
+                <Month>2</Month>
+                <Day>8</Day>
+                <Hour>9</Hour>
+                <Minute>0</Minute>
+            </PubMedPubDate>
+        </History>
+        <PublicationStatus>ppublish</PublicationStatus>
+        <ArticleIdList>
+            <ArticleId IdType="pubmed">17284678</ArticleId>
+            <ArticleId IdType="pii">gr.5823007</ArticleId>
+            <ArticleId IdType="doi">10.1101/gr.5823007</ArticleId>
+            <ArticleId IdType="pmc">PMC1800922</ArticleId>
+        </ArticleIdList>
+        <ReferenceList>
+            <Reference>
+                <Citation>Genome Res. 2000 Nov;10(11):1737-42</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">11076859</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>BMC Bioinformatics. 2005;6:31</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">15713233</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Parasite Immunol. 1986 Nov;8(6):529-39</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">3543808</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Nucleic Acids Res. 2005 Jul 1;33(Web Server issue):W116-20</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">15980438</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Nature. 2002 Oct 3;419(6906):527-31</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">12368867</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Parasitol Res. 1994;80(5):366-73</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">7971922</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Parasitol Res. 2003 Aug;90(6):473-5</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">12802683</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Nat Genet. 2005 Sep;37(9):986-90</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">16086015</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Mol Biochem Parasitol. 1990 Jan 15;38(2):169-73</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">2325704</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Nature. 2002 Jul 4;418(6893):79-85</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">12097910</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>J Mol Biol. 2004 May 14;338(5):1027-36</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">15111065</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Nucleic Acids Res. 1999 Jan 15;27(2):573-80</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">9862982</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Nucleic Acids Res. 2003 Jan 1;31(1):439-41</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">12520045</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Nucleic Acids Res. 1997 Mar 1;25(5):955-64</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">9023104</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Avian Pathol. 2003 Apr;32(2):115-27</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">12745365</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Mol Microbiol. 2006 Apr;60(1):5-15</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">16556216</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>BMC Bioinformatics. 2004 May 14;5:59</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">15144565</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Nature. 2005 May 5;435(7038):43-57</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">15875012</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Nature. 2002 Oct 3;419(6906):498-511</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">12368864</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Trends Parasitol. 2004 May;20(5):199-201</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">15105014</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Nucleic Acids Res. 1995 Dec 25;23(24):4992-9</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">8559656</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Exp Parasitol. 2002 Jun-Jul;101(2-3):168-73</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">12427472</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Chromosome Res. 2005;13(5):517-24</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">16132816</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Bioinformatics. 2006 Feb 1;22(3):361-2</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">16332714</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Bioinformatics. 2000 Oct;16(10):944-5</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">11120685</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Parasitol Today. 1991 May;7(5):99-105</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">15463458</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Int J Parasitol. 1999 Dec;29(12):1885-92</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">10961844</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Genome Res. 2000 Oct;10(10):1587-93</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">11042156</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Genome Res. 2003 Aug;13(8):1787-99</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">12869580</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Bioinformatics. 2004 Nov 1;20(16):2878-9</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">15145805</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Genome Res. 2003 Mar;13(3):443-54</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">12618375</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Nat Rev Genet. 2005 Oct;6(10):743-55</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">16205714</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Nature. 2001 Feb 15;409(6822):860-921</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">11237011</ArticleId>
+                </ArticleIdList>
+            </Reference>
+            <Reference>
+                <Citation>Science. 2005 Jul 15;309(5733):416-22</Citation>
+                <ArticleIdList>
+                    <ArticleId IdType="pubmed">16020726</ArticleId>
+                </ArticleIdList>
+            </Reference>
+        </ReferenceList>
+    </PubmedData>
+</PubmedArticle>
+
+</PubmedArticleSet>

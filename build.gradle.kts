@@ -4,22 +4,24 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Properties
 
 val localPropertiesFile = file("local.properties")
-val localProperties = if (localPropertiesFile.exists()) {
-    val properties = Properties()
-    properties.load(localPropertiesFile.inputStream())
-    properties
-} else { null }
+val localProperties =
+    if (localPropertiesFile.exists()) {
+        val properties = Properties()
+        properties.load(localPropertiesFile.inputStream())
+        properties
+    } else {
+        null
+    }
 
 plugins {
     kotlin("jvm") version "2.2.20"
-    kotlin("plugin.serialization")
+    kotlin("plugin.serialization") version "2.2.20"
     application
-    id("com.github.ben-manes.versions")
-    id("io.gitlab.arturbosch.detekt")
-    id("org.jmailen.kotlinter")
-    id("org.springframework.boot") apply false
-    id("io.spring.dependency-management") apply false
-    kotlin("plugin.spring")
+    id("com.github.ben-manes.versions") version "0.52.0"
+    id("org.jmailen.kotlinter") version "5.2.0"
+    id("org.springframework.boot") version "3.5.4" apply false
+    id("io.spring.dependency-management") version "1.1.7" apply false
+    kotlin("plugin.spring") version "2.2.20"
     `java-library`
 }
 
@@ -29,6 +31,7 @@ allprojects {
 
     repositories {
         mavenCentral()
+        maven("https://jitpack.io") // Added for JitPack GitHub dependencies
 
         localProperties?.let {
             val localMaven: String by it
@@ -42,14 +45,9 @@ subprojects {
 
     apply {
         plugin("com.github.ben-manes.versions")
-        plugin("io.gitlab.arturbosch.detekt")
         plugin("org.jmailen.kotlinter")
         plugin("org.jetbrains.kotlin.jvm")
         plugin("org.jetbrains.kotlin.plugin.serialization")
-    }
-
-    tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-        this.jvmTarget = java
     }
 
     tasks.withType<KotlinCompile>().configureEach {
@@ -66,7 +64,11 @@ subprojects {
     }
 
     tasks.withType<Test> {
-        useJUnitPlatform()
+        useJUnitPlatform {
+            if (!System.getProperty("includeIntegrationTests", "false").toBoolean()) {
+                excludeTags("integration")
+            }
+        }
         testLogging {
             events("PASSED", "FAILED", "SKIPPED")
             warn.events("PASSED", "FAILED", "SKIPPED", "STANDARD_ERROR")
@@ -77,6 +79,15 @@ subprojects {
 
     tasks.withType<JavaExec> {
         jvmArgs = listOf("-Xms16g", "-Xmx24g")
+    }
+
+    tasks.withType<org.jmailen.gradle.kotlinter.tasks.LintTask>().configureEach {
+        exclude("build/generated/**")
+        exclude("**/build/generated/**")
+        exclude("build/generated/source/proto/**")
+        exclude("build/generated/source/proto/main/grpckt/**")
+        exclude("build/generated/source/proto/main/grpc/**")
+        exclude("build/generated/source/proto/main/java/**")
     }
 }
 
@@ -92,10 +103,7 @@ project("uploadLotus") {
         val ktorVersion: String by project
         val serializationVersion: String by project
         val kotlinVersion: String by project
-        val konnectorVersion: String by project
         val detektVersion: String by project
-
-        detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:$detektVersion")
 
         implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
         implementation("org.jetbrains.kotlinx:kotlinx-cli:$kotlinxCliVersion")
@@ -126,11 +134,12 @@ project("uploadLotus") {
         implementation("org.eclipse.rdf4j:rdf4j-repository-sail:$rdf4jVersion")
         implementation("org.eclipse.rdf4j:rdf4j-sail-memory:$rdf4jVersion")
 
-        implementation("net.nprod:konnector:$konnectorVersion")
+        implementation(project(":konnector")) // Use local composite build
 
+        // Unified JUnit 5 (no JUnit 6 release yet). Use BOM + aggregator.
+        testImplementation(platform("org.junit:junit-bom:$junitApiVersion"))
         testImplementation(kotlin("test-junit5"))
-        testImplementation("org.junit.jupiter:junit-jupiter-api:$junitApiVersion")
-        testImplementation("org.junit.jupiter:junit-jupiter:$junitApiVersion")
+        testImplementation("org.junit.jupiter:junit-jupiter")
     }
 }
 
@@ -146,15 +155,13 @@ project("wdkt") {
         val ktorVersion: String by project
         val serializationVersion: String by project
         val kotlinVersion: String by project
-        val konnectorVersion: String by project
         val detektVersion: String by project
-
-        detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:$detektVersion")
 
         implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
         implementation("org.jetbrains.kotlinx:kotlinx-cli:$kotlinxCliVersion")
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
 
+        implementation("io.ktor:ktor-client-core:$ktorVersion")
         implementation("io.ktor:ktor-client-cio:$ktorVersion")
         implementation("org.apache.logging.log4j:log4j-api:$log4jVersion")
         implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")
@@ -182,11 +189,12 @@ project("wdkt") {
         implementation("org.eclipse.rdf4j:rdf4j-repository-sail:$rdf4jVersion")
         implementation("org.eclipse.rdf4j:rdf4j-sail-memory:$rdf4jVersion")
 
-        implementation("net.nprod:konnector:$konnectorVersion")
+        implementation(project(":konnector"))
 
+        // Unified JUnit 5 BOM usage
+        testImplementation(platform("org.junit:junit-bom:$junitApiVersion"))
         testImplementation(kotlin("test-junit5"))
-        testImplementation("org.junit.jupiter:junit-jupiter-api:$junitApiVersion")
-        testImplementation("org.junit.jupiter:junit-jupiter:$junitApiVersion")
+        testImplementation("org.junit.jupiter:junit-jupiter")
     }
 }
 
@@ -206,8 +214,6 @@ project(":uploadLotus") {
         val serializationVersion: String by project
         val detektVersion: String by project
 
-        detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:$detektVersion")
-
         implementation(project(":wdkt"))
 
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
@@ -224,7 +230,6 @@ project(":downloadLotus") {
     val cliktVersion: String by project
     val univocityParserVersion: String by project
     val coroutinesVersion: String by project
-    val konnectorVersion: String by project
     val detektVersion: String by project
 
     apply {
@@ -232,8 +237,6 @@ project(":downloadLotus") {
     }
 
     dependencies {
-        detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:$detektVersion")
-
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
 
         implementation("com.github.ajalt.clikt:clikt:$cliktVersion")
@@ -245,16 +248,15 @@ project(":downloadLotus") {
         implementation("org.eclipse.rdf4j:rdf4j-core:$rdf4jVersion")
         implementation("org.eclipse.rdf4j:rdf4j-client:$rdf4jVersion")
 
-        implementation("net.nprod:konnector:$konnectorVersion")
+        implementation(project(":konnector"))
 
         implementation("org.apache.logging.log4j:log4j-api:$log4jVersion")
         implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")
         implementation("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion")
 
+        testImplementation(platform("org.junit:junit-bom:$junitApiVersion"))
         testImplementation(kotlin("test-junit5"))
-        testImplementation("org.junit.jupiter:junit-jupiter-api:$junitApiVersion")
-        testImplementation("org.junit.jupiter:junit-jupiter-engine:$junitApiVersion")
-        testImplementation("org.junit.jupiter:junit-jupiter-params:$junitApiVersion")
+        testImplementation("org.junit.jupiter:junit-jupiter")
     }
 
     val jar by tasks.getting(Jar::class) {
@@ -278,27 +280,11 @@ project("importPublication") {
     }
 
     dependencies {
-        val detektVersion: String by project
-
-        detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:$detektVersion")
-
         implementation(project(":wdkt"))
     }
 }
 
-kotlinter {
-    ignoreLintFailures = project.hasProperty("lintContinueOnError")
-}
-
-allprojects {
-    detekt {
-        val detektVersion: String by project
-        toolVersion = detektVersion
-        config.setFrom(rootProject.files("qc/detekt.yml"))
-        baseline = rootProject.file("qc/detekt-baseline.xml")
-    }
-}
-
 configurations.all {
+    exclude(group = "org.jetbrains.kotlin", module = "kotlin-compiler-embeddable")
     resolutionStrategy.cacheChangingModulesFor(1, "minutes")
 }
