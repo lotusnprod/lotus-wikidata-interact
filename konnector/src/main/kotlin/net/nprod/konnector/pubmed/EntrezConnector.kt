@@ -54,7 +54,7 @@ const val ENTREZ_DEFAULT_RETRY_DELAY: Long = 2_000
 
 @ExperimentalTime
 class EntrezConnector(
-    private val apikey: String? = null,
+    private val apikey: String? = System.getenv("NCBI_API_KEY"),
     val delay: Long? = null,
 ) : WebAPI {
     override val log: Logger = KotlinLogging.logger(this::class.java.name)
