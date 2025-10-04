@@ -188,6 +188,8 @@ class EntrezConnector(
                         log.error("Too many requests, max retries reached: ${e.message}")
                         throw e
                     }
+                    // Small fixed delay before retry to be extra polite
+                    Thread.sleep(1_000L)
                     val baseBackoff = Math.pow(2.0, attempt.toDouble()).toLong() * 1000L
                     val jitter = random.nextInt(500)
                     val backoff = minOf(baseBackoff + jitter, 8_000L) // cap at 8 seconds
