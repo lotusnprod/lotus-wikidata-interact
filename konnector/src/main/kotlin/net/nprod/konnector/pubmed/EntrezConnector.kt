@@ -159,8 +159,9 @@ class EntrezConnector(
         var newWebEnv = webenv
         var newQueryKey = querykey
         var newRetStart = retstart
-        val maxRetries = 5
+        val maxRetries = 8
         var attempt: Int
+        val random = java.util.Random()
 
         while (resultsLeft) {
             attempt = 0
@@ -187,7 +188,9 @@ class EntrezConnector(
                         log.error("Too many requests, max retries reached: ${e.message}")
                         throw e
                     }
-                    val backoff = Math.pow(2.0, attempt.toDouble()).toLong() * 1000L
+                    val baseBackoff = Math.pow(2.0, attempt.toDouble()).toLong() * 1000L
+                    val jitter = random.nextInt(500) // up to 500ms random jitter
+                    val backoff = baseBackoff + jitter
                     log.warn("Too many requests, backing off for ${backoff}ms (attempt ${attempt + 1}/$maxRetries)")
                     Thread.sleep(backoff)
                     attempt++
@@ -251,6 +254,15 @@ class EntrezConnector(
         return "OK"
     }
 
+    private fun enforcePoliteDelay() {
+        val now = System.currentTimeMillis()
+        val elapsed = now - lastQueryTime
+        if (elapsed < delayTime) {
+            Thread.sleep(delayTime - elapsed)
+        }
+        lastQueryTime = System.currentTimeMillis()
+    }
+
     fun esearch(
         query: String,
         retmax: Int = 20,
@@ -260,6 +272,8 @@ class EntrezConnector(
         querykey: String? = null,
         countonly: Boolean = false,
     ): ESearch {
+        enforcePoliteDelay()
+
         val effectiveWebEnv = if (usehistory) (webenv ?: "stub_webenv_${query.hashCode()}") else webenv
         val effectiveQueryKey = if (usehistory) (querykey?.toIntOrNull() ?: 1) else querykey?.toIntOrNull()
         val returnedRetMax = if (countonly) null else retmax
