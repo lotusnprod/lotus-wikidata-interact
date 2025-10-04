@@ -189,8 +189,8 @@ class EntrezConnector(
                         throw e
                     }
                     val baseBackoff = Math.pow(2.0, attempt.toDouble()).toLong() * 1000L
-                    val jitter = random.nextInt(500) // up to 500ms random jitter
-                    val backoff = baseBackoff + jitter
+                    val jitter = random.nextInt(500)
+                    val backoff = minOf(baseBackoff + jitter, 8_000L) // cap at 8 seconds
                     log.warn("Too many requests, backing off for ${backoff}ms (attempt ${attempt + 1}/$maxRetries)")
                     Thread.sleep(backoff)
                     attempt++
