@@ -29,8 +29,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
     // Logging
     implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
-    implementation("org.slf4j:slf4j-api:2.0.13")
-    implementation("org.slf4j:slf4j-simple:2.0.13")
+    implementation("org.slf4j:slf4j-api:2.0.17")
+    implementation("org.slf4j:slf4j-simple:2.0.17")
     // Woodstox for XML
     implementation("com.fasterxml.woodstox:woodstox-core:6.6.2")
     // JUnit for testing (JUnit 5 latest via BOM; JUnit 6 does not exist yet)
