@@ -112,7 +112,8 @@ internal class EntrezConnectorTest {
             val isCI = System.getenv("GITHUB_ACTIONS") == "true"
             if (isCI) {
                 println("Skipping test due to NCBI rate limiting (429) on CI")
-                org.junit.jupiter.api.Assumptions.assumeTrue(false, "Skipping test due to NCBI rate limiting (429) on CI")
+                org.junit.jupiter.api.Assumptions
+                    .assumeTrue(false, "Skipping test due to NCBI rate limiting (429) on CI")
             } else {
                 throw e
             }
