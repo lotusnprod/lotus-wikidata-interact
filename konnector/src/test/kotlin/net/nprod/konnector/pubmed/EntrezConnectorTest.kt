@@ -10,7 +10,7 @@ import kotlin.time.ExperimentalTime
 @ExperimentalTime
 internal class EntrezConnectorTest {
     private val eFetchPubmedParser = EFetchPubmedParser()
-    private var eSearchConn: EntrezConnector = EntrezConnector(System.getenv("NCBI_APIKEY"), 1000)
+    private var eSearchConn: EntrezConnector = EntrezConnector(System.getenv("NCBI_APIKEY"), 1500)
 
     @Test
     fun `basic search`() {
