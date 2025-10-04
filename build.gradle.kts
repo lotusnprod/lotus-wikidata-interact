@@ -1,27 +1,24 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompilerOptions
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Properties
 
 val localPropertiesFile = file("local.properties")
-val localProperties =
-    if (localPropertiesFile.exists()) {
-        val properties = Properties()
-        properties.load(localPropertiesFile.inputStream())
-        properties
-    } else {
-        null
-    }
+val localProperties = if (localPropertiesFile.exists()) {
+    val props = Properties()
+    props.load(localPropertiesFile.inputStream())
+    props
+} else null
 
 plugins {
-    kotlin("jvm") version "2.2.20"
-    kotlin("plugin.serialization") version "2.2.20"
+    kotlin("jvm")
+    kotlin("plugin.serialization")
     application
-    id("com.github.ben-manes.versions") version "0.52.0"
-    id("org.jmailen.kotlinter") version "5.2.0"
-    id("org.springframework.boot") version "3.5.4" apply false
-    id("io.spring.dependency-management") version "1.1.7" apply false
-    kotlin("plugin.spring") version "2.2.20"
+    id("com.github.ben-manes.versions")
+    id("io.gitlab.arturbosch.detekt")
+    id("org.jmailen.kotlinter")
+    id("org.springframework.boot") apply false
+    id("io.spring.dependency-management") apply false
+    kotlin("plugin.spring")
     `java-library`
 }
 
@@ -31,7 +28,7 @@ allprojects {
 
     repositories {
         mavenCentral()
-        maven("https://jitpack.io") // Added for JitPack GitHub dependencies
+        maven("https://jitpack.io")
 
         localProperties?.let {
             val localMaven: String by it
@@ -41,7 +38,7 @@ allprojects {
 }
 
 subprojects {
-    val java = "17"
+    val javaVersion = "17"
 
     apply {
         plugin("com.github.ben-manes.versions")
@@ -58,8 +55,8 @@ subprojects {
     }
 
     tasks.withType<JavaCompile> {
-        sourceCompatibility = java
-        targetCompatibility = java
+        sourceCompatibility = javaVersion
+        targetCompatibility = javaVersion
         options.encoding = "UTF-8"
     }
 
@@ -84,15 +81,10 @@ subprojects {
     tasks.withType<org.jmailen.gradle.kotlinter.tasks.LintTask>().configureEach {
         exclude("build/generated/**")
         exclude("**/build/generated/**")
-        exclude("build/generated/source/proto/**")
-        exclude("build/generated/source/proto/main/grpckt/**")
-        exclude("build/generated/source/proto/main/grpc/**")
-        exclude("build/generated/source/proto/main/java/**")
     }
 }
 
-project("uploadLotus") {
-
+project(":wdkt") {
     dependencies {
         val kotlinxCliVersion: String by project
         val cdkVersion: String by project
@@ -103,59 +95,6 @@ project("uploadLotus") {
         val ktorVersion: String by project
         val serializationVersion: String by project
         val kotlinVersion: String by project
-        val detektVersion: String by project
-
-        implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
-        implementation("org.jetbrains.kotlinx:kotlinx-cli:$kotlinxCliVersion")
-        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
-
-        implementation("io.ktor:ktor-client-cio:$ktorVersion")
-        implementation("org.apache.logging.log4j:log4j-api:$log4jVersion")
-        implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")
-
-        implementation("org.wikidata.wdtk:wdtk-dumpfiles:$wdtkVersion") {
-            exclude("org.slf4j", "slf4j-api")
-        }
-        implementation("org.wikidata.wdtk:wdtk-wikibaseapi:$wdtkVersion") {
-            exclude("org.slf4j", "slf4j-api")
-        }
-        implementation("org.wikidata.wdtk:wdtk-datamodel:$wdtkVersion") {
-            exclude("org.slf4j", "slf4j-api")
-        }
-        implementation("org.wikidata.wdtk:wdtk-rdf:$wdtkVersion") {
-            exclude("org.slf4j", "slf4j-api")
-        }
-
-        implementation("org.openscience.cdk:cdk-silent:$cdkVersion")
-        implementation("org.openscience.cdk:cdk-smiles:$cdkVersion")
-
-        implementation("org.eclipse.rdf4j:rdf4j-client:$rdf4jVersion")
-        implementation("org.eclipse.rdf4j:rdf4j-core:$rdf4jVersion")
-        implementation("org.eclipse.rdf4j:rdf4j-repository-sail:$rdf4jVersion")
-        implementation("org.eclipse.rdf4j:rdf4j-sail-memory:$rdf4jVersion")
-
-        implementation(project(":konnector")) // Use local composite build
-
-        // Unified JUnit 5 (no JUnit 6 release yet). Use BOM + aggregator.
-        testImplementation(platform("org.junit:junit-bom:$junitApiVersion"))
-        testImplementation(kotlin("test-junit5"))
-        testImplementation("org.junit.jupiter:junit-jupiter")
-    }
-}
-
-project("wdkt") {
-
-    dependencies {
-        val kotlinxCliVersion: String by project
-        val cdkVersion: String by project
-        val wdtkVersion: String by project
-        val rdf4jVersion: String by project
-        val log4jVersion: String by project
-        val junitApiVersion: String by project
-        val ktorVersion: String by project
-        val serializationVersion: String by project
-        val kotlinVersion: String by project
-        val detektVersion: String by project
 
         implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
         implementation("org.jetbrains.kotlinx:kotlinx-cli:$kotlinxCliVersion")
@@ -166,18 +105,10 @@ project("wdkt") {
         implementation("org.apache.logging.log4j:log4j-api:$log4jVersion")
         implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")
 
-        implementation("org.wikidata.wdtk:wdtk-dumpfiles:$wdtkVersion") {
-            exclude("org.slf4j", "slf4j-api")
-        }
-        implementation("org.wikidata.wdtk:wdtk-wikibaseapi:$wdtkVersion") {
-            exclude("org.slf4j", "slf4j-api")
-        }
-        api("org.wikidata.wdtk:wdtk-datamodel:$wdtkVersion") {
-            exclude("org.slf4j", "slf4j-api")
-        }
-        implementation("org.wikidata.wdtk:wdtk-rdf:$wdtkVersion") {
-            exclude("org.slf4j", "slf4j-api")
-        }
+        implementation("org.wikidata.wdtk:wdtk-dumpfiles:$wdtkVersion") { exclude("org.slf4j", "slf4j-api") }
+        implementation("org.wikidata.wdtk:wdtk-wikibaseapi:$wdtkVersion") { exclude("org.slf4j", "slf4j-api") }
+        api("org.wikidata.wdtk:wdtk-datamodel:$wdtkVersion") { exclude("org.slf4j", "slf4j-api") }
+        implementation("org.wikidata.wdtk:wdtk-rdf:$wdtkVersion") { exclude("org.slf4j", "slf4j-api") }
 
         implementation("org.openscience.cdk:cdk-depict:$cdkVersion")
         implementation("org.openscience.cdk:cdk-formula:$cdkVersion")
@@ -191,7 +122,6 @@ project("wdkt") {
 
         implementation(project(":konnector"))
 
-        // Unified JUnit 5 BOM usage
         testImplementation(platform("org.junit:junit-bom:$junitApiVersion"))
         testImplementation(kotlin("test-junit5"))
         testImplementation("org.junit.jupiter:junit-jupiter")
@@ -209,38 +139,71 @@ project(":uploadLotus") {
     }
 
     dependencies {
+        val kotlinxCliVersion: String by project
+        val cdkVersion: String by project
+        val wdtkVersion: String by project
+        val rdf4jVersion: String by project
+        val log4jVersion: String by project
+        val junitApiVersion: String by project
+        val ktorVersion: String by project
+        val serializationVersion: String by project
+        val kotlinVersion: String by project
         val univocityParserVersion: String by project
         val sqliteJdbcVersion: String by project
-        val serializationVersion: String by project
-        val detektVersion: String by project
 
         implementation(project(":wdkt"))
 
+        implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
+        implementation("org.jetbrains.kotlinx:kotlinx-cli:$kotlinxCliVersion")
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
+
+        implementation("io.ktor:ktor-client-cio:$ktorVersion")
+        implementation("org.apache.logging.log4j:log4j-api:$log4jVersion")
+        implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")
+
         implementation("com.univocity:univocity-parsers:$univocityParserVersion")
         implementation("org.xerial:sqlite-jdbc:$sqliteJdbcVersion")
-        implementation("org.jetbrains.kotlin:kotlin-reflect")
+
+        implementation("org.wikidata.wdtk:wdtk-dumpfiles:$wdtkVersion") { exclude("org.slf4j", "slf4j-api") }
+        implementation("org.wikidata.wdtk:wdtk-wikibaseapi:$wdtkVersion") { exclude("org.slf4j", "slf4j-api") }
+        implementation("org.wikidata.wdtk:wdtk-datamodel:$wdtkVersion") { exclude("org.slf4j", "slf4j-api") }
+        implementation("org.wikidata.wdtk:wdtk-rdf:$wdtkVersion") { exclude("org.slf4j", "slf4j-api") }
+
+        implementation("org.openscience.cdk:cdk-silent:$cdkVersion")
+        implementation("org.openscience.cdk:cdk-smiles:$cdkVersion")
+
+        implementation("org.eclipse.rdf4j:rdf4j-client:$rdf4jVersion")
+        implementation("org.eclipse.rdf4j:rdf4j-core:$rdf4jVersion")
+        implementation("org.eclipse.rdf4j:rdf4j-repository-sail:$rdf4jVersion")
+        implementation("org.eclipse.rdf4j:rdf4j-sail-memory:$rdf4jVersion")
+
+        implementation(project(":konnector"))
+
+        testImplementation(platform("org.junit:junit-bom:$junitApiVersion"))
+        testImplementation(kotlin("test-junit5"))
+        testImplementation("org.junit.jupiter:junit-jupiter")
     }
 }
 
 project(":downloadLotus") {
+    apply {
+        plugin("application")
+    }
+
+    application {
+        mainClass.set("net.nprod.lotus.wikidata.download.MainKt")
+    }
+
     val junitApiVersion: String by project
     val rdf4jVersion: String by project
     val log4jVersion: String by project
     val cliktVersion: String by project
     val univocityParserVersion: String by project
     val coroutinesVersion: String by project
-    val detektVersion: String by project
-
-    apply {
-        plugin("application")
-    }
 
     dependencies {
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
-
         implementation("com.github.ajalt.clikt:clikt:$cliktVersion")
-
         implementation("com.univocity:univocity-parsers:$univocityParserVersion")
 
         implementation("org.eclipse.rdf4j:rdf4j-repository-sail:$rdf4jVersion")
@@ -259,21 +222,15 @@ project(":downloadLotus") {
         testImplementation("org.junit.jupiter:junit-jupiter")
     }
 
-    val jar by tasks.getting(Jar::class) {
+    tasks.named<Jar>("jar") {
         manifest {
             attributes["Main-Class"] = "net.nprod.lotus.wikidata.download.MainKt"
         }
     }
-
-    application {
-        mainClass.set("net.nprod.lotus.wikidata.download.MainKt")
-    }
 }
 
-project("importPublication") {
-    apply {
-        plugin("application")
-    }
+project(":importPublication") {
+    apply { plugin("application") }
 
     application {
         mainClass.set("net.nprod.lotus.tools.publicationImporter.MainKt")
