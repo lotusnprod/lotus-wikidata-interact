@@ -159,27 +159,43 @@ class EntrezConnector(
         var newWebEnv = webenv
         var newQueryKey = querykey
         var newRetStart = retstart
+        val maxRetries = 5
+        var attempt: Int
 
         while (resultsLeft) {
-            try {
-                val fetchResult =
-                    this.efetch(
-                        ids = ids,
-                        webenv = newWebEnv,
-                        querykey = newQueryKey,
-                        retmax = retmax,
-                        retstart = newRetStart,
-                        idlist = idlist,
-                    )
+            attempt = 0
+            while (true) {
+                try {
+                    val fetchResult =
+                        this.efetch(
+                            ids = ids,
+                            webenv = newWebEnv,
+                            querykey = newQueryKey,
+                            retmax = retmax,
+                            retstart = newRetStart,
+                            idlist = idlist,
+                        )
 
-                newWebEnv = fetchResult.webenv ?: newWebEnv
-                newRetStart += retmax
-                newQueryKey = fetchResult.querykey ?: 1
+                    newWebEnv = fetchResult.webenv ?: newWebEnv
+                    newRetStart += retmax
+                    newQueryKey = fetchResult.querykey ?: 1
 
-                block(fetchResult)
-            } catch (e: BadRequestError) {
-                log.error(e.toString())
-                resultsLeft = false
+                    block(fetchResult)
+                    break // Success, exit retry loop
+                } catch (e: net.nprod.konnector.commons.TooManyRequests) {
+                    if (attempt >= maxRetries) {
+                        log.error("Too many requests, max retries reached: ${e.message}")
+                        throw e
+                    }
+                    val backoff = Math.pow(2.0, attempt.toDouble()).toLong() * 1000L
+                    log.warn("Too many requests, backing off for ${backoff}ms (attempt ${attempt + 1}/$maxRetries)")
+                    Thread.sleep(backoff)
+                    attempt++
+                } catch (e: BadRequestError) {
+                    log.error(e.toString())
+                    resultsLeft = false
+                    break
+                }
             }
         }
     }
