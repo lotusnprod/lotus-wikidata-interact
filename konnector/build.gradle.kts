@@ -39,13 +39,13 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     // gRPC and Protobuf
     implementation("io.grpc:grpc-kotlin-stub:1.5.0")
-    implementation("io.grpc:grpc-protobuf:1.64.0")
-    implementation("io.grpc:grpc-stub:1.64.0")
+    implementation("io.grpc:grpc-protobuf:1.75.0")
+    implementation("io.grpc:grpc-stub:1.75.0")
     implementation("com.google.protobuf:protobuf-java:3.25.8")
     implementation("com.google.protobuf:protobuf-java-util:3.25.8")
     implementation("javax.annotation:javax.annotation-api:1.3.2")
     // For grpc-netty if needed
-    implementation("io.grpc:grpc-netty-shaded:1.64.0")
+    implementation("io.grpc:grpc-netty-shaded:1.75.0")
 }
 
 protobuf {
@@ -54,7 +54,7 @@ protobuf {
     }
     plugins {
         create("grpc") {
-            artifact = "io.grpc:protoc-gen-grpc-java:1.64.0"
+            artifact = "io.grpc:protoc-gen-grpc-java:1.75.0"
         }
         create("grpckt") {
             artifact = "io.grpc:protoc-gen-grpc-kotlin:1.4.1:jdk8@jar"
