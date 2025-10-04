@@ -22,6 +22,14 @@ val queryForCompoundsRefsAndTaxa =
     }
     """.trimIndent()
 
+/**
+ * Iterates over each CompoundReferenceTaxon found in the repository and applies the given function [f].
+ *
+ * @param repository The RDF4J repository to query.
+ * @param f Function to apply to each CompoundReferenceTaxon.
+ *
+ * This function does not write to the repository and uses no isolation.
+ */
 fun doWithEachCompoundReferenceTaxon(
     repository: Repository,
     f: (CompoundReferenceTaxon) -> Unit,
@@ -29,10 +37,12 @@ fun doWithEachCompoundReferenceTaxon(
     repository.connection.use { conn: RepositoryConnection ->
         conn.begin(IsolationLevels.NONE) // We are not writing anything
 
-        conn.prepareTupleQuery(queryForCompoundsRefsAndTaxa).evaluate().map {
+        conn.prepareTupleQuery(queryForCompoundsRefsAndTaxa).evaluate().forEach {
+            // Extract values from the query result
             val compoundId = it.getValue("compound_id").stringValue()
             val taxonId = it.getValue("taxon_id").stringValue()
             val referenceId = it.getValue("reference_id").stringValue()
+            // Apply the provided function
             f(CompoundReferenceTaxon(compoundId, taxonId, referenceId))
         }
         conn.commit()

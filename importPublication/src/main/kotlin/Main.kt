@@ -15,6 +15,14 @@ import net.nprod.lotus.wdimport.wd.query.WDKT
 import net.nprod.lotus.wdimport.wd.sparql.WDSparql
 import java.util.Locale
 
+/**
+ * Main entry point for the publication importer tool.
+ *
+ * Takes a DOI as input, fetches publication data, and uploads it to Wikidata.
+ *
+ * @param args Command-line arguments. The first argument should be the DOI.
+ * @throws IllegalArgumentException if no DOI is provided.
+ */
 @kotlin.time.ExperimentalTime
 fun main(args: Array<String>) {
     if (args.isEmpty()) throw IllegalArgumentException("Please give this program a DOI")
@@ -22,6 +30,7 @@ fun main(args: Array<String>) {
     val sparql = WDSparql(MainInstanceItems)
     val finder = WDFinder(WDKT(), sparql)
     publisher.connect()
+    // Find or create the article entry
     val article = WDArticle(doi = args[0].lowercase(Locale.getDefault())).tryToFind(finder, MainInstanceItems)
     article.populateFromCrossREF(wdFinder = finder, MainInstanceItems)
     publisher.publish(article, "Bjonnh's scholarly article updater")
