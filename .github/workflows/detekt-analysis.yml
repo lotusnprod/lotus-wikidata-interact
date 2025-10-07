@@ -80,7 +80,7 @@ jobs:
             "${{ github.workspace }}/detekt.sarif.json" > "${{ github.workspace }}/detekt.sarif.json.tmp"
           mv "${{ github.workspace }}/detekt.sarif.json.tmp" "${{ github.workspace }}/detekt.sarif.json"
 
-      - uses: github/codeql-action/upload-sarif@v3
+      - uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: ${{ github.workspace }}/detekt.sarif.json
           checkout_path: ${{ github.workspace }}
