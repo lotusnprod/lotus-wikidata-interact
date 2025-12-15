@@ -9,6 +9,7 @@ package net.nprod.lotus.wikidata.upload.processing
 
 import net.nprod.lotus.chemistry.smilesToCanonical
 import net.nprod.lotus.chemistry.smilesToFormula
+import net.nprod.lotus.chemistry.smilesToMass
 import net.nprod.lotus.chemistry.subscriptFormula
 import net.nprod.lotus.wdimport.wd.InstanceItems
 import net.nprod.lotus.wdimport.wd.WDFinder
@@ -69,6 +70,13 @@ fun DataTotal.processCompounds(
                         logger.error("Invalid smiles exception cannot make a formula: ${e.message}")
                         return@forEachIndexed
                     },
+                mass =
+                    try {
+                        smilesToMass(smiles)
+                    } catch (e: InvalidSmilesException) {
+                        logger.error("Invalid smiles exception cannot make an exact mass: ${e.message}")
+                        return@forEachIndexed
+                    },
                 iupac = compound.iupac,
                 undefinedStereocenters = compound.unspecifiedStereocenters,
             ).tryToFind(wdFinder, instanceItems, wikidataCompoundCache)
@@ -86,9 +94,7 @@ fun DataTotal.processCompounds(
                         val taxon = taxonProcessor.get(organism)
                         taxon?.let {
                             logger.info(" Found taxon $taxon")
-                            foundInTaxon(
-                                taxon,
-                            ) {
+                            foundInTaxon(taxon) {
                                 quads.map {
                                     statedIn(referenceProcessor.get(it.reference).id)
                                 }
@@ -96,10 +102,7 @@ fun DataTotal.processCompounds(
                             logger.info("     Properties generated")
                         }
                     } catch (e: InvalidTaxonName) {
-                        logger.error(
-                            " ERROR: Couldn't a good database for the organism: ${organism.name} -" +
-                                " ${e.message}",
-                        )
+                        logger.error(" ERROR: Couldn't a good database for the organism: ${organism.name} -" + " ${e.message}")
                     }
                 }
         }
