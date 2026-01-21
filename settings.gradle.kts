@@ -33,5 +33,5 @@ include(
     "uploadLotus",
     "importPublication",
     "downloadLotus",
-    "konnector"
+    "konnector",
 )
