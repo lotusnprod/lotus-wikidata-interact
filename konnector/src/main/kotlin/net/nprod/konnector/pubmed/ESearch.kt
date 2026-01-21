@@ -14,6 +14,14 @@ import kotlinx.serialization.json.Json
 import net.nprod.konnector.pubmed.models.ESearch
 import kotlin.time.ExperimentalTime
 
+private val SHARED_JSON =
+    Json {
+        isLenient = true
+        ignoreUnknownKeys = true
+        allowSpecialFloatingPointValues = true
+        useArrayPolymorphism = true
+    }
+
 /**
  * Runs a query on ESearch
  *
@@ -72,12 +80,7 @@ fun EntrezConnector.esearch(
         )
     runBlocking { delay(calcDelay()) }
     val esearchResult =
-        Json {
-            isLenient = true
-            ignoreUnknownKeys = true
-            allowSpecialFloatingPointValues = true
-            useArrayPolymorphism = true
-        }.decodeFromString(ESearch.serializer(), call)
+        SHARED_JSON.decodeFromString(ESearch.serializer(), call)
     esearchResult.query = query
     log.debug(esearchResult.toString())
     return esearchResult
