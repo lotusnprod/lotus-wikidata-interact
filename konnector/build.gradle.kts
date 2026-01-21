@@ -1,7 +1,7 @@
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
-    id("com.google.protobuf") version "0.9.5"
+    id("com.google.protobuf") version "0.9.6"
 }
 
 group = "net.nprod"
