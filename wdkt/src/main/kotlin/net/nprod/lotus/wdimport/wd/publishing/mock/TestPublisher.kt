@@ -104,10 +104,11 @@ class TestPublisher(
 
         doc.allStatements.asSequence().toList().map {
             when (val value = it.value) {
-                is StringValue ->
+                is StringValue -> {
                     if (value.string == "") {
                         throw EmptyPropertyNotAllowedException("We cannot send an empty property for entry $doc")
                     }
+                }
             }
         }
         val conn = repository?.connection

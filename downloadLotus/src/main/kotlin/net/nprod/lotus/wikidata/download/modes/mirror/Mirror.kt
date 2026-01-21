@@ -85,7 +85,10 @@ fun Repository.getTaxaParentIRIs(taxasToParentMirror: Set<IRI>): Set<IRI> {
             newIRIsToMirror.addAll(
                 result.mapNotNull { bindingSet ->
                     when (val value = bindingSet.getBinding("parenttaxon_id").value) {
-                        is IRI -> value
+                        is IRI -> {
+                            value
+                        }
+
                         else -> { // In two cases we have parenttaxon_id being a blank node, we just ignore those two
                             println("Incorrect value $value")
                             null

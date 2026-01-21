@@ -103,12 +103,25 @@ fun XMLStreamReader.contentAsXML(tagName: String): String {
                         }
                     }
                 }
-                XMLEvent.END_ELEMENT -> writer.writeEndElement()
+
+                XMLEvent.END_ELEMENT -> {
+                    writer.writeEndElement()
+                }
+
                 XMLEvent.SPACE -> {
                 }
-                XMLEvent.CHARACTERS -> writer.writeCharacters(this.textCharacters, this.textStart, this.textLength)
-                XMLEvent.PROCESSING_INSTRUCTION -> writer.writeProcessingInstruction(this.piTarget, this.piData)
-                else -> throw UnexpectedXMLElementException("Unhandled element ${this.eventType}")
+
+                XMLEvent.CHARACTERS -> {
+                    writer.writeCharacters(this.textCharacters, this.textStart, this.textLength)
+                }
+
+                XMLEvent.PROCESSING_INSTRUCTION -> {
+                    writer.writeProcessingInstruction(this.piTarget, this.piData)
+                }
+
+                else -> {
+                    throw UnexpectedXMLElementException("Unhandled element ${this.eventType}")
+                }
             }
         }.toList()
     writer.writeEndElement()
