@@ -3,11 +3,14 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Properties
 
 val localPropertiesFile = file("local.properties")
-val localProperties = if (localPropertiesFile.exists()) {
-    val props = Properties()
-    props.load(localPropertiesFile.inputStream())
-    props
-} else null
+val localProperties =
+    if (localPropertiesFile.exists()) {
+        val props = Properties()
+        props.load(localPropertiesFile.inputStream())
+        props
+    } else {
+        null
+    }
 
 plugins {
     kotlin("jvm")
@@ -241,7 +244,12 @@ project(":importPublication") {
     }
 }
 
+val kotlinVersion: String by project
+
 configurations.all {
-    exclude(group = "org.jetbrains.kotlin", module = "kotlin-compiler-embeddable")
+    resolutionStrategy {
+        // Force the kotlin-compiler-embeddable to the project's kotlinVersion to avoid old versions
+        force("org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlinVersion")
+    }
     resolutionStrategy.cacheChangingModulesFor(1, "minutes")
 }
