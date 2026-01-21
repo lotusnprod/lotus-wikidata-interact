@@ -66,7 +66,7 @@ fun EntrezConnector.esearch(
         parameters["rettype"] = "count"
     }
     val call =
-        call(
+        callGet(
             eSearchapiURL,
             parameters,
         )
