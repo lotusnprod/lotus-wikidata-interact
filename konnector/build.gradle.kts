@@ -1,6 +1,6 @@
 plugins {
-    kotlin("jvm") version "2.2.21"
-    kotlin("plugin.serialization") version "2.2.21"
+    kotlin("jvm") version "2.3.0"
+    kotlin("plugin.serialization") version "2.3.0"
     id("com.google.protobuf") version "0.9.5"
 }
 
@@ -49,14 +49,35 @@ dependencies {
 }
 
 protobuf {
+    // Use explicit single-string coordinates including OS classifier when available to avoid
+    // the multi-string dependency notation deprecation (Gradle 10).
+    val osClassifier: String? = project.findProperty("os.detected.classifier") as String?
+    val protocArtifact =
+        if (osClassifier !=
+            null
+        ) {
+            "com.google.protobuf:protoc:4.33.1:$osClassifier@exe"
+        } else {
+            "com.google.protobuf:protoc:4.33.1"
+        }
     protoc {
-        artifact = "com.google.protobuf:protoc:4.33.1"
+        artifact = protocArtifact
     }
     plugins {
         create("grpc") {
-            artifact = "io.grpc:protoc-gen-grpc-java:1.77.0"
+            // grpc java plugin is a native executable; add classifier if detected so artifact is a single string
+            val grpcJavaArtifact =
+                if (osClassifier !=
+                    null
+                ) {
+                    "io.grpc:protoc-gen-grpc-java:1.77.0:$osClassifier@exe"
+                } else {
+                    "io.grpc:protoc-gen-grpc-java:1.77.0"
+                }
+            artifact = grpcJavaArtifact
         }
         create("grpckt") {
+            // The Kotlin grpc plugin is a jar (jdk8) so single-string coordinate is fine already.
             artifact = "io.grpc:protoc-gen-grpc-kotlin:1.5.0:jdk8@jar"
         }
     }
