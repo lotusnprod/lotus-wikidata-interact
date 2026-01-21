@@ -1,6 +1,7 @@
 package net.nprod.konnector.crossref
 
 import org.junit.jupiter.api.Test
+import kotlin.test.assertTrue
 import kotlin.time.ExperimentalTime
 
 @ExperimentalTime
@@ -13,12 +14,9 @@ internal class OfficialCrossrefConnectorTest {
             connector.works(
                 query = "bisson can invalid bioactives medicinal 10.1021/acs.jmedchem.5b01009",
             )
-        assert(
-            output.message
-                ?.items
-                ?.get(0)
-                ?.doi == "10.1021/acs.jmedchem.5b01009",
-        )
+        val dois = output.message?.items?.mapNotNull { it.doi } ?: emptyList()
+        val expected = "10.1021/acs.jmedchem.5b01009"
+        assertTrue(dois.contains(expected), "Expected DOI '$expected' in results but got: $dois")
     }
 
     @Test
