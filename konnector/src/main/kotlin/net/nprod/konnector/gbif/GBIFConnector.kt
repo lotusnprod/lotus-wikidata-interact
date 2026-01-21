@@ -68,7 +68,7 @@ class GBIFConnector constructor(
 
     fun taxonkeyByName(name: String): TaxonSearchResponse {
         val output =
-            api.call(
+            api.callGet(
                 api.apiURL + "species/match",
                 mutableMapOf("name" to name),
             )
@@ -105,7 +105,7 @@ class GBIFConnector constructor(
         }
 
         val output =
-            api.call(
+            api.callGet(
                 api.apiURL + "occurrence/search",
                 parameters,
             )

@@ -32,7 +32,7 @@ class ShortDOIConnector constructor(
 
     fun shorten(doi: String): ShortDOI {
         val output =
-            api.call(
+            api.callGet(
                 api.apiURL + doi,
                 mutableMapOf("format" to "json"),
             )
