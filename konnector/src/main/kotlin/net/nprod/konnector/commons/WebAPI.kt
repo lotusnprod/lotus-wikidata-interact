@@ -11,6 +11,7 @@ package net.nprod.konnector.commons
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
@@ -23,10 +24,13 @@ import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.slf4j.Logger
+import java.io.IOException
 import kotlin.time.ExperimentalTime
 
 const val DEFAULT_HTTP_CLIENT_THREADS = 4
 const val DEFAULT_HTTP_CLIENT_CONNECT_ATTEMPTS = 5
+const val DEFAULT_HTTP_CLIENT_CONNECT_TIMEOUT: Long = 10_000 // 10s
+const val DEFAULT_HTTP_CLIENT_REQUEST_TIMEOUT: Long = 60_000 // 60s (increased from 20s)
 
 /**
  * Any kind of WebAPI based on a Ktor HTTP Client
@@ -125,20 +129,46 @@ interface WebAPI {
 
                     delayUpdate(response)
                     when (response.status.value) {
-                        HttpStatusCode.OK.value -> response.body<String>()
-                        HttpStatusCode.NotFound.value -> throw NonExistent
-                        HttpStatusCode.BadRequest.value -> throw BadRequestError(response.body<String>())
+                        HttpStatusCode.OK.value -> {
+                            response.body<String>()
+                        }
+
+                        HttpStatusCode.NotFound.value -> {
+                            throw NonExistent
+                        }
+
+                        HttpStatusCode.BadRequest.value -> {
+                            throw BadRequestError(response.body<String>())
+                        }
+
                         HttpStatusCode.TooManyRequests.value -> {
                             delay(retryDelay)
                             throw TooManyRequests
                         }
-                        else -> throw UnManagedReturnCode(response.status.value)
+
+                        else -> {
+                            throw UnManagedReturnCode(response.status.value)
+                        }
                     }
                 }
             call
         } catch (e: KnownError) {
             if (retries > 0) return call(retries - 1, responseGenerator)
             throw e
+        } catch (e: HttpRequestTimeoutException) {
+            // Ktor request timed out, map to our TimeoutException to allow retries
+            if (retries > 0) {
+                runBlocking { delay(retryDelay) }
+                return call(retries - 1, responseGenerator)
+            }
+            throw TimeoutException
+        } catch (e: IOException) {
+            // Network I/O problem, retry a few times then raise a generic APIError
+            if (retries > 0) {
+                runBlocking { delay(retryDelay) }
+                return call(retries - 1, responseGenerator)
+            }
+            throw APIError
         }
     }
 
@@ -157,7 +187,7 @@ interface WebAPI {
     fun callPost(
         url: String,
         parameters: Map<String, String>? = null,
-        retries: Int = 0,
+        retries: Int = 3,
         requestBody: String = "",
     ): String {
         log.debug("POST to {}, parameters: {}, body: {}", url, parameters, requestBody)
@@ -218,6 +248,9 @@ interface WebAPI {
                 // threadsCount is deprecated, so do not set it
                 with(endpoint) {
                     connectAttempts = DEFAULT_HTTP_CLIENT_CONNECT_ATTEMPTS
+                    // set sensible defaults for timeouts and keep alive to reduce flakiness
+                    connectTimeout = DEFAULT_HTTP_CLIENT_CONNECT_TIMEOUT
+                    requestTimeout = DEFAULT_HTTP_CLIENT_REQUEST_TIMEOUT
                 }
             }
         }
