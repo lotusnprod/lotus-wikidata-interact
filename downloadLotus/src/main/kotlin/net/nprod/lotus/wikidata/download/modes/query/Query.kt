@@ -9,11 +9,11 @@ package net.nprod.lotus.wikidata.download.modes.query
 
 import com.univocity.parsers.tsv.TsvWriter
 import com.univocity.parsers.tsv.TsvWriterSettings
+import net.nprod.lotus.wdimport.wd.sparql.SPARQLRepositoryFactory
 import net.nprod.lotus.wikidata.download.rdf.RDFRepository
 import net.nprod.lotus.wikidata.download.sparql.LOTUSQueries
 import org.eclipse.rdf4j.query.MalformedQueryException
 import org.eclipse.rdf4j.repository.RepositoryConnection
-import org.eclipse.rdf4j.repository.sparql.SPARQLRepository
 import org.slf4j.LoggerFactory
 import java.io.BufferedWriter
 import java.io.File
@@ -49,7 +49,7 @@ fun query(
     val rdfRepository = RDFRepository(repositoryLocation)
     val connection =
         if (direct) {
-            SPARQLRepository("https://query.wikidata.org/sparql").connection
+            SPARQLRepositoryFactory.createRepository("https://query.wikidata.org/sparql").connection
         } else {
             rdfRepository.repository.connection
         }

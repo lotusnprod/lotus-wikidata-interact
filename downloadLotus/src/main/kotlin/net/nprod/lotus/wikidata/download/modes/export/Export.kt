@@ -10,6 +10,7 @@ package net.nprod.lotus.wikidata.download.modes.export
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import net.nprod.lotus.wdimport.wd.sparql.SPARQLRepositoryFactory
 import net.nprod.lotus.wikidata.download.formats.compoundReferenceTaxonListToTSV
 import net.nprod.lotus.wikidata.download.formats.compoundsToTSV
 import net.nprod.lotus.wikidata.download.formats.referenceListToTSV
@@ -29,7 +30,7 @@ fun export(
 
     val repository =
         if (direct) {
-            SPARQLRepository("https://query.wikidata.org/sparql")
+            SPARQLRepositoryFactory.createRepository("https://query.wikidata.org/sparql")
         } else {
             rdfRepository.repository
         }

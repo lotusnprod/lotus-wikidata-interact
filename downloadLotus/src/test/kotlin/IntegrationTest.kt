@@ -3,9 +3,9 @@
  *
  * Copyright (c) 2020 Jonathan Bisson
  */
-
 package net.nprod.lotus.wikidata.download
 
+import net.nprod.lotus.wdimport.wd.sparql.SPARQLRepositoryFactory
 import net.nprod.lotus.wikidata.download.modes.mirror.addEntriesFromConstruct
 import net.nprod.lotus.wikidata.download.modes.mirror.getAllTaxRanks
 import net.nprod.lotus.wikidata.download.modes.mirror.getIRIsAndTaxaIRIs
@@ -66,7 +66,7 @@ internal class IntegrationTest {
         fun setup(
             @TempDir tempDir: Path,
         ) {
-            sparqlRepository = SPARQLRepository("https://query.wikidata.org/sparql")
+            sparqlRepository = SPARQLRepositoryFactory.createRepository("https://query.wikidata.org/sparql")
             rdfRepository = RDFRepository(tempDir.toFile())
         }
     }

@@ -29,8 +29,9 @@ class WDSparql(
 
     init {
         repository =
-            SPARQLRepository(
-                instanceItems.sparqlEndpoint,
+            SPARQLRepositoryFactory.createRepository(
+                instanceItems.sparqlEndpoint
+                    ?: throw IllegalArgumentException("SPARQL endpoint is required"),
             )
     }
 

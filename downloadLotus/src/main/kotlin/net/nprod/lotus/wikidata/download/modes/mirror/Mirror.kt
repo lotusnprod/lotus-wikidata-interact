@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import net.nprod.lotus.wdimport.wd.sparql.SPARQLRepositoryFactory
 import net.nprod.lotus.wikidata.download.rdf.RDFRepository
 import net.nprod.lotus.wikidata.download.sparql.LOTUSQueries
 import org.eclipse.rdf4j.common.transaction.IsolationLevels
@@ -17,7 +18,6 @@ import org.eclipse.rdf4j.model.IRI
 import org.eclipse.rdf4j.model.Statement
 import org.eclipse.rdf4j.query.TupleQueryResult
 import org.eclipse.rdf4j.repository.Repository
-import org.eclipse.rdf4j.repository.sparql.SPARQLRepository
 import org.eclipse.rdf4j.repository.util.Repositories
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -195,7 +195,7 @@ suspend fun RDFRepository.repositoryWriter(channelStatements: Channel<List<State
 fun mirror(repositoryLocation: File) =
     runBlocking<Unit> {
         val logger = LoggerFactory.getLogger("mirror")
-        val sparqlRepository = SPARQLRepository("https://query.wikidata.org/sparql")
+        val sparqlRepository = SPARQLRepositoryFactory.createRepository("https://query.wikidata.org/sparql")
         val rdfRepository = RDFRepository(repositoryLocation)
 
         logger.info("Starting in mirroring mode into the repository: $repositoryLocation")
