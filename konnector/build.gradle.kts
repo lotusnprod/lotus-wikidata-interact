@@ -41,8 +41,8 @@ dependencies {
     implementation("io.grpc:grpc-kotlin-stub:1.5.0")
     implementation("io.grpc:grpc-protobuf:1.80.0")
     implementation("io.grpc:grpc-stub:1.80.0")
-    implementation("com.google.protobuf:protobuf-java:4.34.0")
-    implementation("com.google.protobuf:protobuf-java-util:4.34.0")
+    implementation("com.google.protobuf:protobuf-java:4.34.1")
+    implementation("com.google.protobuf:protobuf-java-util:4.34.1")
     implementation("javax.annotation:javax.annotation-api:1.3.2")
     // For grpc-netty if needed
     implementation("io.grpc:grpc-netty-shaded:1.80.0")
@@ -58,7 +58,7 @@ protobuf {
         ) {
             "com.google.protobuf:protoc:4.33.1:$osClassifier@exe"
         } else {
-            "com.google.protobuf:protoc:4.34.0"
+            "com.google.protobuf:protoc:4.34.1"
         }
     protoc {
         artifact = protocArtifact
