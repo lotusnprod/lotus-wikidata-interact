@@ -31,6 +31,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - name: Get Detekt download URL
         id: detekt_info
@@ -59,12 +61,14 @@ jobs:
         run: |
           dest="$(mktemp -d)"
           curl --request GET \
-            --url "${{ steps.detekt_info.outputs.download_url }}" \
+            --url "${STEPS_DETEKT_INFO_OUTPUTS_DOWNLOAD_URL}" \
             --silent \
             --location \
             --output "$dest/detekt"
           chmod a+x "$dest/detekt"
           echo "$dest" >> "$GITHUB_PATH"
+        env:
+          STEPS_DETEKT_INFO_OUTPUTS_DOWNLOAD_URL: ${{ steps.detekt_info.outputs.download_url }}
 
       - name: Run Detekt
         continue-on-error: true
